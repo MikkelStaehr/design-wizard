@@ -92,7 +92,7 @@ test("AC2/AC3/AC4: every font pair and every sub-decision, only localhost reques
     const u = new URL(r.url());
     if (u.protocol.startsWith("http") && !["localhost", "127.0.0.1"].includes(u.hostname)) external.push(r.url());
   });
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await expect(page.locator("[data-v-root]").first()).toBeVisible();
   const before = await chrome(page);
@@ -179,7 +179,7 @@ test("AC6: every clickable row in step 3 is at least 44px, on every sub-decision
 
 test("AC6/AC7/saved: step 3 by keyboard alone with visible focus, brand typed; decisions autosave, resolve and survive reload", async ({ page }) => {
   await seed(page, openVisual);
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await expect(page.locator("[data-v-root]")).toHaveCount(3);
   await page.keyboard.press("3");

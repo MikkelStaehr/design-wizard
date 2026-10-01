@@ -1,6 +1,7 @@
 import { WizardShell } from "@/components/wizard/WizardShell";
 
-// Slice 2 builds step 3 (visual system); steps 1, 2, 4 and 5 arrive in slice 3.
+// Slice 3a: steps 1 (profile) and 3 (visual system) are built; step 2 is a placeholder stop.
+// A new project opens on its first open stop (WizardShell).
 export default function Page() {
-  return <WizardShell current="visual" />;
+  return <WizardShell />;
 }

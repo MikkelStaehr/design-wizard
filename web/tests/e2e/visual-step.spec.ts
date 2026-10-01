@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 const isMobile = () => test.info().project.name === "mobile-390";
 
 async function openSpacing(page: Page) {
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await expect(page.locator("[data-v-root]").first()).toBeVisible();
   // J reaches the next sub-decision on the keyboard; on 390 the rail is hidden, so use the decision list there.
@@ -42,7 +42,7 @@ test("spacing shows 3 plates side by side at 1280 and stacked at 390, with no ho
 });
 
 test("leak: choosing another palette or font pair leaves the chrome h1 font and colour unchanged", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await expect(page.locator("[data-v-root]").first()).toBeVisible();
   const before = await chromeH1Style(page);
@@ -68,7 +68,7 @@ test("leak: choosing another palette or font pair leaves the chrome h1 font and 
 
 test("keyboard: 1/2/3 then Enter records a decision; J and K move between sub-decisions", async ({ page }) => {
   test.skip(isMobile(), "The keyboard flow is a desktop feature; the rail that shows it is hidden at 390.");
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   const radios = page.getByRole("radiogroup", { name: "Font pair variants" }).getByRole("radio");
   // The radios exist in the static HTML; a loaded plate root only appears once the client has hydrated.
@@ -100,7 +100,7 @@ test("keyboard: 1/2/3 then Enter records a decision; J and K move between sub-de
 
 test("font 404: a failed variant font shows 'Font failed' and cannot be chosen", async ({ page }) => {
   await page.route("**/fonts/sora/**", (route) => route.fulfill({ status: 404, body: "" }));
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await expect(page.getByText("Font failed: Sora + Inter")).toBeVisible();
   const failed = page.getByRole("radio", { name: /Sora \+ Inter/ });

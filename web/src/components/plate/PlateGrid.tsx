@@ -10,9 +10,12 @@ export interface PlateOption<Id extends string = string> {
   id: Id;
   label: string;
   description: string;
-  tokens: PlateTokens;
-  fontPairId: string;
-  fontLabel: string;
+  /** Variant plates only: the project tokens and font pair the sample renders in. Panels leave them out. */
+  tokens?: PlateTokens;
+  fontPairId?: string;
+  fontLabel?: string;
+  /** What the plate or panel shows; defaults to the SampleCard. */
+  sample?: ReactNode;
   /** Read-only content under the plate, e.g. the contrast table. */
   footer?: ReactNode;
 }
@@ -27,6 +30,12 @@ interface PlateGridProps<Id extends string> {
   chosenId: Id | null;
   productName: string | null;
   onChoose: (id: Id) => void;
+  /** "panel": the tool's own output (chrome fill, no variant root, no font loading), 2 columns. */
+  frame?: "plate" | "panel";
+  /** Status line once a choosable option is selected; defaults to "moves to the next open decision". */
+  status?: string;
+  /** A line under the options, above the choose bar. */
+  note?: ReactNode;
 }
 
 
@@ -34,7 +43,7 @@ interface PlateGridProps<Id extends string> {
  * 2–3 plates side by side as one radio group. 1/2/3 (or arrows) select a variant; Enter or the
  * primary button records it. A variant whose fonts failed can be looked at but not chosen.
  */
-export function PlateGrid<Id extends string>({ label, decision, options, chosenId, productName, onChoose }: PlateGridProps<Id>) {
+export function PlateGrid<Id extends string>({ label, decision, options, chosenId, productName, onChoose, frame = "plate", status, note }: PlateGridProps<Id>) {
   const [selectedId, setSelectedId] = useState<Id | null>(chosenId);
   const [fontStates, setFontStates] = useState<Record<string, FontLoadState>>({});
   const refs = useRef<(HTMLDivElement | null)[]>([]);
@@ -99,7 +108,8 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
     const contents = roots.map((r) => r.firstElementChild).filter((c): c is HTMLElement => c instanceof HTMLElement);
     if (contents.length === 0) return;
     const sync = () => {
-      const tallest = Math.max(...contents.map((c) => c.offsetHeight));
+      // Exact (fractional) height: offsetHeight rounds, which shifted a plate by a sub-pixel after fonts loaded.
+      const tallest = Math.max(...contents.map((c) => c.getBoundingClientRect().height));
       for (const r of roots) r.style.minHeight = `${tallest}px`;
     };
     const observer = new ResizeObserver(sync);
@@ -109,7 +119,7 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
 
   return (
     <>
-      <div ref={groupRef} role="radiogroup" aria-label={label} className="mt-5 grid grid-cols-1 gap-6 min-[761px]:grid-cols-3 min-[761px]:gap-5">
+      <div ref={groupRef} role="radiogroup" aria-label={label} className={`mt-5 grid grid-cols-1 gap-6 min-[761px]:gap-5 ${frame === "panel" || options.length === 2 ? "min-[761px]:grid-cols-2" : "min-[761px]:grid-cols-3"}`}>
         {options.map((o, i) => (
           <section key={o.id} className="flex min-w-0 flex-col gap-2.5">
             <div className="flex min-h-5 items-center justify-between gap-2" aria-hidden="true">
@@ -119,15 +129,32 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
                 <kbd>{i + 1}</kbd>
               </span>
             </div>
+            {frame === "panel" || o.tokens === undefined || o.fontPairId === undefined ? (
+              <div
+                ref={(el) => {
+                  refs.current[i] = el;
+                }}
+                role="radio"
+                aria-checked={selectedId === o.id}
+                aria-label={`Option ${i + 1}, ${o.label}: ${o.description}`}
+                tabIndex={tabIndexId === o.id ? 0 : -1}
+                onClick={() => select(i, false)}
+                onKeyDown={onArrow(i)}
+                className="dw-plate dw-panel"
+              >
+                <span className="dw-cm" aria-hidden="true" />
+                {o.sample}
+              </div>
+            ) : (
             <PlateSlot option={o} onFontState={onFontState}>
               {(report) => (
                 <Plate
                   ref={(el) => {
                     refs.current[i] = el;
                   }}
-                  tokens={o.tokens}
-                  fontPairId={o.fontPairId}
-                  fontLabel={o.fontLabel}
+                  tokens={o.tokens as PlateTokens}
+                  fontPairId={o.fontPairId as string}
+                  fontLabel={o.fontLabel ?? ""}
                   selected={selectedId === o.id}
                   tabbable={tabIndexId === o.id}
                   ariaLabel={`Variant ${i + 1}, ${o.label}: ${o.description}`}
@@ -135,22 +162,24 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
                   onKeyDown={onArrow(i)}
                   onFontState={report}
                 >
-                  <SampleCard productName={productName} />
+                  {o.sample ?? <SampleCard productName={productName} />}
                 </Plate>
               )}
             </PlateSlot>
+            )}
             <p className="min-h-9 text-small text-dw-text-muted">{o.description}</p>
             {o.footer}
           </section>
         ))}
       </div>
+      {note}
       <div className="mt-5 flex flex-col items-start gap-3 border-t border-dw-line pt-4">
         <p className="max-w-[56ch] text-dw-text-muted">
           {selected === null
             ? `Pick a ${decision} variant with a number key or a click.`
             : selectedFailed
               ? `${selected.label} can't be chosen: its fonts failed to load.`
-              : `Choosing records the ${decision} and moves to the next open decision. You can change it later.`}
+              : (status ?? `Choosing records the ${decision} and moves to the next open decision. You can change it later.`)}
         </p>
         <button
           type="button"

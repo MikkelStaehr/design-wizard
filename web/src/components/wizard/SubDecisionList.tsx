@@ -2,36 +2,57 @@
 import type { Visual } from "@/contracts/project";
 import { VISUAL_SUBDECISIONS, type VisualKey } from "@/domain/decisions";
 import { ArrowText } from "./ArrowText";
-import { firstOpen, isDecided, nextOpenAfter } from "@/domain/decisions";
 import { valueLabel } from "./steps/visual/model";
 
-/** Step 3's sub-decisions with their state: the chosen value, "now", "next" or "open". Rows are 44px buttons. */
-export function SubDecisionList({ visual, current, onPick }: { visual: Visual; current: VisualKey; onPick: (key: VisualKey) => void }) {
-  const next = isDecided(visual, current) ? firstOpen(visual) : nextOpenAfter(visual, current);
+export interface StopRow<Id extends string> {
+  id: Id;
+  label: string;
+  /** The chosen value as shown in the rail, or null while open. */
+  value: string | null;
+}
+
+/**
+ * A step's stops with their state: the chosen value, "now", "next" or "open". Rows are 44px buttons.
+ * "next" is the next open row after the current one (wrapping), or the first open row once the current is decided.
+ */
+export function StopList<Id extends string>({ rows, current, onPick }: { rows: StopRow<Id>[]; current: Id | null; onPick: (id: Id) => void }) {
+  const at = rows.findIndex((r) => r.id === current);
+  let next: Id | null = null;
+  if (at >= 0 && rows[at].value !== null) next = rows.find((r) => r.value === null)?.id ?? null;
+  else
+    for (let n = 1; n < rows.length && next === null; n++) {
+      const r = rows[((at < 0 ? -1 : at) + n + rows.length) % rows.length];
+      if (r.value === null && r.id !== current) next = r.id;
+    }
   return (
     <ul className="flex flex-col">
-      {VISUAL_SUBDECISIONS.map((s) => {
-        const isCurrent = s.key === current;
-        const value = valueLabel(visual, s.key);
-        const state = value ?? (isCurrent ? "now" : s.key === next ? "next" : "open");
+      {rows.map((s) => {
+        const isCurrent = s.id === current;
+        const state = s.value ?? (isCurrent ? "now" : s.id === next ? "next" : "open");
         return (
-          <li key={s.key}>
+          <li key={s.id}>
             <button
               type="button"
-              onClick={() => onPick(s.key)}
+              onClick={() => onPick(s.id)}
               aria-current={isCurrent ? "true" : undefined}
               className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-1.5 text-left text-small transition-colors duration-[120ms] ease-out ${
                 isCurrent ? "bg-dw-surface font-medium text-dw-text outline outline-1 -outline-offset-1 outline-dw-ctl" : "text-dw-text-muted hover:bg-[var(--dw-hover)]"
               }`}
             >
-              <span>
+              <span className="min-w-0">
                 <ArrowText text={s.label} />
               </span>
-              <span className={`font-mono text-label font-normal ${isCurrent ? "text-dw-text" : ""}`}>{state}</span>
+              <span className={`max-w-[55%] shrink-0 truncate font-mono text-label font-normal ${isCurrent ? "text-dw-text" : ""}`}>{state}</span>
             </button>
           </li>
         );
       })}
     </ul>
   );
+}
+
+/** Step 3's sub-decisions. */
+export function SubDecisionList({ visual, current, onPick }: { visual: Visual; current: VisualKey | null; onPick: (key: VisualKey) => void }) {
+  const rows = VISUAL_SUBDECISIONS.map((s) => ({ id: s.key, label: s.label, value: valueLabel(visual, s.key) }));
+  return <StopList rows={rows} current={current} onPick={onPick} />;
 }

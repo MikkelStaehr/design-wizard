@@ -1,19 +1,22 @@
 "use client";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { STEPS, type StepId, type VisualKey } from "@/domain/decisions";
-import { useProject } from "@/data/project/store";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { firstOpen, firstOpenStop, lastDecidedStopBefore, nextStop, prevStop, STEPS, STOPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
+import { projectStore, useProject } from "@/data/project/store";
 import { ownsKey } from "./use-shortcuts";
 import { Rail } from "./Rail";
+import { SnapshotNotice } from "./SnapshotNotice";
 import { VisualStep } from "./steps/visual/VisualStep";
-import { firstOpen, lastDecidedBefore, SUB_KEYS } from "@/domain/decisions";
+import { ProfileStep } from "./steps/profile/ProfileStep";
+import type { ProfileStop } from "./steps/profile/model";
 
-/** ?step=visual.<key> opens a sub-decision directly (screenshots); "palette" is accepted for paletteVariant. */
-function subFromSearch(search: string): VisualKey | null {
-  const step = new URLSearchParams(search).get("step");
-  if (!step?.startsWith("visual.")) return null;
-  const key = step.slice("visual.".length);
-  const alias = key === "palette" ? "paletteVariant" : key === "spacing" ? "spacingBase" : key;
-  return (SUB_KEYS as readonly string[]).includes(alias) ? (alias as VisualKey) : null;
+const STOP_IDS: readonly string[] = STOPS.map((s) => s.id);
+
+/** ?step=<stop id> opens a stop directly; "visual.palette" and "visual.spacing" stay accepted as aliases. */
+function stopFromSearch(search: string): StopId | null {
+  const raw = new URLSearchParams(search).get("step");
+  if (raw === null) return null;
+  const id = raw === "visual.palette" ? "visual.paletteVariant" : raw === "visual.spacing" ? "visual.spacingBase" : raw;
+  return STOP_IDS.includes(id) ? (id as StopId) : null;
 }
 
 const noSubscribe = () => () => {};
@@ -24,33 +27,51 @@ function withoutPath(path: string, message: string): string {
   return rest.charAt(0).toUpperCase() + rest.slice(1);
 }
 
+const stepOf = (id: StopId) => (id.startsWith("visual.") ? "visual" : id === "principles" ? "principles" : "profile");
+
 // Layout from DESIGN.md "Space & density": ≥1101px rail 232 | main | preview 340;
 // 761–1100px rail 200 + main with the preview below; ≤760px one column, rail and legend hidden.
-export function WizardShell({ current }: { current: StepId }) {
+export function WizardShell() {
   const { project, errors, saveFailed } = useProject();
   const visual = project.visual;
   const productName = project.profile.name;
+  const [picked, setPicked] = useState<StopId | null>(null);
+  /** Until the user moves, the wizard opens on the first open stop (the project may load after first render). */
+  const fromUrl = useSyncExternalStore(noSubscribe, () => stopFromSearch(window.location.search), () => null);
+  // Every decision set: open step 3, the last built step.
+  const stop: StopId = picked ?? fromUrl ?? firstOpenStop(project) ?? "visual.fontPair";
+  const current = stepOf(stop);
   const step = STEPS.find((s) => s.id === current) ?? STEPS[0];
-  const [picked, setPicked] = useState<VisualKey | null>(null);
-  /** Until the user moves, the step opens on the first open sub-decision (the project may load after first render). */
-  const fromUrl = useSyncExternalStore(noSubscribe, () => subFromSearch(window.location.search), () => null);
-  const sub: VisualKey = picked ?? fromUrl ?? firstOpen(visual) ?? SUB_KEYS[0];
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || ownsKey(e.target, e.key)) return;
       const k = e.key.toLowerCase();
-      const i = SUB_KEYS.indexOf(sub);
-      if (k === "j" && i < SUB_KEYS.length - 1) setPicked(SUB_KEYS[i + 1]);
-      else if (k === "k" && i > 0) setPicked(SUB_KEYS[i - 1]);
-      else if (k === "e") {
-        const back = lastDecidedBefore(visual, sub);
-        if (back) setPicked(back);
+      if (e.key === "Enter" && stepOf(stop) === "principles") {
+        e.preventDefault();
+        setPicked(`visual.${firstOpen(projectStore().getState().project.visual) ?? SUB_KEYS[0]}`);
+        return;
       }
+      const to = k === "j" ? nextStop(stop) : k === "k" ? prevStop(stop) : k === "e" ? lastDecidedStopBefore(projectStore().getState().project, stop) : null;
+      if (to) setPicked(to);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [sub, visual]);
+  }, [stop]);
+
+  // On arriving at a stop, focus its h1; a new project's identity stop focuses the first empty field instead.
+  const arrived = useRef<StopId | null>(null);
+  useEffect(() => {
+    if (arrived.current === stop) return;
+    arrived.current = stop;
+    const { name, productType } = project.profile;
+    if (stop === "profile.identity" && (name === null || productType === null)) {
+      const inputs = [...document.querySelectorAll<HTMLInputElement>("main form input")];
+      (inputs.find((i) => i.value === "") ?? inputs[0])?.focus();
+    } else document.querySelector<HTMLElement>("main h1")?.focus();
+  }, [stop, project.profile]);
+
+  const visualSub = (current === "visual" ? stop.slice("visual.".length) : SUB_KEYS[0]) as VisualKey;
 
   return (
     <div className="min-h-dvh min-[761px]:grid min-[761px]:grid-cols-[200px_minmax(0,1fr)] min-[1101px]:grid-cols-[232px_minmax(0,1fr)_340px]">
@@ -61,7 +82,7 @@ export function WizardShell({ current }: { current: StepId }) {
         </span>
       </header>
       <aside className="hidden min-[761px]:block min-[761px]:row-span-2 min-[1101px]:row-span-1">
-        <Rail current={current} productName={productName} visual={visual} sub={sub} onPick={setPicked} />
+        <Rail project={project} stop={stop} onPick={setPicked} />
       </aside>
       <main className="min-w-0 px-4 pt-5 pb-8 min-[761px]:px-6">
         {errors.length > 0 && (
@@ -85,14 +106,31 @@ export function WizardShell({ current }: { current: StepId }) {
             This browser did not save your last change. Keep the tab open until you can download the project file.
           </p>
         )}
-        {current === "visual" ? (
-          <VisualStep sub={sub} visual={visual} productName={productName} onMove={setPicked} />
-        ) : (
+        <SnapshotNotice />
+        {current === "visual" && (
+          <VisualStep sub={visualSub} visual={visual} productName={productName} onMove={(k) => setPicked(`visual.${k}`)} />
+        )}
+        {current === "profile" && <ProfileStep stop={stop as ProfileStop} project={project} onMove={setPicked} />}
+        {current === "principles" && (
           <>
-            <h1 className="text-title font-semibold tracking-[-0.025em]">{step.title}</h1>
-            <p role="status" className="mt-6 border border-dashed border-dw-ctl px-4 py-6 text-dw-text-muted">
-              This step is not built yet.
+            <p className="font-mono text-label font-medium tracking-[0.08em] text-dw-text-muted uppercase">Step 02 · UX principles</p>
+            <h1 id="stop-title" tabIndex={-1} className="mt-1.5 text-title font-semibold tracking-[-0.025em]">
+              UX principles
+            </h1>
+            <p role="status" className="mt-6 max-w-[60ch] border border-dashed border-dw-ctl px-4 py-6 text-dw-text-muted">
+              Step 2 isn’t built yet. Your profile is saved; UX principles stay open until this step arrives.
             </p>
+            <div className="mt-5 flex flex-col items-start gap-3 border-t border-dw-line pt-4">
+              <button
+                type="button"
+                onClick={() => setPicked(`visual.${firstOpen(visual) ?? SUB_KEYS[0]}`)}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2.5 rounded-sm bg-dw-accent px-4 font-semibold whitespace-nowrap text-dw-on-accent min-[761px]:w-auto"
+              >
+                Continue to visual system
+                <kbd className="border-dw-on-accent bg-transparent text-dw-on-accent">Enter</kbd>
+              </button>
+              <p className="text-small text-dw-text-muted">Press E to reopen the profile.</p>
+            </div>
           </>
         )}
       </main>

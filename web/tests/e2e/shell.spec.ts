@@ -7,7 +7,7 @@ test("the shell renders and makes no request outside localhost", async ({ page }
     if (protocol.startsWith("http") && hostname !== "localhost") external.push(req.url());
   });
 
-  await page.goto("/");
+  await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await page.waitForLoadState("networkidle");
 

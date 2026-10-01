@@ -45,7 +45,7 @@ export function VisualStep({ sub, visual, productName, onMove }: { sub: VisualKe
       <p className="font-mono text-label font-medium tracking-[0.08em] text-dw-text-muted uppercase">
         Step 03 · Visual system · Decision {index + 1} of {SUB_KEYS.length}
       </p>
-      <h1 className="mt-1.5 text-title font-semibold tracking-[-0.025em]">
+      <h1 id="stop-title" tabIndex={-1} className="mt-1.5 text-title font-semibold tracking-[-0.025em]">
         <ArrowText text={meta.label} />
       </h1>
       <p className="mt-1 max-w-[60ch] text-dw-text-muted">{LEADS[sub](whose)}</p>

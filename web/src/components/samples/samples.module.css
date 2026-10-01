@@ -141,3 +141,57 @@
   border-width: 0 0.12em 0.12em 0;
   transform: rotate(45deg);
 }
+
+/* Platform stage: fixed 4:3 box, so its size never depends on the fonts (AC5). Frames sit at their true
+   logical size on a canvas that PlatformStage scales to fit; "both" = desktop and mobile side by side,
+   bottom-aligned, 48px apart, at one shared scale. */
+.stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--v-bg);
+}
+
+.canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transform-origin: center;
+}
+
+.canvas-desktop {
+  width: 1280px;
+  height: 800px;
+}
+
+.canvas-mobile {
+  width: 390px;
+  height: 844px;
+}
+
+.canvas-both {
+  width: 1718px;
+  height: 844px;
+}
+
+.frame {
+  position: absolute;
+  bottom: 0;
+  overflow: hidden;
+  border: 1px solid var(--v-border);
+  border-radius: 0;
+  background: var(--v-bg);
+}
+
+.frame-desktop {
+  left: 0;
+  width: 1280px;
+  height: 800px;
+}
+
+.frame-mobile {
+  right: 0;
+  width: 390px;
+  height: 844px;
+}

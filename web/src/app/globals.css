@@ -233,3 +233,12 @@
     outline-offset: 3px;
   }
 }
+
+/* Chrome panel (step 1 component library): the tool's own output, so --surface fill and a 1px --line
+   outline drawn inset (box-shadow), leaving `outline` free for the focus ring. Brackets as a plate. */
+@layer components {
+  .dw-plate.dw-panel {
+    background: var(--dw-surface);
+    box-shadow: inset 0 0 0 1px var(--dw-line);
+  }
+}
