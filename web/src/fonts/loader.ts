@@ -1,6 +1,7 @@
 // Variant font loading (docs/PLAN.md, decision on fonts): committed OFL woff2 files under
 // /fonts/<id>/, registered with the FontFace API as "dwv-<id>" only when a plate needs them.
-// A face that fails stays failed; the plate then says so instead of showing a fallback font.
+// A face that fails is reported as failed (the plate says so instead of showing a fallback font)
+// and forgotten, so the next mount tries again.
 import type { FontPairEntry } from "@/contracts/content";
 import { FONT_BY_ID, variantFace } from "@/content/fonts";
 
@@ -26,7 +27,12 @@ function loadFace(fontId: string, weight: number): Promise<boolean> {
           document.fonts.add(face);
           return face.load().then(
             () => true,
-            () => false,
+            () => {
+              // Forget the failure so a remount retries; the plate shows "Font failed" meanwhile.
+              document.fonts.delete(face);
+              faces.delete(key);
+              return false;
+            },
           );
         })();
   faces.set(key, promise);

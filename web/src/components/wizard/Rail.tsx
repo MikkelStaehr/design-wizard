@@ -3,7 +3,7 @@ import type { Visual } from "@/contracts/project";
 import { STEPS, type StepId, type VisualKey } from "@/domain/decisions";
 import { ShortcutLegend } from "./ShortcutLegend";
 import { SubDecisionList } from "./SubDecisionList";
-import { isDecided, SUB_KEYS } from "./steps/visual/model";
+import { isDecided, SUB_KEYS } from "@/domain/decisions";
 
 export function Rail({
   current,

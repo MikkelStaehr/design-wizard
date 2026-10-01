@@ -2,10 +2,10 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { STEPS, type StepId, type VisualKey } from "@/domain/decisions";
 import { useProject } from "@/data/project/store";
-import { ownsKey } from "@/components/plate/PlateGrid";
+import { ownsKey } from "./use-shortcuts";
 import { Rail } from "./Rail";
 import { VisualStep } from "./steps/visual/VisualStep";
-import { firstOpen, lastDecidedBefore, SUB_KEYS } from "./steps/visual/model";
+import { firstOpen, lastDecidedBefore, SUB_KEYS } from "@/domain/decisions";
 
 /** ?step=visual.<key> opens a sub-decision directly (screenshots); "palette" is accepted for paletteVariant. */
 function subFromSearch(search: string): VisualKey | null {

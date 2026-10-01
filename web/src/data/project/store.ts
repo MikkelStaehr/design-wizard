@@ -1,10 +1,12 @@
 // The project store: the only writer of project state (docs/ARCHITECTURE.md §1).
 // Every change is autosaved; an invalid file never replaces the current state.
-// Slice 2 adds decision actions and resolving `resolved` once every decision is set.
+// `resolved` is recomputed only when something it depends on changes (visual decisions, laws) or a
+// decision opens or closes; a file's stored snapshot is never replaced silently (CONTRACTS §1).
 import { useSyncExternalStore } from "react";
 import type { ParseError } from "@/contracts/errors";
 import type { Principle, ProjectFile, Profile, Visual } from "@/contracts/project";
 import { palette } from "@/domain/color/palette";
+import { openDecisions } from "@/domain/decisions";
 import { resolveSnapshot } from "@/domain/tokens/resolve";
 import { devFixtureName, devFixtureText } from "./dev-fixtures";
 import { emptyProject } from "./empty";
@@ -20,6 +22,8 @@ export interface ProjectState {
   downloadedAt: string | null;
   /** True when the last autosave to this browser failed (full or blocked storage); the download is then the only copy. */
   saveFailed: boolean;
+  /** The opened file's stored snapshot differs from a fresh computation: the UI asks keep or recompute. */
+  snapshotDiffers: boolean;
 }
 
 export interface ProjectStore {
@@ -28,17 +32,20 @@ export interface ProjectStore {
   /** Parses `text`; on success it replaces the project, otherwise only `errors` change. */
   open(text: string): ParseError[];
   replace(project: ProjectFile): void;
-  /** Decision actions: each recomputes `resolved` (null while any decision is open) and autosaves. */
+  /** Decision actions: each autosaves; `resolved` is null while any decision is open. */
   setProfile<K extends keyof Profile>(key: K, value: Profile[K]): void;
   setPrinciples(principles: Principle[] | null): void;
   setVisual<K extends keyof Visual>(key: K, value: Visual[K]): void;
   markDownloaded(): void;
+  /** Answers to the "Stored values differ" notice: keep the file's snapshot, or replace it with a fresh one. */
+  keepSnapshot(): void;
+  recomputeSnapshot(): void;
   /** Dev only (?fixture=): open fixture text and pretend it was saved at `savedAt`. */
   openDevFixture(text: string, savedAt: string | null): void;
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, snapshotDiffers: false };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
@@ -54,16 +61,33 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     }
   };
 
-  /** Every decision change goes through here: recompute the snapshot, then save. */
-  const decide = (next: ProjectFile) => {
-    const project = { ...next, resolved: resolveSnapshot(next) };
-    emit({ ...state, project, errors: [], ...persist(project, state.downloadedAt) });
+/**
+   * Every change goes through here. While any decision is open, `resolved` is null. Otherwise it is
+   * recomputed only if the change affects it (visual decisions, laws) or there is none yet; editing
+   * the name, product type, platform, notes or component library keeps the stored snapshot.
+   */
+  const decide = (next: ProjectFile, affectsSnapshot: boolean) => {
+    const open = openDecisions(next).length > 0;
+    const resolved = open ? null : affectsSnapshot || next.resolved === null ? resolveSnapshot(next) : next.resolved;
+    const project = { ...next, resolved };
+    const snapshotDiffers = !open && !affectsSnapshot && state.snapshotDiffers;
+    emit({ ...state, project, errors: [], snapshotDiffers, ...persist(project, state.downloadedAt) });
+  };
+
+  /** Opened or restored file: resolve it if every decision is set but there is no snapshot; else compare. */
+  const settle = (p: ProjectFile): { project: ProjectFile; snapshotDiffers: boolean; changed: boolean } => {
+    if (openDecisions(p).length > 0 || p.principles === null) return { project: p, snapshotDiffers: false, changed: false };
+    const fresh = resolveSnapshot(p);
+    if (p.resolved === null) return { project: { ...p, resolved: fresh }, snapshotDiffers: false, changed: fresh !== null };
+    const differs = fresh !== null && serialize({ ...p, resolved: fresh }) !== serialize(p);
+    return { project: p, snapshotDiffers: differs, changed: false };
   };
 
   if (storage) {
     const restored = restore(storage);
     if (restored.kind === "restored") {
-      state = { ...state, project: restored.project, savedAt: restored.envelope.savedAt, downloadedAt: restored.envelope.downloadedAt };
+      const { project, snapshotDiffers } = settle(restored.project);
+      state = { ...state, project, snapshotDiffers, savedAt: restored.envelope.savedAt, downloadedAt: restored.envelope.downloadedAt };
     } else if (restored.kind === "quarantined") {
       state = { ...state, errors: restored.errors };
     }
@@ -81,17 +105,18 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
         emit({ ...state, errors: result.errors });
         return result.errors;
       }
-      emit({ ...state, project: result.project, errors: [], downloadedAt: null, ...persist(result.project, null) });
+      const { project, snapshotDiffers } = settle(result.project);
+      emit({ ...state, project, errors: [], downloadedAt: null, snapshotDiffers, ...persist(project, null) });
       return [];
     },
     replace(project) {
-      emit({ ...state, project, errors: [], ...persist(project, state.downloadedAt) });
+      emit({ ...state, project, errors: [], snapshotDiffers: false, ...persist(project, state.downloadedAt) });
     },
     setProfile(key, value) {
-      decide({ ...state.project, profile: { ...state.project.profile, [key]: value } });
+      decide({ ...state.project, profile: { ...state.project.profile, [key]: value } }, false);
     },
     setPrinciples(principles) {
-      decide({ ...state.project, principles });
+      decide({ ...state.project, principles }, true);
     },
     setVisual(key, value) {
       const visual = { ...state.project.visual, [key]: value };
@@ -99,11 +124,18 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       if (key === "brandHex" && visual.brandHex !== null && visual.paletteVariant !== null && palette(visual.brandHex, visual.paletteVariant) === null) {
         visual.paletteVariant = null;
       }
-      decide({ ...state.project, visual });
+      decide({ ...state.project, visual }, true);
     },
     openDevFixture(text, savedAt) {
       const errors = this.open(text);
       if (errors.length === 0) emit({ ...state, savedAt });
+    },
+    keepSnapshot() {
+      emit({ ...state, snapshotDiffers: false });
+    },
+    recomputeSnapshot() {
+      const project = { ...state.project, resolved: resolveSnapshot(state.project) };
+      emit({ ...state, project, snapshotDiffers: false, ...persist(project, state.downloadedAt) });
     },
     markDownloaded() {
       const downloadedAt = now().toISOString();
@@ -113,7 +145,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, snapshotDiffers: false };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {

@@ -2,7 +2,8 @@
 import type { Visual } from "@/contracts/project";
 import { VISUAL_SUBDECISIONS, type VisualKey } from "@/domain/decisions";
 import { ArrowText } from "./ArrowText";
-import { firstOpen, isDecided, nextOpenAfter, valueLabel } from "./steps/visual/model";
+import { firstOpen, isDecided, nextOpenAfter } from "@/domain/decisions";
+import { valueLabel } from "./steps/visual/model";
 
 /** Step 3's sub-decisions with their state: the chosen value, "now", "next" or "open". Rows are 44px buttons. */
 export function SubDecisionList({ visual, current, onPick }: { visual: Visual; current: VisualKey; onPick: (key: VisualKey) => void }) {

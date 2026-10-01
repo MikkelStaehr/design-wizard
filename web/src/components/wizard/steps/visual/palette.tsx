@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import type { PaletteVariant } from "@/contracts/project";
 import { palettes, PALETTE_LABELS } from "@/domain/color/palette";
 import { checkPairs } from "@/domain/color/pairs";
 import { parseHexInput } from "@/domain/parse-input";
@@ -93,7 +92,7 @@ export function PaletteDecision({ visual, productName, onChoose }: DecisionProps
           options={options}
           chosenId={visual.paletteVariant}
           productName={productName}
-          onChoose={(id) => onChoose("paletteVariant", id as PaletteVariant)}
+          onChoose={(id) => onChoose("paletteVariant", id)}
         />
       )}
     </>

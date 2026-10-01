@@ -59,3 +59,30 @@ test("a damaged saved copy is quarantined, not lost, and the store starts empty"
   expect(store.getState().project.profile.name).toBeNull();
   expect(store.getState().errors.map((e) => e.code)).toEqual(["json-syntax"]);
 });
+
+test("the stored snapshot is never replaced silently", () => {
+  const store = createProjectStore(null, now);
+  store.open(harbour);
+  // Harbour's palette was chosen by hand, so a fresh computation differs: the UI must ask.
+  expect(store.getState().snapshotDiffers).toBe(true);
+  const stored = store.getState().project.resolved;
+  store.setProfile("notes", "Edited notes");
+  store.setProfile("name", "Harbour Clinic");
+  store.setProfile("componentLibrary", "none");
+  expect(store.getState().project.resolved).toBe(stored);
+  expect(store.getState().snapshotDiffers).toBe(true);
+  store.keepSnapshot();
+  expect(store.getState().snapshotDiffers).toBe(false);
+  expect(store.getState().project.resolved).toBe(stored);
+  store.recomputeSnapshot();
+  expect(store.getState().project.resolved).not.toEqual(stored);
+  expect(store.getState().project.resolved?.color.light.accent).toBe("#0F766E");
+});
+
+test("an opened file with every decision set but no snapshot is resolved on open", () => {
+  const store = createProjectStore(null, now);
+  store.open(harbour.replace(/"resolved": \{[\s\S]*\}\n\}\n$/, '"resolved": null\n}\n'));
+  expect(store.getState().errors).toEqual([]);
+  expect(store.getState().project.resolved).not.toBeNull();
+  expect(store.getState().snapshotDiffers).toBe(false);
+});

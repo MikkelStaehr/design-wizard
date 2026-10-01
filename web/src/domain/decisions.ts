@@ -1,6 +1,6 @@
 // Owner of the wizard's ordered steps, the list of decisions, which are open, and the export gate
 // (docs/ARCHITECTURE.md §4). The parser and the exporters both ask this module.
-import type { ProjectFile } from "@/contracts/project";
+import type { ProjectFile, Visual } from "@/contracts/project";
 
 /** Every decision, in wizard order. `null` = open. notes and componentLibrary are not decisions. */
 export const DECISIONS: readonly { path: string; label: string; get: (p: ProjectFile) => unknown }[] = [
@@ -11,9 +11,9 @@ export const DECISIONS: readonly { path: string; label: string; get: (p: Project
   { path: "visual.fontPair", label: "Font pair", get: (p) => p.visual?.fontPair },
   { path: "visual.spacingBase", label: "Spacing base", get: (p) => p.visual?.spacingBase },
   { path: "visual.radius", label: "Radius", get: (p) => p.visual?.radius },
-  { path: "visual.density", label: "Density", get: (p) => p.visual?.density },
   { path: "visual.brandHex", label: "Brand colour", get: (p) => p.visual?.brandHex },
   { path: "visual.paletteVariant", label: "Palette", get: (p) => p.visual?.paletteVariant },
+  { path: "visual.density", label: "Density", get: (p) => p.visual?.density },
 ];
 
 /** Labels of the decisions that are still open (null), in wizard order. */
@@ -80,6 +80,36 @@ export function evenPages(n: number, max = 3): [number, number][] {
     start += size;
   }
   return pages;
+}
+
+/** Visual sub-decision keys in wizard order. */
+export const SUB_KEYS: readonly VisualKey[] = VISUAL_SUBDECISIONS.map((s) => s.key);
+
+/** The palette sub-decision needs both the brand colour and a variant. */
+export function isDecided(v: Visual, key: VisualKey): boolean {
+  return key === "paletteVariant" ? v.paletteVariant !== null && v.brandHex !== null : v[key] !== null;
+}
+
+export function firstOpen(v: Visual): VisualKey | null {
+  return SUB_KEYS.find((k) => !isDecided(v, k)) ?? null;
+}
+
+/** The next open sub-decision after `from`, wrapping around; null when every other one is decided. */
+export function nextOpenAfter(v: Visual, from: VisualKey): VisualKey | null {
+  const i = SUB_KEYS.indexOf(from);
+  for (let n = 1; n < SUB_KEYS.length; n++) {
+    const k = SUB_KEYS[(i + n) % SUB_KEYS.length];
+    if (!isDecided(v, k)) return k;
+  }
+  return null;
+}
+
+/** E: the nearest decided sub-decision before `from`, else the last decided one. */
+export function lastDecidedBefore(v: Visual, from: VisualKey): VisualKey | null {
+  const i = SUB_KEYS.indexOf(from);
+  for (let n = i - 1; n >= 0; n--) if (isDecided(v, SUB_KEYS[n])) return SUB_KEYS[n];
+  for (let n = SUB_KEYS.length - 1; n > i; n--) if (isDecided(v, SUB_KEYS[n])) return SUB_KEYS[n];
+  return null;
 }
 
 export type StepId = "profile" | "principles" | "visual" | "preview" | "export";

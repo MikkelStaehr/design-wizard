@@ -3,10 +3,11 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type Reac
 import type { FontLoadState } from "@/fonts/loader";
 import type { PlateTokens } from "@/domain/tokens/resolve";
 import { SampleCard } from "@/components/samples/SampleCard";
+import { ownsKey } from "@/components/wizard/use-shortcuts";
 import { Plate } from "./Plate";
 
-export interface PlateOption {
-  id: string;
+export interface PlateOption<Id extends string = string> {
+  id: Id;
   label: string;
   description: string;
   tokens: PlateTokens;
@@ -16,31 +17,25 @@ export interface PlateOption {
   footer?: ReactNode;
 }
 
-interface PlateGridProps {
+interface PlateGridProps<Id extends string> {
   /** Accessible name of the radio group, e.g. "Spacing variants". */
   label: string;
   /** Name of the decision for the choose bar, e.g. "spacing". */
   decision: string;
-  options: PlateOption[];
+  options: PlateOption<Id>[];
   /** The recorded value, or null while the decision is open. */
-  chosenId: string | null;
+  chosenId: Id | null;
   productName: string | null;
-  onChoose: (id: string) => void;
+  onChoose: (id: Id) => void;
 }
 
-/** True when the key belongs to the focused control (typing, or a button's own Enter). */
-export function ownsKey(target: EventTarget | null, key: string): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  if (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return true;
-  return key === "Enter" && ["BUTTON", "A", "SUMMARY"].includes(target.tagName);
-}
 
 /**
  * 2–3 plates side by side as one radio group. 1/2/3 (or arrows) select a variant; Enter or the
  * primary button records it. A variant whose fonts failed can be looked at but not chosen.
  */
-export function PlateGrid({ label, decision, options, chosenId, productName, onChoose }: PlateGridProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(chosenId);
+export function PlateGrid<Id extends string>({ label, decision, options, chosenId, productName, onChoose }: PlateGridProps<Id>) {
+  const [selectedId, setSelectedId] = useState<Id | null>(chosenId);
   const [fontStates, setFontStates] = useState<Record<string, FontLoadState>>({});
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const selected = options.find((o) => o.id === selectedId) ?? null;
@@ -92,6 +87,7 @@ export function PlateGrid({ label, decision, options, chosenId, productName, onC
     [],
   );
   const tabIndexId = selected?.id ?? options[0]?.id;
+  const optionKey = options.map((o) => o.id).join("|");
 
   // Equal plates: one ResizeObserver measures each variant's content; every root gets the tallest as min-height,
   // so columns stay level and nothing shifts between candidates. Re-runs as plates finish loading their fonts.
@@ -109,7 +105,7 @@ export function PlateGrid({ label, decision, options, chosenId, productName, onC
     const observer = new ResizeObserver(sync);
     contents.forEach((c) => observer.observe(c));
     return () => observer.disconnect();
-  }, [fontStates, options]);
+  }, [fontStates, optionKey]);
 
   return (
     <>

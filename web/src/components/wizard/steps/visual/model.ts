@@ -1,11 +1,10 @@
-// View helpers for step 3: which sub-decisions are open, and how a chosen value reads in the rail.
+// View helpers for step 3: how a chosen value reads in the rail. Which sub-decisions are open is
+// owned by domain/decisions.ts.
 import type { Visual } from "@/contracts/project";
 import { FONT_BY_ID } from "@/content/fonts";
 import { FONT_PAIR_BY_ID } from "@/content/font-pairs";
 import { PALETTE_LABELS } from "@/domain/color/palette";
-import { VISUAL_SUBDECISIONS, type VisualKey } from "@/domain/decisions";
-
-export const SUB_KEYS: readonly VisualKey[] = VISUAL_SUBDECISIONS.map((s) => s.key);
+import { isDecided, type VisualKey } from "@/domain/decisions";
 
 /** "Sora + Inter", or "Inter" for a single-family pair. Unknown ids are shown as-is, never hidden. */
 export function fontPairLabel(id: string): string {
@@ -19,11 +18,6 @@ export function fontPairLabel(id: string): string {
 export const spacingLabel = (n: number) => `${n}-pt`;
 export const radiusLabel = (n: number) => `${n} px`;
 export const densityLabel = (d: string) => d.charAt(0).toUpperCase() + d.slice(1);
-
-/** The palette sub-decision needs both the brand colour and a variant. */
-export function isDecided(v: Visual, key: VisualKey): boolean {
-  return key === "paletteVariant" ? v.paletteVariant !== null && v.brandHex !== null : v[key] !== null;
-}
 
 /** The chosen value as shown in the rail, or null while open. */
 export function valueLabel(v: Visual, key: VisualKey): string | null {
@@ -40,28 +34,6 @@ export function valueLabel(v: Visual, key: VisualKey): string | null {
     case "density":
       return densityLabel(v.density as string);
   }
-}
-
-export function firstOpen(v: Visual): VisualKey | null {
-  return SUB_KEYS.find((k) => !isDecided(v, k)) ?? null;
-}
-
-/** The next open sub-decision after `from`, wrapping around; null when every other one is decided. */
-export function nextOpenAfter(v: Visual, from: VisualKey): VisualKey | null {
-  const i = SUB_KEYS.indexOf(from);
-  for (let n = 1; n < SUB_KEYS.length; n++) {
-    const k = SUB_KEYS[(i + n) % SUB_KEYS.length];
-    if (!isDecided(v, k)) return k;
-  }
-  return null;
-}
-
-/** E: the nearest decided sub-decision before `from`, else the last decided one. */
-export function lastDecidedBefore(v: Visual, from: VisualKey): VisualKey | null {
-  const i = SUB_KEYS.indexOf(from);
-  for (let n = i - 1; n >= 0; n--) if (isDecided(v, SUB_KEYS[n])) return SUB_KEYS[n];
-  for (let n = SUB_KEYS.length - 1; n > i; n--) if (isDecided(v, SUB_KEYS[n])) return SUB_KEYS[n];
-  return null;
 }
 
 /** Props every sub-decision view takes. `onChoose` records the value through the store, then moves on. */
