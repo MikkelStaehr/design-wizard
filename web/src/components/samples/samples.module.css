@@ -12,6 +12,8 @@
   font-weight: var(--v-weight-text);
   font-size: var(--v-fs-sm);
   line-height: var(--v-lh-text);
+  /* Lines never wrap, so a plate keeps its height whatever font loads (AC5). */
+  white-space: nowrap;
 }
 
 .bar {

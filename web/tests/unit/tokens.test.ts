@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { COLOR_ROLES, FONT_SIZE_KEYS, SPACE_KEYS } from "@/contracts/project";
 import { emptyProject } from "@/data/project/empty";
 import { parse } from "@/data/project/parse";
@@ -100,4 +100,30 @@ test("a saved spacing or radius outside the fixed candidates is always shown", a
   expect(numericCandidates("radius", 32)).toEqual([0, 6, 32]);
   expect(numericCandidates("radius", 1)).toEqual([1, 6, 14]);
   expect(numericCandidates("spacingBase", 5)).toEqual([5, 6, 8]);
+});
+
+test("font pairs are paged evenly: 2–3 per page, no duplicates, nothing left out", async () => {
+  const { evenPages } = await import("@/domain/decisions");
+  const sizes = (n: number) => evenPages(n).map(([a, b]) => b - a);
+  expect(sizes(7)).toEqual([3, 2, 2]);
+  expect(sizes(3)).toEqual([3]);
+  expect(sizes(4)).toEqual([2, 2]);
+  expect(sizes(5)).toEqual([3, 2]);
+  expect(sizes(8)).toEqual([3, 3, 2]);
+  for (let n = 2; n <= 40; n++) {
+    const pages = evenPages(n);
+    const ids = pages.flatMap(([a, b]) => Array.from({ length: b - a }, (_, i) => a + i));
+    expect(ids).toEqual(Array.from({ length: n }, (_, i) => i));
+    for (const [a, b] of pages) expect(b - a === 2 || b - a === 3).toBe(true);
+  }
+});
+
+test("a brand colour change never stores grey preview colours", async () => {
+  const { resolveSnapshot } = await import("@/domain/tokens/resolve");
+  const palette = await import("@/domain/color/palette");
+  const p = harbour();
+  expect(resolveSnapshot(p)?.color.light.accent).toBe("#0F766E");
+  const spy = vi.spyOn(palette, "palette").mockReturnValue(null);
+  expect(resolveSnapshot(p)).toBeNull();
+  spy.mockRestore();
 });

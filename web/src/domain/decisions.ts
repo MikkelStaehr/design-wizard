@@ -64,6 +64,24 @@ export function numericCandidates(key: "spacingBase" | "radius", saved: number |
   return fixed.sort((a, b) => a - b);
 }
 
+/**
+ * Splits n items into the fewest pages of at most 3, as evenly as possible (7 → 3, 2, 2), so every
+ * page shows 2–3 variants side by side and nothing repeats. Returns [start, end) per page.
+ */
+export function evenPages(n: number, max = 3): [number, number][] {
+  const count = Math.max(1, Math.ceil(n / max));
+  const base = Math.floor(n / count);
+  const extra = n % count;
+  const pages: [number, number][] = [];
+  let start = 0;
+  for (let i = 0; i < count; i++) {
+    const size = base + (i < extra ? 1 : 0);
+    pages.push([start, start + size]);
+    start += size;
+  }
+  return pages;
+}
+
 export type StepId = "profile" | "principles" | "visual" | "preview" | "export";
 
 export interface Step {

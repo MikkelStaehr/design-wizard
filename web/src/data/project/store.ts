@@ -4,6 +4,7 @@
 import { useSyncExternalStore } from "react";
 import type { ParseError } from "@/contracts/errors";
 import type { Principle, ProjectFile, Profile, Visual } from "@/contracts/project";
+import { palette } from "@/domain/color/palette";
 import { resolveSnapshot } from "@/domain/tokens/resolve";
 import { devFixtureName, devFixtureText } from "./dev-fixtures";
 import { emptyProject } from "./empty";
@@ -93,7 +94,12 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       decide({ ...state.project, principles });
     },
     setVisual(key, value) {
-      decide({ ...state.project, visual: { ...state.project.visual, [key]: value } });
+      const visual = { ...state.project.visual, [key]: value };
+      // A new brand colour that can't produce the chosen palette reopens the palette decision.
+      if (key === "brandHex" && visual.brandHex !== null && visual.paletteVariant !== null && palette(visual.brandHex, visual.paletteVariant) === null) {
+        visual.paletteVariant = null;
+      }
+      decide({ ...state.project, visual });
     },
     openDevFixture(text, savedAt) {
       const errors = this.open(text);

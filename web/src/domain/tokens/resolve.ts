@@ -65,6 +65,8 @@ export function resolveForPlate(visual: Visual, candidate: Partial<VisualDecisio
 export function resolveSnapshot(p: ProjectFile): Resolved | null {
   if (openDecisions(p).length > 0 || p.principles === null) return null;
   const v = p.visual as Required<{ [K in keyof VisualDecisions]: NonNullable<VisualDecisions[K]> }> & Visual;
+  // A palette that can't pass for this brand colour is an open decision, never a grey stand-in.
+  if (palette(v.brandHex, v.paletteVariant) === null) return null;
   const rules = p.principles.map((pr) => {
     const law = LAW_BY_ID.get(pr.lawId);
     if (!law) throw new Error(`Unknown law "${pr.lawId}"`);
