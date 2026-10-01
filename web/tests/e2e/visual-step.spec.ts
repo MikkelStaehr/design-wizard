@@ -72,7 +72,8 @@ test("keyboard: 1/2/3 then Enter records a decision; J and K move between sub-de
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   const radios = page.getByRole("radiogroup", { name: "Font pair variants" }).getByRole("radio");
   // The radios exist in the static HTML; a loaded plate root only appears once the client has hydrated.
-  await expect(page.locator("[data-v-root]")).toHaveCount(2);
+  // 3 pairs at a time (the catalogue has more, behind "More pairs").
+  await expect(page.locator("[data-v-root]")).toHaveCount(3);
 
   await page.keyboard.press("2");
   await expect(radios.nth(1)).toHaveAttribute("aria-checked", "true");

@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Wizard · Content review: laws, fonts and pairs (draft)</title>
+<style>
+/* Generated from laws.json, fonts.json, font-pairs.json. Chrome: Grading Suite light (DESIGN.md Part B). All fonts self-hosted, OFL. */
+@font-face{font-family:"Geist";src:url("../../web/public/fonts/geist/geist-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Geist";src:url("../../web/public/fonts/geist/geist-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Geist";src:url("../../web/public/fonts/geist/geist-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"IBM Plex Mono";src:url("../../web/public/fonts/ibm-plex-mono/ibm-plex-mono-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"IBM Plex Mono";src:url("../../web/public/fonts/ibm-plex-mono/ibm-plex-mono-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Inter";src:url("../../web/public/fonts/inter/inter-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Inter";src:url("../../web/public/fonts/inter/inter-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Inter";src:url("../../web/public/fonts/inter/inter-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Sora";src:url("../../web/public/fonts/sora/sora-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Sora";src:url("../../web/public/fonts/sora/sora-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
+@font-face{font-family:"Open Sans";src:url("../../web/public/fonts/open-sans/open-sans-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Open Sans";src:url("../../web/public/fonts/open-sans/open-sans-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Fraunces";src:url("../../web/public/fonts/fraunces/fraunces-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Space Grotesk";src:url("../../web/public/fonts/space-grotesk/space-grotesk-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+@font-face{font-family:"Manrope";src:url("../../web/public/fonts/manrope/manrope-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Manrope";src:url("../../web/public/fonts/manrope/manrope-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Manrope";src:url("../../web/public/fonts/manrope/manrope-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
+@font-face{font-family:"Atkinson Hyperlegible Next";src:url("../../web/public/fonts/atkinson-hyperlegible-next/atkinson-hyperlegible-next-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Atkinson Hyperlegible Next";src:url("../../web/public/fonts/atkinson-hyperlegible-next/atkinson-hyperlegible-next-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"Atkinson Hyperlegible Next";src:url("../../web/public/fonts/atkinson-hyperlegible-next/atkinson-hyperlegible-next-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
+@font-face{font-family:"Barlow";src:url("../../web/public/fonts/barlow/barlow-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:block}
+:root{--bg:#E6E6E6;--surface:#F2F2F2;--plate:#CCCCCC;--line:#CCCCCC;--ctl:#6B6B6B;--text:#141414;--muted:#4F4F4F;--accent:#000;--on-accent:#fff;--focus:#000;--r:2px;
+--sans:"Geist",sans-serif;--mono:"IBM Plex Mono",monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:var(--text);font:400 13px/1.5 var(--sans)}
+body{padding:0 24px 64px}
+a{color:var(--text)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;min-height:44px;border-bottom:1px solid var(--line);margin:0 -24px;padding:0 24px}
+.brand{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;display:flex;gap:8px;align-items:center}
+.brand i{width:10px;height:10px;background:var(--accent);display:inline-block}
+.lab{font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.intro{max-width:1232px;margin:32px auto 0}
+h1{font:600 25px/1.2 var(--sans);letter-spacing:-.025em;margin-top:6px}
+.lead{max-width:60ch;margin-top:12px}
+.lead+.lead{margin-top:8px}
+.jump{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.jump a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--ctl);border-radius:var(--r);background:var(--surface);text-decoration:none;font-weight:500}
+.jump a .mono{color:var(--muted)}
+.jump svg{width:1em;height:1em}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+section{max-width:1232px;margin:48px auto 0}
+.sec-hd{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:1px solid var(--ctl);padding-top:12px;margin-bottom:20px}
+h2{font:600 25px/1.2 var(--sans);letter-spacing:-.025em}
+.sec-hd p{max-width:60ch;color:var(--muted)}
+.mono{font:400 11px/1.6 var(--mono);font-variant-numeric:tabular-nums}
+.mut{color:var(--muted)}
+code.id{font:500 11px/1.4 var(--mono);color:var(--text);background:var(--surface);border:1px solid var(--ctl);border-radius:var(--r);padding:2px 6px;user-select:all}
+.tag{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:20px;padding:0 6px;font:400 11px/1 var(--mono);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line);letter-spacing:.04em}
+.tag.strong{color:var(--text);box-shadow:inset 0 0 0 1px var(--ctl);font-weight:500}
+.tag.inv{background:var(--accent);color:var(--on-accent);box-shadow:none;font-weight:500}
+.tags{display:flex;gap:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column}
+.card.is-cut{border-color:var(--ctl);border-style:dashed}
+.card-hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card h3{font:600 13px/1.4 var(--sans);margin-top:12px}
+.rng{margin-left:6px}
+.measure .q{color:var(--text)}
+.sum{margin-top:2px}
+.kv{margin-top:12px;display:grid;gap:2px}
+.kv dt{font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.kv dt:first-child{margin-top:0}
+.rule b{font-weight:600}
+.measure{color:var(--muted);font-size:12px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.note b{color:var(--text);font-weight:500}
+.dd{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto;padding-top:16px}
+figcaption{font:500 11px/1 var(--mono);letter-spacing:.08em;margin-bottom:6px}
+/* Viewing plates with crop marks */
+.plate{position:relative;background:var(--plate);padding:18px}
+.plate::before,.plate::after,.plate .cm::before,.plate .cm::after{content:"";position:absolute;width:12px;height:12px;border:1px solid var(--muted)}
+.plate::before{top:6px;left:6px;border-right:0;border-bottom:0}
+.plate::after{bottom:6px;right:6px;border-left:0;border-top:0}
+.plate .cm::before{top:6px;right:6px;border-left:0;border-bottom:0}
+.plate .cm::after{bottom:6px;left:6px;border-right:0;border-top:0}
+.plate.mini{padding:14px}
+.plate.mini::before,.plate.mini::after,.plate.mini .cm::before,.plate.mini .cm::after{width:8px;height:8px}
+.plate.mini::before{top:4px;left:4px}.plate.mini::after{bottom:4px;right:4px}.plate.mini .cm::before{top:4px;right:4px}.plate.mini .cm::after{bottom:4px;left:4px}
+/* Neutral sample UI (not chrome): Inter, white, 6px radius */
+.smp{background:#fff;color:#1C1C1C;font:400 12px/1.4 "Inter",sans-serif;padding:10px;border-radius:6px;min-height:164px;display:flex;flex-direction:column;gap:6px}
+.smp *{font-family:inherit}
+.s-h{font-weight:600;font-size:13px}
+.s-p{font-size:12px}
+.s-meta{font-size:11px;color:#5E5E5E;margin-top:auto}
+.s-kick{font-size:11px;color:#5E5E5E;font-weight:500}
+.s-row{display:flex;gap:6px}
+.s-btn{font:600 12px/1 "Inter",sans-serif;border-radius:6px;min-height:36px;padding:0 10px;border:1px solid transparent;cursor:pointer;background:none;color:#1C1C1C}
+.s-pri{background:#1C1C1C;color:#fff}
+.s-sec{border-color:#8C8C8C;background:#fff}
+.s-tiny{min-height:0;padding:0 6px;font-size:11px}
+.s-link{text-decoration:underline;min-height:28px}
+.s-full{width:100%}
+.s-grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.s-grid2 .s-btn{padding:0 4px;min-height:32px;font-size:11px}
+.s-lbl{font-size:11px;font-weight:500}
+.s-in{border:1px solid #8C8C8C;border-radius:6px;height:32px;padding:0 8px;display:flex;align-items:center;font-size:12px}
+.s-focus-do{outline:2px solid #1C1C1C;outline-offset:2px}
+.s-focus-dont{border-color:#7A7A7A}
+.s-err{border:2px solid #B42318}
+.s-errt{font-size:11px;color:#B42318;font-weight:500}
+.s-sum{font-size:12px;background:#F0F0F0;border-radius:6px;padding:6px 8px;font-weight:500}
+.s-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.s-steps i{height:4px;background:#D4D4D4;border-radius:2px}
+.s-steps i.on{background:#1C1C1C}
+.s-dl{display:grid;grid-template-columns:auto 1fr;column-gap:8px;font-size:11px;align-content:start}
+.s-dl span{color:#5E5E5E;margin-top:var(--in)}
+.s-dl b{font-weight:500;margin-top:var(--in)}
+.s-dl span:first-child,.s-dl span:first-child+b{margin-top:0}
+.s-dl .g,.s-dl .g+b{margin-top:var(--out)}
+.s-list{list-style:none;font-size:11px}
+.s-list li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #E0E0E0}
+.s-list .s-flag{color:#B42318}
+.s-list .s-flag span:last-child{display:inline-flex;gap:4px;align-items:center}
+.s-ico{width:12px;height:12px}
+.wf{border:1px solid #BDBDBD;border-radius:4px;padding:5px;display:flex;flex-direction:column;gap:4px}
+.wf i{display:block;height:6px;background:#D4D4D4;border-radius:2px}
+.wf .wf-nav{background:#1C1C1C;height:8px}
+.wf .s{width:60%}
+/* Font and pair cells */
+.fcell .cap{padding-top:10px;display:grid;gap:2px;justify-items:start}
+.fcell h3{font:500 13px/1.4 var(--sans);margin-top:6px}
+.fcell .mono{color:var(--text)}
+.sm{font-size:12px;color:var(--muted)}
+.bk,.scr{background:#fff;color:#1C1C1C;border-radius:6px;font-synthesis:none}
+.bk{padding:16px;display:flex;flex-direction:column;min-height:290px}
+.bk-h{font-size:20px;line-height:1.2;letter-spacing:-.01em}
+.bk-p{font-size:14px;line-height:1.45;margin-top:6px}
+.bk-l{font-size:13px;margin-top:14px}
+.bk-in{font-size:14px;border:1px solid #8C8C8C;border-radius:6px;height:44px;display:flex;align-items:center;padding:0 12px;margin-top:6px}
+.bk-b{font-size:14px;background:#1C1C1C;color:#fff;border-radius:6px;height:44px;display:flex;align-items:center;justify-content:center;margin-top:12px}
+.bk-m{font-size:12px;color:#5E5E5E;margin-top:8px}
+.scr{overflow:hidden}
+.scr-bar{display:flex;justify-content:space-between;align-items:center;padding:0 14px;height:40px;border-bottom:1px solid #E0E0E0;font-size:13px}
+.scr-bar span:last-child{color:#5E5E5E;font-size:12px}
+.scr-body{padding:14px;display:flex;flex-direction:column}
+.scr-h{font-size:26px;line-height:1.15;letter-spacing:-.01em}
+.scr-p{font-size:14px;line-height:1.45;margin-top:6px}
+.scr-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid #E0E0E0}
+.scr-sh{font-size:15px;margin-top:14px}
+.scr-sh+.scr-row{margin-top:6px;border-top:1px solid #E0E0E0}
+.scr-row span:first-child{color:#5E5E5E}
+.excl{background:var(--surface);border:1px dashed var(--ctl);padding:16px;display:flex;flex-direction:column;gap:8px;align-self:start}
+.excl h3{font:500 13px/1.4 var(--sans)}
+.foot{max-width:1232px;margin:48px auto 0;border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:12px}
+@media (max-width:1100px){.grid3{grid-template-columns:repeat(2,1fr)}.grid4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){body{padding:0 16px 48px}.top{margin:0 -16px;padding:0 16px}.grid3,.grid4{grid-template-columns:1fr}.sec-hd{flex-direction:column}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><i aria-hidden="true"></i>Design Wizard · Content review</div><span class="lab">Slice 2, step 4 · draft</span></header>
+<main>
+<div class="intro">
+  <p class="lab">For approval</p>
+  <h1>Curated laws, fonts and pairs</h1>
+  <p class="lead">Nothing is built on these lists until you approve them. Answer with ids, for example: drop <code class="id">goal-gradient</code>, keep <code class="id">fraunces</code>.</p>
+  <p class="lead">Every sample below renders live in its own font. The wizard’s own chrome fonts, Geist and IBM Plex Mono, are not offered as project fonts.</p>
+  <nav class="jump" aria-label="Sections">
+    <a href="#laws">Laws <span class="mono">12</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg><span class="vh">jump to section</span></a><a href="#fonts">Font families <span class="mono">8</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg><span class="vh">jump to section</span></a><a href="#pairs">Font pairs <span class="mono">7</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg><span class="vh">jump to section</span></a>
+  </nav>
+</div>
+
+<section id="laws" aria-labelledby="h-laws">
+  <div class="sec-hd"><h2 id="h-laws">UX laws <span class="mono mut">12</span></h2><p>Order follows the moments of building a UI. Dashed cards are the ones I would cut first. SEED marks the four ids the fixtures use.</p></div>
+  <div class="grid3">
+<article class="card law" id="law-fitts">
+  <div class="card-hd"><code class="id">fitts</code><span class="tags"><span class="tag strong">MUST</span><span class="tag">SEED</span></span></div>
+  <h3>Fitts's law</h3>
+  <p class="sum">The time to hit a target depends on its distance and its size.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Any screen with controls a user clicks or taps.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Make every interactive element at least <b>44px</b> by <b>44px</b>.</dd>
+    <dt>Check</dt><dd><span class="mono">min-target-size</span><br><span class="mono">minPx 44px</span> <span class="mono mut rng">range 24px to 64px</span><br><span class="measure">Tester measures the box of every visible control at each viewport.</span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><div class="s-row"><button class="s-btn s-sec" style="height:44px;min-width:44px">Edit</button><button class="s-btn s-sec" style="height:44px;min-width:44px">Move</button></div><p class="s-meta">44px tall</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><div class="s-row"><button class="s-btn s-sec s-tiny" style="height:28px">Edit</button><button class="s-btn s-sec s-tiny" style="height:28px">Move</button></div><p class="s-meta">28px tall</p></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-hick">
+  <div class="card-hd"><code class="id">hick</code><span class="tags"><span class="tag strong">MUST</span><span class="tag">SEED</span></span></div>
+  <h3>Hick's law</h3>
+  <p class="sum">The time it takes to decide grows with the number of choices.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Screens where the user picks one action from several.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Limit primary actions to <b>1</b> per screen.</dd>
+    <dt>Check</dt><dd><span class="mono">max-count</span><br><span class="mono">max 1</span> <span class="mono mut rng">range 1 to 3</span><br><span class="measure">Tester counts the visible matches on each screen.</span></dd>
+  </dl>
+  <p class="note">Seed change: range 1 to 3 (was 0 to 5). Zero primary actions is not a useful screen-wide rule.</p>
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-h">Confirm booking</p><button class="s-btn s-pri s-full">Confirm</button><button class="s-btn s-link s-full">Back</button></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-h">Confirm booking</p><div class="s-grid2"><button class="s-btn s-pri">Confirm</button><button class="s-btn s-pri">Save</button><button class="s-btn s-pri">Share</button><button class="s-btn s-pri">Print</button></div></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-wcag-contrast">
+  <div class="card-hd"><code class="id">wcag-contrast</code><span class="tags"><span class="tag strong">MUST</span><span class="tag">SEED</span></span></div>
+  <h3>Contrast minimum (WCAG 2.2, 1.4.3)</h3>
+  <p class="sum">Text needs enough contrast against its background to be read with low vision.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Every screen with text.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Give all body text a contrast ratio of at least <b>4.5:1</b> against its background.</dd>
+    <dt>Check</dt><dd><span class="mono">contrast</span><br><span class="mono">minRatio 4.5:1</span> <span class="mono mut rng">range 4.5:1 to 7:1</span><br><span class="measure">Tester computes each text colour against its effective background.</span></dd>
+  </dl>
+  <p class="note">Seed change: minimum 4.5 (was 3). Body text below 4.5:1 fails WCAG AA.</p>
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-p" style="color:#5E5E5E">Free cancellation until 24 hours before.</p><p class="s-meta">#5E5E5E on white, 6.49:1</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-p" style="color:#9A9A9A">Free cancellation until 24 hours before.</p><p class="s-meta">#9A9A9A on white, 2.82:1</p></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-wcag-focus-visible">
+  <div class="card-hd"><code class="id">wcag-focus-visible</code><span class="tags"><span class="tag strong">MUST</span></span></div>
+  <h3>Focus visible (WCAG 2.2, 2.4.7)</h3>
+  <p class="sum">Keyboard users must be able to see which element has focus at every moment.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Every screen with links, buttons or form fields.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Show a focus outline at least <b>2px</b> thick on every interactive element reached by keyboard.</dd>
+    <dt>Check</dt><dd><span class="mono">focus-visible</span><br><span class="mono">minOutlinePx 2px</span> <span class="mono mut rng">range 1px to 4px</span><br><span class="measure">Tester tabs to each match and measures its outline or ring.</span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><label class="s-lbl">Phone</label><div class="s-in s-focus-do">20 12 34</div><p class="s-meta">Focused: 2px ring</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><label class="s-lbl">Phone</label><div class="s-in s-focus-dont">20 12 34</div><p class="s-meta">Focused: no ring</p></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-response-limits">
+  <div class="card-hd"><code class="id">response-limits</code><span class="tags"><span class="tag strong">MUST</span></span></div>
+  <h3>Response-time limits</h3>
+  <p class="sum">A response within 0.1 s feels instant; after about 1 s users notice they are waiting.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Every control that changes something on screen when it is activated.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Show a visible response within <b>100 ms</b> of every button press.</dd>
+    <dt>Check</dt><dd><span class="mono">response-time</span><br><span class="mono">maxMs 100 ms</span> <span class="mono mut rng">range 50 ms to 1000 ms</span><br><span class="measure">Tester clicks each match and times the first visual change.</span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><button class="s-btn s-pri s-full" data-delay="0">Save</button><p class="s-meta" aria-live="polite" data-out>Click to try</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><button class="s-btn s-pri s-full" data-delay="1200">Save</button><p class="s-meta" aria-live="polite" data-out>Click to try</p></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-recognition-recall">
+  <div class="card-hd"><code class="id">recognition-recall</code><span class="tags"><span class="tag">SHOULD</span></span></div>
+  <h3>Recognition over recall</h3>
+  <p class="sum">Recognising an option on screen is easier than remembering it from an earlier step.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Multi-step forms, filters and any screen that depends on an earlier choice.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Keep earlier choices visible on every step that depends on them.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">On each later step of a multi-step form, are the choices made in earlier steps visible without going back?</span></span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-kick">Step 3 of 3</p><p class="s-h">Confirm</p><p class="s-sum">Tue 14 Oct, 10:30<br>Dr Lind, check-up</p><button class="s-btn s-pri s-full">Confirm</button></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-kick">Step 3 of 3</p><p class="s-h">Confirm</p><p class="s-p">Are your details correct?</p><button class="s-btn s-pri s-full">Confirm</button></div></div></figure>
+  </div>
+</article>
+<article class="card law is-cut" id="law-consistency">
+  <div class="card-hd"><code class="id">consistency</code><span class="tags"><span class="tag">SHOULD</span><span class="tag inv">CUT FIRST 3</span></span></div>
+  <h3>Consistency and standards (Jakob's law)</h3>
+  <p class="sum">Users expect the same thing to look and work the same way everywhere, as it does in products they already know.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Products with more than one main screen.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Keep the main navigation in the same place and the same order on every screen.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">Moving between the main screens, does the main navigation stay in the same place in the same order?</span></span></dd>
+  </dl>
+  
+  <p class="note"><b>Why cut first:</b> A shared layout component gives this almost for free; it rarely fails in practice.</p>
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><div class="wf"><i class="wf-nav"></i><i class="wf-l"></i><i class="wf-l s"></i></div><div class="wf"><i class="wf-nav"></i><i class="wf-l"></i><i class="wf-l s"></i></div><p class="s-meta">Nav on top on both screens</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><div class="wf"><i class="wf-nav"></i><i class="wf-l"></i><i class="wf-l s"></i></div><div class="wf"><i class="wf-l"></i><i class="wf-l s"></i><i class="wf-nav"></i></div><p class="s-meta">Nav moves on screen 2</p></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-proximity">
+  <div class="card-hd"><code class="id">proximity</code><span class="tags"><span class="tag">SHOULD</span></span></div>
+  <h3>Law of proximity (Gestalt)</h3>
+  <p class="sum">Things placed close together are read as one group.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Forms, settings and any screen with groups of related fields.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Group related fields by spacing, with more space between groups than inside them.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">On each form, is the gap between groups of fields larger than the gap between fields inside a group?</span></span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><div class="s-dl" style="--in:2px;--out:14px"><span>Name</span><b>Mia Lind</b><span>Phone</span><b>20 12 34 56</b><span class="g">Clinic</span><b>Harbour</b><span>Time</span><b>10:30</b></div></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><div class="s-dl" style="--in:8px;--out:8px"><span>Name</span><b>Mia Lind</b><span>Phone</span><b>20 12 34 56</b><span class="g">Clinic</span><b>Harbour</b><span>Time</span><b>10:30</b></div></div></div></figure>
+  </div>
+</article>
+<article class="card law is-cut" id="law-von-restorff">
+  <div class="card-hd"><code class="id">von-restorff</code><span class="tags"><span class="tag">SHOULD</span><span class="tag inv">CUT FIRST 2</span></span></div>
+  <h3>Von Restorff effect</h3>
+  <p class="sum">Among similar items, the one that differs is the one people notice and remember.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Lists and tables where one item needs attention, such as an error or an overdue date.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Make the item that needs attention differ by more than colour: add a word, an icon or weight.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">In a list with a flagged item, such as an overdue row, can you still find that item with the screen in greyscale?</span></span></dd>
+  </dl>
+  
+  <p class="note"><b>Why cut first:</b> Largely covered by wcag-contrast plus the Part A guardrail that colour never carries meaning alone.</p>
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><ul class="s-list"><li><span>Inv. 1042</span><span>Paid</span></li><li class="s-flag"><span>Inv. 1043</span><span><svg class="s-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6v4M8 11.6v.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg><b>Overdue</b></span></li><li><span>Inv. 1044</span><span>Paid</span></li></ul></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><ul class="s-list"><li><span>Inv. 1042</span><span>12 Oct</span></li><li><span>Inv. 1043</span><span style="color:#B42318">2 Oct</span></li><li><span>Inv. 1044</span><span>14 Oct</span></li></ul></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-error-recovery">
+  <div class="card-hd"><code class="id">error-recovery</code><span class="tags"><span class="tag strong">MUST</span></span></div>
+  <h3>Help users recover from errors</h3>
+  <p class="sum">An error message helps only if it says what went wrong and how to put it right.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Every form and every action that can fail.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Show each error next to its field, saying what went wrong and what to do next.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">When a required field is left empty on submit, does the message next to that field say what to enter?</span></span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><label class="s-lbl">Phone</label><div class="s-in s-err"></div><p class="s-errt">Enter a phone number, for example 20 12 34 56.</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><label class="s-lbl">Phone</label><div class="s-in s-err"></div><p class="s-errt">Invalid input.</p></div></div></figure>
+  </div>
+</article>
+<article class="card law is-cut" id="law-goal-gradient">
+  <div class="card-hd"><code class="id">goal-gradient</code><span class="tags"><span class="tag">SHOULD</span><span class="tag inv">CUT FIRST 1</span></span></div>
+  <h3>Goal-gradient effect</h3>
+  <p class="sum">People speed up and drop out less when they can see how close they are to the goal.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Flows with three or more steps, such as checkout, booking or onboarding.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">Show the current step and the total number of steps in every multi-step flow.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">On each step of a multi-step flow, does the screen show its position, such as Step 2 of 4?</span></span></dd>
+  </dl>
+  
+  <p class="note"><b>Why cut first:</b> Narrow: only multi-step flows, and peak-end already covers how flows end.</p>
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-kick">Step 2 of 4</p><div class="s-steps"><i class="on"></i><i class="on"></i><i></i><i></i></div><p class="s-h">Choose a time</p><p class="s-p">10:30 · 11:00 · 13:15</p></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-h">Choose a time</p><p class="s-p">10:30 · 11:00 · 13:15</p></div></div></figure>
+  </div>
+</article>
+<article class="card law" id="law-peak-end">
+  <div class="card-hd"><code class="id">peak-end</code><span class="tags"><span class="tag">SHOULD</span><span class="tag">SEED</span></span></div>
+  <h3>Peak-end rule</h3>
+  <p class="sum">People judge an experience mostly by its most intense moment and by its end.</p>
+  <dl class="kv">
+    <dt>When it applies</dt><dd>Flows with a clear end, such as booking or sign-up.</dd>
+    <dt>Rule, as exported</dt><dd class="rule">End every main flow on a screen that confirms the result and offers one next step.</dd>
+    <dt>Check</dt><dd><span class="mono">manual</span><br><span class="measure">Reviewer answers yes or no: <span class="q">At the end of the main flow, does the last screen say in plain words what happened and offer one next step?</span></span></dd>
+  </dl>
+  
+  
+  <div class="dd">
+    <figure><figcaption>DO</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-h">You are booked</p><p class="s-p">Tue 14 Oct, 10:30 with Dr Lind.</p><button class="s-btn s-pri s-full">Add to calendar</button></div></div></figure>
+    <figure><figcaption>DON’T</figcaption><div class="plate mini"><span class="cm"></span><div class="smp"><p class="s-h">Success!</p><p class="s-p">&nbsp;</p><button class="s-btn s-sec s-full">OK</button></div></div></figure>
+  </div>
+</article>
+  </div>
+</section>
+
+<section id="fonts" aria-labelledby="h-fonts">
+  <div class="sec-hd"><h2 id="h-fonts">Font families <span class="mono mut">8</span></h2><p>The same booking card, set entirely in each family with only the weights the pairs ship. All are OFL-1.1, from Fontsource, latin subset.</p></div>
+  <div class="grid4">
+<article class="fcell" id="font-inter">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Inter&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:600">Book a check-up</p>
+      <p class="bk-p" style="font-weight:400">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:500">Phone number</p>
+      <div class="bk-in" style="font-weight:400">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:600">Confirm booking</div>
+      <p class="bk-m" style="font-weight:400">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">inter</code><h3>Inter</h3>
+    <p class="mono">400 500 600 · display / text · sans-serif</p>
+    <p class="sm">Neutral grotesk. The safe default for dense UI.</p></div>
+</article>
+<article class="fcell" id="font-sora">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Sora&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:700">Book a check-up</p>
+      <p class="bk-p" style="font-weight:600">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:600">Phone number</p>
+      <div class="bk-in" style="font-weight:600">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:600">Confirm booking</div>
+      <p class="bk-m" style="font-weight:600">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">sora</code><h3>Sora</h3>
+    <p class="mono">600 700 · display · sans-serif</p>
+    <p class="sm">Wide geometric. Confident headings.</p><p class="note">Display only: body lines fall back to 600, the lightest weight shipped.</p></div>
+</article>
+<article class="fcell" id="font-open-sans">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Open Sans&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:600">Book a check-up</p>
+      <p class="bk-p" style="font-weight:400">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:400">Phone number</p>
+      <div class="bk-in" style="font-weight:400">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:600">Confirm booking</div>
+      <p class="bk-m" style="font-weight:400">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">open-sans</code><h3>Open Sans</h3>
+    <p class="mono">400 600 · text · sans-serif</p>
+    <p class="sm">Humanist. Friendly, familiar, very readable.</p></div>
+</article>
+<article class="fcell" id="font-fraunces">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Fraunces&quot;,serif">
+      <p class="bk-h" style="font-weight:600">Book a check-up</p>
+      <p class="bk-p" style="font-weight:600">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:600">Phone number</p>
+      <div class="bk-in" style="font-weight:600">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:600">Confirm booking</div>
+      <p class="bk-m" style="font-weight:600">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">fraunces</code><h3>Fraunces</h3>
+    <p class="mono">600 · display · serif</p>
+    <p class="sm">Soft serif with character. Warm headings.</p><p class="note">Display only: body lines fall back to 600, the lightest weight shipped.</p></div>
+</article>
+<article class="fcell" id="font-space-grotesk">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Space Grotesk&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:600">Book a check-up</p>
+      <p class="bk-p" style="font-weight:600">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:600">Phone number</p>
+      <div class="bk-in" style="font-weight:600">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:600">Confirm booking</div>
+      <p class="bk-m" style="font-weight:600">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">space-grotesk</code><h3>Space Grotesk</h3>
+    <p class="mono">600 · display · sans-serif</p>
+    <p class="sm">Grotesk with quirky details. Technical headings.</p><p class="note">Display only: body lines fall back to 600, the lightest weight shipped.</p></div>
+</article>
+<article class="fcell" id="font-manrope">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Manrope&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:700">Book a check-up</p>
+      <p class="bk-p" style="font-weight:400">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:500">Phone number</p>
+      <div class="bk-in" style="font-weight:400">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:500">Confirm booking</div>
+      <p class="bk-m" style="font-weight:400">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">manrope</code><h3>Manrope</h3>
+    <p class="mono">400 500 700 · display / text · sans-serif</p>
+    <p class="sm">Modern grotesk with open shapes. Works alone.</p></div>
+</article>
+<article class="fcell" id="font-atkinson-hyperlegible-next">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:700">Book a check-up</p>
+      <p class="bk-p" style="font-weight:400">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:500">Phone number</p>
+      <div class="bk-in" style="font-weight:400">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:500">Confirm booking</div>
+      <p class="bk-m" style="font-weight:400">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">atkinson-hyperlegible-next</code><h3>Atkinson Hyperlegible Next</h3>
+    <p class="mono">400 500 700 · display / text · sans-serif</p>
+    <p class="sm">Legibility first. Letters that are hard to confuse.</p></div>
+</article>
+<article class="fcell" id="font-barlow">
+  <div class="plate"><span class="cm"></span>
+    <div class="bk" style="font-family:&quot;Barlow&quot;,sans-serif">
+      <p class="bk-h" style="font-weight:600">Book a check-up</p>
+      <p class="bk-p" style="font-weight:600">Harbour Clinic, Dr Lind. 30 minutes, Tue 14 Oct at 10:30.</p>
+      <p class="bk-l" style="font-weight:600">Phone number</p>
+      <div class="bk-in" style="font-weight:600">20 12 34 56</div>
+      <div class="bk-b" style="font-weight:600">Confirm booking</div>
+      <p class="bk-m" style="font-weight:600">Free cancellation until 24 hours before.</p>
+    </div>
+  </div>
+  <div class="cap"><code class="id">barlow</code><h3>Barlow</h3>
+    <p class="mono">600 · display · sans-serif</p>
+    <p class="sm">Road-sign grotesk. Sturdy, practical headings.</p><p class="note">Display only: body lines fall back to 600, the lightest weight shipped.</p></div>
+</article>
+  </div>
+</section>
+
+<section id="pairs" aria-labelledby="h-pairs">
+  <div class="sec-hd"><h2 id="h-pairs">Font pairs <span class="mono mut">7</span></h2><p>Display face on the app name and heading, text face on everything else.</p></div>
+  <div class="grid4">
+<article class="fcell" id="pair-sora-inter">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Sora&quot;,sans-serif;font-weight:700">Harbour</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Sora&quot;,sans-serif;font-weight:700">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Sora&quot;,sans-serif;font-weight:600">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">When</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Where</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:600">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">sora-inter</code>
+    <p class="mono">Display Sora 600 700</p>
+    <p class="mono">Text Inter 400 500 600</p>
+    <p class="sm">A wide geometric display face over a neutral text face. Confident and technical.</p></div>
+</article>
+<article class="fcell" id="pair-inter-solo">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:600">Harbour</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:600">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:600">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">When</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Where</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">inter-solo</code>
+    <p class="mono">Display Inter 600</p>
+    <p class="mono">Text Inter 400 500</p>
+    <p class="sm">One family; hierarchy comes from weight alone. Neutral and quiet.</p></div>
+</article>
+<article class="fcell" id="pair-fraunces-open-sans">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Fraunces&quot;,serif;font-weight:600">Harbour</span><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Fraunces&quot;,serif;font-weight:600">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Fraunces&quot;,serif;font-weight:600">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">When</span><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Where</span><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:600">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">fraunces-open-sans</code>
+    <p class="mono">Display Fraunces 600</p>
+    <p class="mono">Text Open Sans 400 600</p>
+    <p class="sm">A soft serif on headings over a friendly humanist text face. Warm and editorial.</p></div>
+</article>
+<article class="fcell" id="pair-space-grotesk-inter">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Space Grotesk&quot;,sans-serif;font-weight:600">Harbour</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Space Grotesk&quot;,sans-serif;font-weight:600">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Space Grotesk&quot;,sans-serif;font-weight:600">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">When</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:500">Where</span><span style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:600">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Inter&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">space-grotesk-inter</code>
+    <p class="mono">Display Space Grotesk 600</p>
+    <p class="mono">Text Inter 400 500 600</p>
+    <p class="sm">A grotesk with quirky details on headings, a neutral grotesk for reading. Technical with a wink.</p></div>
+</article>
+<article class="fcell" id="pair-barlow-open-sans">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Barlow&quot;,sans-serif;font-weight:600">Harbour</span><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Barlow&quot;,sans-serif;font-weight:600">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Barlow&quot;,sans-serif;font-weight:600">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">When</span><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Where</span><span style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:600">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Open Sans&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">barlow-open-sans</code>
+    <p class="mono">Display Barlow 600</p>
+    <p class="mono">Text Open Sans 400 600</p>
+    <p class="sm">Road-sign headings over a humanist text face. Sturdy and practical.</p></div>
+</article>
+<article class="fcell" id="pair-manrope-solo">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:700">Harbour</span><span style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:500">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:700">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:700">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:500">When</span><span style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:500">Where</span><span style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:500">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Manrope&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">manrope-solo</code>
+    <p class="mono">Display Manrope 700</p>
+    <p class="mono">Text Manrope 400 500</p>
+    <p class="sm">One modern grotesk with open shapes. Compact and current.</p></div>
+</article>
+<article class="fcell" id="pair-atkinson-hyperlegible-next-solo">
+  <div class="plate"><span class="cm"></span>
+    <div class="scr">
+      <div class="scr-bar"><span style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:700">Harbour</span><span style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:500">Today · Bookings</span></div>
+      <div class="scr-body">
+        <p class="scr-h" style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:700">Your next visit</p>
+        <p class="scr-p" style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:400">Dental check-up with Dr Lind at Harbour Clinic. Bring your health card.</p>
+        <p class="scr-sh" style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:700">Details</p>
+        <div class="scr-row"><span style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:500">When</span><span style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:400">Tue 14 Oct, 10:30</span></div>
+        <div class="scr-row"><span style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:500">Where</span><span style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:400">Pier 4, 2nd floor</span></div>
+        <div class="bk-b" style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:500">Reschedule</div>
+        <p class="bk-m" style="font-family:&quot;Atkinson Hyperlegible Next&quot;,sans-serif;font-weight:400">Free cancellation until 24 hours before.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><code class="id">atkinson-hyperlegible-next-solo</code>
+    <p class="mono">Display Atkinson Hyperlegible Next 700</p>
+    <p class="mono">Text Atkinson Hyperlegible Next 400 500</p>
+    <p class="sm">One family drawn so letters are hard to confuse, for low-vision readers. Legibility first.</p></div>
+</article>
+    <aside class="excl" aria-labelledby="h-excl"><p class="lab">Not offered</p><h3 id="h-excl">Geist, IBM Plex Mono</h3><p class="sm">These are the wizard’s chrome fonts. Keeping them out of the catalogue means a variant can never look like the tool around it.</p></aside>
+  </div>
+</section>
+
+</main>
+<p class="foot">Draft data: laws.json, fonts.json, font-pairs.json in this folder. Font files and OFL.txt per family under web/public/fonts/&lt;id&gt;/ (one copy, used by the app).</p>
+<script>
+for (const b of document.querySelectorAll("button[data-delay]")) {
+  const out = b.parentElement.querySelector("[data-out]");
+  b.addEventListener("click", () => {
+    out.textContent = "";
+    setTimeout(() => { out.textContent = "Saved at " + new Date().toLocaleTimeString("en-GB"); }, Number(b.dataset.delay));
+  });
+}
+</script>
+</body>
+</html>

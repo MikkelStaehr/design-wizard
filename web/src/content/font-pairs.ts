@@ -1,19 +1,129 @@
 import type { FontPairEntry } from "@/contracts/content";
 
-// SEED pairs for the slice 1 contract fixtures. Each weight must exist in that font's files.
+// Curated pairs, approved 2026-10-01. Each weight must exist in that font's files (catalogue test).
 export const FONT_PAIRS: readonly FontPairEntry[] = [
   {
-    id: "sora-inter",
-    display: { font: "sora", weights: [600, 700] },
-    text: { font: "inter", weights: [400, 500, 600] },
-    note: "A geometric display face over a neutral text face.",
+    "id": "sora-inter",
+    "display": {
+      "font": "sora",
+      "weights": [
+        600,
+        700
+      ]
+    },
+    "text": {
+      "font": "inter",
+      "weights": [
+        400,
+        500,
+        600
+      ]
+    },
+    "note": "A wide geometric display face over a neutral text face. Confident and technical."
   },
   {
-    id: "inter-solo",
-    display: { font: "inter", weights: [600] },
-    text: { font: "inter", weights: [400, 500] },
-    note: "One family; hierarchy comes from weight alone.",
+    "id": "inter-solo",
+    "display": {
+      "font": "inter",
+      "weights": [
+        600
+      ]
+    },
+    "text": {
+      "font": "inter",
+      "weights": [
+        400,
+        500
+      ]
+    },
+    "note": "One family; hierarchy comes from weight alone. Neutral and quiet."
   },
+  {
+    "id": "fraunces-open-sans",
+    "display": {
+      "font": "fraunces",
+      "weights": [
+        600
+      ]
+    },
+    "text": {
+      "font": "open-sans",
+      "weights": [
+        400,
+        600
+      ]
+    },
+    "note": "A soft serif on headings over a friendly humanist text face. Warm and editorial."
+  },
+  {
+    "id": "space-grotesk-inter",
+    "display": {
+      "font": "space-grotesk",
+      "weights": [
+        600
+      ]
+    },
+    "text": {
+      "font": "inter",
+      "weights": [
+        400,
+        500,
+        600
+      ]
+    },
+    "note": "A grotesk with quirky details on headings, a neutral grotesk for reading. Technical with a wink."
+  },
+  {
+    "id": "barlow-open-sans",
+    "display": {
+      "font": "barlow",
+      "weights": [
+        600
+      ]
+    },
+    "text": {
+      "font": "open-sans",
+      "weights": [
+        400,
+        600
+      ]
+    },
+    "note": "Road-sign headings over a humanist text face. Sturdy and practical."
+  },
+  {
+    "id": "manrope-solo",
+    "display": {
+      "font": "manrope",
+      "weights": [
+        700
+      ]
+    },
+    "text": {
+      "font": "manrope",
+      "weights": [
+        400,
+        500
+      ]
+    },
+    "note": "One modern grotesk with open shapes. Compact and current."
+  },
+  {
+    "id": "atkinson-hyperlegible-next-solo",
+    "display": {
+      "font": "atkinson-hyperlegible-next",
+      "weights": [
+        700
+      ]
+    },
+    "text": {
+      "font": "atkinson-hyperlegible-next",
+      "weights": [
+        400,
+        500
+      ]
+    },
+    "note": "One family drawn so letters are hard to confuse, for low-vision readers. Legibility first."
+  }
 ];
 
 export const FONT_PAIR_BY_ID: ReadonlyMap<string, FontPairEntry> = new Map(FONT_PAIRS.map((p) => [p.id, p]));

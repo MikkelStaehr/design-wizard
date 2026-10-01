@@ -1,8 +1,4 @@
-import type { LawEntry } from "@/contracts/content";
-
-// Curated UX laws, approved by the user on 2026-10-01 from design/content-review (cut: goal-gradient, von-restorff, consistency).
-// Ids are stored in project files: never rename one. Changing wording changes the exports (goldens).
-export const LAWS: readonly LawEntry[] = [
+[
   {
     "id": "fitts",
     "name": "Fitts's law",
@@ -15,22 +11,11 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "min-target-size",
         "selector": "a[href], button, input, select, textarea, [role=button], [tabindex]:not([tabindex='-1'])",
-        "viewports": [
-          390,
-          1280
-        ]
+        "viewports": [390, 1280]
       }
     },
     "params": [
-      {
-        "key": "minPx",
-        "label": "Minimum target size",
-        "unit": "px",
-        "integer": true,
-        "min": 24,
-        "max": 64,
-        "suggested": 44
-      }
+      { "key": "minPx", "label": "Minimum target size", "unit": "px", "integer": true, "min": 24, "max": 64, "suggested": 44 }
     ],
     "source": "Fitts, P. M. (1954). The information capacity of the human motor system in controlling the amplitude of movement."
   },
@@ -46,22 +31,11 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "max-count",
         "selector": "[data-primary-action]",
-        "viewports": [
-          390,
-          1280
-        ]
+        "viewports": [390, 1280]
       }
     },
     "params": [
-      {
-        "key": "max",
-        "label": "Primary actions per screen",
-        "unit": "count",
-        "integer": true,
-        "min": 1,
-        "max": 3,
-        "suggested": 1
-      }
+      { "key": "max", "label": "Primary actions per screen", "unit": "count", "integer": true, "min": 1, "max": 3, "suggested": 1 }
     ],
     "source": "Hick, W. E. (1952). On the rate of gain of information. Hyman, R. (1953)."
   },
@@ -77,22 +51,11 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "contrast",
         "selector": "p, li, td, th, label, a, button, h1, h2, h3, h4, h5, h6",
-        "viewports": [
-          390,
-          1280
-        ]
+        "viewports": [390, 1280]
       }
     },
     "params": [
-      {
-        "key": "minRatio",
-        "label": "Minimum contrast ratio",
-        "unit": "ratio",
-        "integer": false,
-        "min": 4.5,
-        "max": 7,
-        "suggested": 4.5
-      }
+      { "key": "minRatio", "label": "Minimum contrast ratio", "unit": "ratio", "integer": false, "min": 4.5, "max": 7, "suggested": 4.5 }
     ],
     "source": "W3C, Web Content Accessibility Guidelines 2.2, Success Criterion 1.4.3."
   },
@@ -108,22 +71,11 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "focus-visible",
         "selector": "a[href], button, input, select, textarea, [role=button], [tabindex]:not([tabindex='-1'])",
-        "viewports": [
-          390,
-          1280
-        ]
+        "viewports": [390, 1280]
       }
     },
     "params": [
-      {
-        "key": "minOutlinePx",
-        "label": "Minimum focus outline",
-        "unit": "px",
-        "integer": false,
-        "min": 1,
-        "max": 4,
-        "suggested": 2
-      }
+      { "key": "minOutlinePx", "label": "Minimum focus outline", "unit": "px", "integer": false, "min": 1, "max": 4, "suggested": 2 }
     ],
     "source": "W3C, Web Content Accessibility Guidelines 2.2, Success Criteria 2.4.7 (Focus Visible) and 2.4.13 (Focus Appearance)."
   },
@@ -131,30 +83,19 @@ export const LAWS: readonly LawEntry[] = [
     "id": "response-limits",
     "name": "Response-time limits",
     "summary": "A response within 0.1 s feels instant; after about 1 s users notice they are waiting.",
-    "when": "Every screen with a primary action.",
+    "when": "Every control that changes something on screen when it is activated.",
     "rule": {
       "key": "instant-feedback",
-      "template": "Show a visible response within {maxMs} of activating a primary action.",
+      "template": "Show a visible response within {maxMs} of every button press.",
       "severity": "must",
       "check": {
         "kind": "response-time",
-        "selector": "[data-primary-action]",
-        "viewports": [
-          390,
-          1280
-        ]
+        "selector": "button:not([disabled]), [role=button]",
+        "viewports": [390, 1280]
       }
     },
     "params": [
-      {
-        "key": "maxMs",
-        "label": "Maximum time to first response",
-        "unit": "ms",
-        "integer": true,
-        "min": 50,
-        "max": 1000,
-        "suggested": 100
-      }
+      { "key": "maxMs", "label": "Maximum time to first response", "unit": "ms", "integer": true, "min": 50, "max": 1000, "suggested": 100 }
     ],
     "source": "Miller, R. B. (1968). Response time in man-computer conversational transactions. Nielsen, J. (1993). Usability Engineering, chapter 5."
   },
@@ -170,15 +111,31 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "manual",
         "selector": null,
-        "viewports": [
-          390,
-          1280
-        ],
+        "viewports": [390, 1280],
         "question": "On each later step of a multi-step form, are the choices made in earlier steps visible without going back?"
       }
     },
     "params": [],
     "source": "Nielsen, J. (1994). Enhancing the explanatory power of usability heuristics. Heuristic 6: recognition rather than recall."
+  },
+  {
+    "id": "consistency",
+    "name": "Consistency and standards (Jakob's law)",
+    "summary": "Users expect the same thing to look and work the same way everywhere, as it does in products they already know.",
+    "when": "Products with more than one main screen.",
+    "rule": {
+      "key": "same-place",
+      "template": "Keep the main navigation in the same place and the same order on every screen.",
+      "severity": "should",
+      "check": {
+        "kind": "manual",
+        "selector": null,
+        "viewports": [390, 1280],
+        "question": "Moving between the main screens, does the main navigation stay in the same place in the same order?"
+      }
+    },
+    "params": [],
+    "source": "Nielsen, J. (1994). Heuristic 4: consistency and standards. Nielsen, J. (2000). Jakob's law of internet user experience."
   },
   {
     "id": "proximity",
@@ -192,15 +149,31 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "manual",
         "selector": null,
-        "viewports": [
-          390,
-          1280
-        ],
+        "viewports": [390, 1280],
         "question": "On each form, is the gap between groups of fields larger than the gap between fields inside a group?"
       }
     },
     "params": [],
     "source": "Wertheimer, M. (1923). Untersuchungen zur Lehre von der Gestalt II. Psychologische Forschung, 4."
+  },
+  {
+    "id": "von-restorff",
+    "name": "Von Restorff effect",
+    "summary": "Among similar items, the one that differs is the one people notice and remember.",
+    "when": "Lists and tables where one item needs attention, such as an error or an overdue date.",
+    "rule": {
+      "key": "not-colour-alone",
+      "template": "Make the item that needs attention differ by more than colour: add a word, an icon or weight.",
+      "severity": "should",
+      "check": {
+        "kind": "manual",
+        "selector": null,
+        "viewports": [390, 1280],
+        "question": "In a list with a flagged item, such as an overdue row, can you still find that item with the screen in greyscale?"
+      }
+    },
+    "params": [],
+    "source": "von Restorff, H. (1933). Psychologische Forschung, 18. W3C, WCAG 2.2, Success Criterion 1.4.1 (Use of Color)."
   },
   {
     "id": "error-recovery",
@@ -214,15 +187,31 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "manual",
         "selector": null,
-        "viewports": [
-          390,
-          1280
-        ],
+        "viewports": [390, 1280],
         "question": "When a required field is left empty on submit, does the message next to that field say what to enter?"
       }
     },
     "params": [],
     "source": "Nielsen, J. (1994). Heuristic 9: help users recognize, diagnose, and recover from errors."
+  },
+  {
+    "id": "goal-gradient",
+    "name": "Goal-gradient effect",
+    "summary": "People speed up and drop out less when they can see how close they are to the goal.",
+    "when": "Flows with three or more steps, such as checkout, booking or onboarding.",
+    "rule": {
+      "key": "show-progress",
+      "template": "Show the current step and the total number of steps in every multi-step flow.",
+      "severity": "should",
+      "check": {
+        "kind": "manual",
+        "selector": null,
+        "viewports": [390, 1280],
+        "question": "On each step of a multi-step flow, does the screen show its position, such as Step 2 of 4?"
+      }
+    },
+    "params": [],
+    "source": "Hull, C. L. (1932). The goal-gradient hypothesis and maze learning. Kivetz, R., Urminsky, O., Zheng, Y. (2006)."
   },
   {
     "id": "peak-end",
@@ -236,16 +225,11 @@ export const LAWS: readonly LawEntry[] = [
       "check": {
         "kind": "manual",
         "selector": null,
-        "viewports": [
-          390,
-          1280
-        ],
+        "viewports": [390, 1280],
         "question": "At the end of the main flow, does the last screen say in plain words what happened and offer one next step?"
       }
     },
     "params": [],
     "source": "Kahneman, D., Fredrickson, B. L., Schreiber, C. A., Redelmeier, D. A. (1993)."
   }
-];
-
-export const LAW_BY_ID: ReadonlyMap<string, LawEntry> = new Map(LAWS.map((l) => [l.id, l]));
+]
