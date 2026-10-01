@@ -111,7 +111,7 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 7. Font pair, spacing, radius and density decisions.
 8. Brand colour → 3 palettes that pass AA, with the contrast table.
 
-*Slice 3 is split into 3a–3d, one new UI surface each* (team rule, 2026-10-01: plan an L slice's build against 40 of its 60 minutes; design-lead review, polish, tester and reviewer take about 20). **Status: proposed 2026-10-01, waiting for the user's go.** Every slice runs the same L flow: design-lead spec-lite (not for 3c, which the mock covers) → ui build → design-lead review (Must only, checked against the ACs below) → polish → commit → tester ∥ reviewer → push.
+*Slice 3 is split into 3a–3d, one new UI surface each, plus task 3e* (team rule, 2026-10-01: plan an L slice's build against 40 of its 60 minutes; design-lead review, polish, tester and reviewer take about 20). **Status: approved by the user on 2026-10-01; 3a started.** The user gives the go before each later slice. Every slice runs the same L flow: design-lead spec-lite (not for 3c, which the mock covers) → ui build → design-lead review (Must only, checked against the ACs below) → polish → commit → tester ∥ reviewer → push.
 
 *Slice 3a: carry-over fixes + project profile (step 1). Build 40 min: fixes ~12, profile ~28.*
 
@@ -153,16 +153,20 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
      - the preview updates within 100 ms of focusing a variant
      - no overflow at 390
 
-*Slice 3d: export (step 5), the keyboard-only e2e, and docs. Build 40 min.*
+*Slice 3d: export (step 5) only. Build 40 min.*
 
 5. **The export step:**
    - Open decisions are listed by name, each with a way back to it (AC8).
    - Each file has its own download button, plus "Download all": `<slug>.dwproj.json`, `DESIGN.md`, `tokens.json`, `ux-rules.yaml`.
    - A hint says to commit the project file to the target repo's `design/` folder.
    - `markDownloaded()` is recorded.
+   - **Done when:** AC8, AC9 and AC10 hold at the UI level; step 5 works by keyboard alone; every clickable row is at least 44px.
+
+*Task 3e: wrap-up of v0.1. Size **M**, 30 min (M flow: build → reviewer; no security, because no data or access changes).*
+
 6. **A keyboard-only e2e test** through the whole wizard, profile to export, at 1280 and 390 (AC6), plus a full AC1–AC11 run.
 7. **Docs:** update `docs/ARCHITECTURE.md`. Write the ProjectStart consumer proposal and a LESSONS row (text only, for `C:\dev\waan\teams`): how ui, tester and reviewer read DESIGN.md Part B, tokens.json and ux-rules.yaml.
-   - **Done when:** AC1, AC6, AC8, AC9, AC10 (at the UI level) and AC11 all hold.
+   - **Done when:** AC1–AC11 all hold in one run, and the docs match the code.
 
 ## Acceptance criteria (tester)
 
