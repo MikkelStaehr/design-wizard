@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "format": "design-wizard-project",
+  "profile": {
+    "name": "Harbour",
+    "productType": "Clinic booking",
+    "platform": "desktop",
+    "notes": "Booking tool for small physiotherapy clinics. Fictional sample project.",
+    "componentLibrary": "none"
+  },
+  "principles": [
+    {
+      "lawId": "fitts",
+      "params": {
+        "minPx": 44
+      }
+    },
+    {
+      "lawId": "hick",
+      "params": {
+        "max": 1
+      }
+    },
+    {
+      "lawId": "wcag-contrast",
+      "params": {
+        "minRatio": 4.5
+      }
+    },
+    {
+      "lawId": "peak-end",
+      "params": {}
+    }
+  ],
+  "visual": {
+    "fontPair": "sora-inter",
+    "spacingBase": 4,
+    "radius": 8,
+    "density": "compact",
+    "brandHex": "#0F766E",
+    "paletteVariant": "tinted",
+    "colorOverrides": {}
+  },
+  "resolved": {
+    "color": {
+      "light": {
+        "bg": "#EEF6F4",
+        "surface": "#FFFFFF",
+        "border": "#5F817C",
+        "text": "#0B2B28",
+        "text-muted": "#527370",
+        "accent": "#0F766E",
+        "on-accent": "#FFFFFF",
+        "positive": "#166534",
+        "warning": "#92400E",
+        "negative": "#B91C1C",
+        "focus": "#0F766E"
+      },
+      "dark": null
+    },
+    "font": {
+      "display": {
+        "catalogueId": "sora",
+        "family": "Sora",
+        "generic": "sans-serif",
+        "fontsource": "@fontsource/sora",
+        "subset": "latin",
+        "weights": [
+          600,
+          700
+        ],
+        "style": "normal",
+        "license": "OFL-1.1",
+        "copyright": "Copyright 2019 The Sora Project Authors (https://github.com/sora-xor/sora-font)"
+      },
+      "text": {
+        "catalogueId": "inter",
+        "family": "Inter",
+        "generic": "sans-serif",
+        "fontsource": "@fontsource/inter",
+        "subset": "latin",
+        "weights": [
+          400,
+          500,
+          600
+        ],
+        "style": "normal",
+        "license": "OFL-1.1",
+        "copyright": "Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)"
+      }
+    },
+    "fontSize": {
+      "xs": 0.6875,
+      "sm": 0.75,
+      "base": 0.8125,
+      "lg": 0.9375,
+      "xl": 1.25,
+      "2xl": 1.5625,
+      "3xl": 2
+    },
+    "lineHeight": {
+      "text": 1.5,
+      "display": 1.2
+    },
+    "space": {
+      "1": 4,
+      "2": 8,
+      "3": 12,
+      "4": 16,
+      "6": 24,
+      "8": 32,
+      "12": 48,
+      "16": 64
+    },
+    "radius": 8,
+    "rules": [
+      {
+        "id": "fitts.target-size",
+        "law": "fitts",
+        "when": "Any screen with controls a user clicks or taps.",
+        "rule": "Make every interactive element at least 44px by 44px.",
+        "severity": "must",
+        "check": {
+          "kind": "min-target-size",
+          "selector": "a[href], button, input, select, textarea, [role=button], [tabindex]:not([tabindex='-1'])",
+          "params": {
+            "minPx": 44
+          },
+          "viewports": [
+            390,
+            1280
+          ]
+        }
+      },
+      {
+        "id": "hick.primary-actions",
+        "law": "hick",
+        "when": "Screens where the user picks one action from several.",
+        "rule": "Limit primary actions to 1 per screen.",
+        "severity": "must",
+        "check": {
+          "kind": "max-count",
+          "selector": "[data-primary-action]",
+          "params": {
+            "max": 1
+          },
+          "viewports": [
+            390,
+            1280
+          ]
+        }
+      },
+      {
+        "id": "wcag-contrast.text-contrast",
+        "law": "wcag-contrast",
+        "when": "Every screen with text.",
+        "rule": "Give all body text a contrast ratio of at least 4.5:1 against its background.",
+        "severity": "must",
+        "check": {
+          "kind": "contrast",
+          "selector": "p, li, td, th, label, a, button, h1, h2, h3, h4, h5, h6",
+          "params": {
+            "minRatio": 4.5
+          },
+          "viewports": [
+            390,
+            1280
+          ]
+        }
+      },
+      {
+        "id": "peak-end.closing-screen",
+        "law": "peak-end",
+        "when": "Flows with a clear end, such as booking or sign-up.",
+        "rule": "End every main flow on a screen that confirms the result and offers one next step.",
+        "severity": "should",
+        "check": {
+          "kind": "manual",
+          "selector": null,
+          "params": {},
+          "viewports": [
+            390,
+            1280
+          ],
+          "question": "At the end of the main flow, does the last screen say in plain words what happened and offer one next step?"
+        }
+      }
+    ]
+  }
+}

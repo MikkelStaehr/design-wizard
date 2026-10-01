@@ -326,7 +326,7 @@ This is one fenced `css` block. Its text equals `roleCss(tokensJson)` from `expo
 | `summary` | string | One sentence saying what the law says |
 | `when` | string | One sentence saying when it applies. Shown in the picker and copied to `rule.when` |
 | `rule.key` | kebab string | The rule id is `<id>.<key>` |
-| `rule.template` | string | An imperative sentence. Each `{paramKey}` is filled from the params (numbers: up to 2 decimals, trailing zeros trimmed, then the unit) |
+| `rule.template` | string | An imperative sentence. Each `{paramKey}` is filled from the params: up to 2 decimals with trailing zeros trimmed, then the unit as `44px`, `400 ms`, `4.5:1`, or a bare number for `count` (owned by `domain/rules.ts#formatParam`) |
 | `rule.severity` | `"must"` or `"should"` | |
 | `rule.check` | `{ kind, selector, viewports, question? }` | `question` is required if and only if `kind` is `manual`. Check params are the law params |
 | `params` | array of `{ key, label, unit, integer, min, max, suggested }` | `unit` is `px`, `ms`, `count` or `ratio`. **0 is valid only if `min` ≤ 0.** `suggested` pre-fills the visible field; the user's value is stored when they choose the law. `manual` laws have `[]` |
@@ -384,7 +384,7 @@ The project fixtures live in `web/fixtures/`, and their goldens in `web/tests/co
 | `edge-name.project.json` | Name `Nørrebro: "Ida's" #1` → slug `norrebro-idas-1`, plus JSON, YAML and markdown escaping | C2 golden |
 | `edge-no-shadcn.project.json` | Harbour with `componentLibrary: "none"`: no shadcn table, a role-named CSS block (§4.2a), and tokens.json byte-equal to Harbour's | C2 golden, C4 |
 | `edge-zero-laws.project.json` | `principles: []` → `rules: []` and "0 rules" | C2 golden, C5 |
-| `invalid-many.project.json` + `.errors.json` | At least 8 problems at once: radius `-2`, brandHex `"teal"`, spacingBase `0`, density `"dense"`, unknown lawId `"fits"`, unknown fontPair, extra key `raduis`, `resolved` set while density is `null`. The `.errors.json` file is the exact ordered list of `{ path, code }` | C6 |
+| `invalid-many.project.json` + `.errors.json` | At least 8 problems at once: radius `-2`, brandHex `"teal"`, spacingBase `0`, density `"dense"`, unknown lawId `"fits"`, unknown fontPair, extra key `raduis`, `resolved` set while `paletteVariant` is `null` (density is `"dense"`, so it cannot also be null). The `.errors.json` file is the exact ordered list of `{ path, code }` | C6 |
 | `invalid-syntax.txt`, `invalid-version.project.json` | Truncated JSON (one `json-syntax` error with line:col); `schemaVersion: 2` (one `schema-version` error) | C6 |
 
 | Test | Asserts |

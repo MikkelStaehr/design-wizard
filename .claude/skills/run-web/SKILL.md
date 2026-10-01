@@ -27,7 +27,7 @@ to the session scratchpad or `%TEMP%`, never into the repo.
 # One shot (dev mode, no build needed)
 .claude/skills/run-web/serve.ps1 -Cmd "node .claude/skills/run-web/shoot.mjs --out $env:TEMP\shell-390.png"
 
-# Several shots against one server; ?fixture= picks a dev state (empty, harbour, stale, invalid-many)
+# Several shots against one server; ?fixture= picks a dev state (empty, harbour, stale, invalid-many) once slice 2 wires it up
 .claude/skills/run-web/serve.ps1 -Cmd "node .claude/skills/run-web/shoot.mjs --out $env:TEMP\h-1280.png --width 1280 --path '/?fixture=harbour'; node .claude/skills/run-web/shoot.mjs --out $env:TEMP\h-390.png --path '/?fixture=harbour'"
 ```
 

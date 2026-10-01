@@ -50,6 +50,7 @@ web/
 │  │  ├─ parse.ts         text → ProjectFile, or every error
 │  │  ├─ serialize.ts     ProjectFile → canonical bytes
 │  │  ├─ migrate.ts       version switch (v1 only; the hook for v2)
+│  │  ├─ empty.ts         a new project: every decision null, componentLibrary "shadcn"
 │  │  ├─ store.ts         in-memory store + actions + useProject() (useSyncExternalStore, no library)
 │  │  ├─ storage.ts       localStorage envelope, "unsaved since", quarantine of unparseable text
 │  │  ├─ file-io.ts       open (File.text) and download (Blob URL)

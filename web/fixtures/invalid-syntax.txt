@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "format": "design-wizard-project",
+  "profile": {
+    "name": "Harbour",
+    "productType": "Clinic booking",
+    "platform": "desktop",
+    "notes": "Booking tool for small physiotherapy clinics. Fictional sample project.",
+    "componentLibrary": "shadcn"
+  },
+  "principl

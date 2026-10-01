@@ -1,0 +1,34 @@
+[
+  {
+    "path": "principles[0].lawId",
+    "code": "unknown-id"
+  },
+  {
+    "path": "visual.fontPair",
+    "code": "unknown-id"
+  },
+  {
+    "path": "visual.spacingBase",
+    "code": "range"
+  },
+  {
+    "path": "visual.radius",
+    "code": "range"
+  },
+  {
+    "path": "visual.density",
+    "code": "enum"
+  },
+  {
+    "path": "visual.brandHex",
+    "code": "hex"
+  },
+  {
+    "path": "visual.raduis",
+    "code": "unknown-key"
+  },
+  {
+    "path": "resolved",
+    "code": "inconsistent"
+  }
+]
