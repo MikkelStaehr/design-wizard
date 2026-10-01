@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { firstOpen, firstOpenStop, lastDecidedStopBefore, nextStop, prevStop, STEPS, STOPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
+import { firstOpen, firstOpenStop, isStopId, lastDecidedStopBefore, nextStop, prevStop, stepOfStop, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
 import { projectStore, useProject } from "@/data/project/store";
 import { ownsKey } from "./use-shortcuts";
 import { Rail } from "./Rail";
@@ -9,14 +9,14 @@ import { VisualStep } from "./steps/visual/VisualStep";
 import { ProfileStep } from "./steps/profile/ProfileStep";
 import type { ProfileStop } from "./steps/profile/model";
 
-const STOP_IDS: readonly string[] = STOPS.map((s) => s.id);
-
 /** ?step=<stop id> opens a stop directly; "visual.palette" and "visual.spacing" stay accepted as aliases. */
 function stopFromSearch(search: string): StopId | null {
   const raw = new URLSearchParams(search).get("step");
   if (raw === null) return null;
   const id = raw === "visual.palette" ? "visual.paletteVariant" : raw === "visual.spacing" ? "visual.spacingBase" : raw;
-  return STOP_IDS.includes(id) ? (id as StopId) : null;
+  if (isStopId(id)) return id;
+  console.warn(`Unknown ?step=${raw}; opening the first open stop instead.`);
+  return null;
 }
 
 const noSubscribe = () => () => {};
@@ -26,8 +26,6 @@ function withoutPath(path: string, message: string): string {
   const rest = path !== "" && message.startsWith(`${path} `) ? message.slice(path.length + 1) : message;
   return rest.charAt(0).toUpperCase() + rest.slice(1);
 }
-
-const stepOf = (id: StopId) => (id.startsWith("visual.") ? "visual" : id === "principles" ? "principles" : "profile");
 
 // Layout from DESIGN.md "Space & density": ≥1101px rail 232 | main | preview 340;
 // 761–1100px rail 200 + main with the preview below; ≤760px one column, rail and legend hidden.
@@ -40,14 +38,16 @@ export function WizardShell() {
   const fromUrl = useSyncExternalStore(noSubscribe, () => stopFromSearch(window.location.search), () => null);
   // Every decision set: open step 3, the last built step.
   const stop: StopId = picked ?? fromUrl ?? firstOpenStop(project) ?? "visual.fontPair";
-  const current = stepOf(stop);
+  const current = stepOfStop(stop);
+  // Pin the starting stop once, so committing a field never moves the user mid-step.
+  if (hydrated && picked === null) setPicked(stop);
   const step = STEPS.find((s) => s.id === current) ?? STEPS[0];
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || ownsKey(e.target, e.key)) return;
       const k = e.key.toLowerCase();
-      if (e.key === "Enter" && stepOf(stop) === "principles") {
+      if (e.key === "Enter" && stepOfStop(stop) === "principles") {
         e.preventDefault();
         setPicked(`visual.${firstOpen(projectStore().getState().project.visual) ?? SUB_KEYS[0]}`);
         return;

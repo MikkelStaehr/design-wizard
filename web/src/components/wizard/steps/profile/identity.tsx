@@ -1,6 +1,7 @@
 "use client";
 import { useId, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import type { Profile, Visual } from "@/contracts/project";
+import { hasControlChars, PROFILE_TEXT_LIMITS } from "@/data/project/parse";
 import { projectStore } from "@/data/project/store";
 import { Plate } from "@/components/plate/Plate";
 import { SampleCard } from "@/components/samples/SampleCard";
@@ -9,7 +10,7 @@ import { fontPairLabel } from "../visual/model";
 
 type Field = "name" | "productType" | "notes";
 const FIELDS: readonly Field[] = ["name", "productType", "notes"];
-const LIMIT: Record<Field, number> = { name: 80, productType: 60, notes: 2000 };
+const LIMIT: Record<Field, number> = PROFILE_TEXT_LIMITS;
 
 /** Trim, then check (CONTRACTS §1). Returns the error message, or null when valid. */
 export function validate(field: Field, draft: string, saved: string | null): string | null {
@@ -17,7 +18,10 @@ export function validate(field: Field, draft: string, saved: string | null): str
   const n = v.length;
   const over = n - LIMIT[field];
   if (field === "notes") return over > 0 ? `Notes are ${n} characters; the limit is 2000. Shorten them by ${over}. The saved notes haven’t changed.` : null;
-  if (/[\r\n]/.test(v)) return field === "name" ? "Keep the name on one line. The saved name hasn’t changed." : "Keep the type on one line. The saved type hasn’t changed.";
+  if (hasControlChars(v))
+    return field === "name"
+      ? "Keep the name on one line, without tabs. The saved name hasn’t changed."
+      : "Keep the type on one line, without tabs. The saved type hasn’t changed.";
   if (field === "name") {
     if (n === 0)
       return saved === null

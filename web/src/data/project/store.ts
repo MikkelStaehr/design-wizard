@@ -4,9 +4,9 @@
 // decision opens or closes; a file's stored snapshot is never replaced silently (CONTRACTS §1).
 import { useSyncExternalStore } from "react";
 import type { ParseError } from "@/contracts/errors";
-import type { Principle, ProjectFile, Profile, Visual } from "@/contracts/project";
+import type { Principle, ProjectFile, Profile, Resolved, Visual } from "@/contracts/project";
 import { palette } from "@/domain/color/palette";
-import { openDecisions } from "@/domain/decisions";
+import { DECISIONS, openDecisions } from "@/domain/decisions";
 import { resolveSnapshot } from "@/domain/tokens/resolve";
 import { devFixtureName, devFixtureText } from "./dev-fixtures";
 import { emptyProject } from "./empty";
@@ -26,6 +26,10 @@ export interface ProjectState {
   hydrated: boolean;
   /** The opened file's stored snapshot differs from a fresh computation: the UI asks keep or recompute. */
   snapshotDiffers: boolean;
+  /** Set when a real decision change replaced a snapshot that differed: "Changing {label} recomputed every stored value." */
+  recomputedBy: string | null;
+  /** The snapshot before "Recompute now", kept for Undo until the next change. */
+  previousResolved: Resolved | null;
 }
 
 export interface ProjectStore {
@@ -42,12 +46,14 @@ export interface ProjectStore {
   /** Answers to the "Stored values differ" notice: keep the file's snapshot, or replace it with a fresh one. */
   keepSnapshot(): void;
   recomputeSnapshot(): void;
+  /** Undo "Recompute now": put the stored snapshot back and show the notice again. */
+  undoRecompute(): void;
   /** Dev only (?fixture=): open fixture text and pretend it was saved at `savedAt`. */
   openDevFixture(text: string, savedAt: string | null): void;
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
@@ -68,13 +74,16 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
    * recomputed only if the change affects it (visual decisions, laws) or there is none yet; editing
    * the name, product type, platform, notes or component library keeps the stored snapshot.
    */
-  const decide = (next: ProjectFile, affectsSnapshot: boolean) => {
+  const decide = (next: ProjectFile, affectsSnapshot: boolean, label: string) => {
     const open = openDecisions(next).length > 0;
     const resolved = open ? null : affectsSnapshot || next.resolved === null ? resolveSnapshot(next) : next.resolved;
     const project = { ...next, resolved };
+    // A real change to a decision the snapshot depends on replaces it; say so if it differed.
+    const recomputedBy = affectsSnapshot && state.snapshotDiffers ? label : affectsSnapshot ? null : state.recomputedBy;
     const snapshotDiffers = !open && !affectsSnapshot && state.snapshotDiffers;
-    emit({ ...state, project, errors: [], snapshotDiffers, ...persist(project, state.downloadedAt) });
+    emit({ ...state, project, errors: [], snapshotDiffers, recomputedBy, previousResolved: null, ...persist(project, state.downloadedAt) });
   };
+  const labelOf = (path: string) => DECISIONS.find((d) => d.path === path)?.label ?? path;
 
   /** Opened or restored file: resolve it if every decision is set but there is no snapshot; else compare. */
   const settle = (p: ProjectFile): { project: ProjectFile; snapshotDiffers: boolean; changed: boolean } => {
@@ -88,8 +97,10 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
   if (storage) {
     const restored = restore(storage);
     if (restored.kind === "restored") {
-      const { project, snapshotDiffers } = settle(restored.project);
+      const { project, snapshotDiffers, changed } = settle(restored.project);
       state = { ...state, project, snapshotDiffers, savedAt: restored.envelope.savedAt, downloadedAt: restored.envelope.downloadedAt };
+      // Resolved on load (CONTRACTS §1: the file is marked as changed), so save it back.
+      if (changed) state = { ...state, ...persist(project, restored.envelope.downloadedAt) };
     } else if (restored.kind === "quarantined") {
       state = { ...state, errors: restored.errors };
     }
@@ -115,18 +126,24 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       emit({ ...state, project, errors: [], snapshotDiffers: false, ...persist(project, state.downloadedAt) });
     },
     setProfile(key, value) {
-      decide({ ...state.project, profile: { ...state.project.profile, [key]: value } }, false);
+      decide({ ...state.project, profile: { ...state.project.profile, [key]: value } }, false, labelOf(`profile.${String(key)}`));
     },
     setPrinciples(principles) {
-      decide({ ...state.project, principles }, true);
+      // Re-choosing the same laws is not a change: it must not replace a stored snapshot.
+      const changed = JSON.stringify(state.project.principles) !== JSON.stringify(principles);
+      decide({ ...state.project, principles }, changed, labelOf("principles"));
     },
     setVisual(key, value) {
       const visual = { ...state.project.visual, [key]: value };
       // A new brand colour that can't produce the chosen palette reopens the palette decision.
+      let reopened = false;
       if (key === "brandHex" && visual.brandHex !== null && visual.paletteVariant !== null && palette(visual.brandHex, visual.paletteVariant) === null) {
         visual.paletteVariant = null;
+        reopened = true;
       }
-      decide({ ...state.project, visual }, true);
+      // Re-choosing the value already chosen is not a change: it must not replace a stored snapshot.
+      const changed = state.project.visual[key] !== value || reopened;
+      decide({ ...state.project, visual }, changed, labelOf(`visual.${String(key)}`));
     },
     openDevFixture(text, savedAt) {
       const errors = this.open(text);
@@ -136,8 +153,14 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       emit({ ...state, snapshotDiffers: false });
     },
     recomputeSnapshot() {
+      const previousResolved = state.project.resolved;
       const project = { ...state.project, resolved: resolveSnapshot(state.project) };
-      emit({ ...state, project, snapshotDiffers: false, ...persist(project, state.downloadedAt) });
+      emit({ ...state, project, snapshotDiffers: false, recomputedBy: null, previousResolved, ...persist(project, state.downloadedAt) });
+    },
+    undoRecompute() {
+      if (state.previousResolved === null) return;
+      const project = { ...state.project, resolved: state.previousResolved };
+      emit({ ...state, project, snapshotDiffers: true, previousResolved: null, ...persist(project, state.downloadedAt) });
     },
     markDownloaded() {
       const downloadedAt = now().toISOString();
@@ -147,7 +170,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ProjectFile } from "@/contracts/project";
 import { projectStore, useProject } from "@/data/project/store";
 import { resolveSnapshot } from "@/domain/tokens/resolve";
@@ -25,14 +25,33 @@ function differences(p: ProjectFile): [string, number][] {
 
 /** Project-level notice at the top of main in every step (design/specs/step-1-profile.md §6). */
 export function SnapshotNotice() {
-  const { project, snapshotDiffers } = useProject();
+  const { project, snapshotDiffers, recomputedBy, previousResolved } = useProject();
   const [done, setDone] = useState<string | null>(null);
+  // The answered button unmounts; move focus to the result line instead of dropping it on <body>.
+  const resultRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (done !== null) resultRef.current?.focus();
+  }, [done]);
 
   if (!snapshotDiffers) {
-    return done === null ? null : (
-      <p role="status" className="mb-5 border border-dw-ctl bg-dw-surface px-4 py-3 text-small">
-        {done}
-      </p>
+    const message = recomputedBy !== null ? `Changing ${recomputedBy} recomputed every stored value.` : done;
+    if (message === null) return null;
+    return (
+      <div ref={resultRef} tabIndex={-1} role="status" className="mb-5 flex flex-wrap items-center gap-3 border border-dw-ctl bg-dw-surface px-4 py-3 text-small">
+        <span>{message}</span>
+        {previousResolved !== null && (
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center text-small text-dw-text underline underline-offset-4"
+            onClick={() => {
+              projectStore().undoRecompute();
+              setDone(null);
+            }}
+          >
+            Undo
+          </button>
+        )}
+      </div>
     );
   }
 
@@ -40,7 +59,7 @@ export function SnapshotNotice() {
   const total = diff.reduce((n, [, c]) => n + c, 0);
   const buttonClass = "inline-flex min-h-11 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-4 font-medium hover:bg-[var(--dw-hover)]";
   return (
-    <section role="status" aria-labelledby="snapshot-title" className="mb-5 border border-dw-ctl bg-dw-surface px-4 py-3">
+    <section role="region" aria-labelledby="snapshot-title" className="mb-5 border border-dw-ctl bg-dw-surface px-4 py-3">
       <h2 id="snapshot-title" className="font-medium">
         Stored values differ from the current algorithm: keep or recompute
       </h2>

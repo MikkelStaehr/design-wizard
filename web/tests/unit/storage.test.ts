@@ -86,3 +86,22 @@ test("an opened file with every decision set but no snapshot is resolved on open
   expect(store.getState().project.resolved).not.toBeNull();
   expect(store.getState().snapshotDiffers).toBe(false);
 });
+
+test("re-choosing a value never replaces a stored snapshot; Recompute can be undone", () => {
+  const store = createProjectStore(null, now);
+  store.open(harbour);
+  const stored = store.getState().project.resolved;
+  store.setVisual("radius", 8);
+  store.setVisual("paletteVariant", "tinted");
+  store.setPrinciples(store.getState().project.principles);
+  expect(store.getState().project.resolved).toBe(stored);
+  expect(store.getState().snapshotDiffers).toBe(true);
+  store.recomputeSnapshot();
+  expect(store.getState().project.resolved).not.toEqual(stored);
+  store.undoRecompute();
+  expect(store.getState().project.resolved).toEqual(stored);
+  expect(store.getState().snapshotDiffers).toBe(true);
+  store.setVisual("radius", 6);
+  expect(store.getState().recomputedBy).toBe("Radius");
+  expect(store.getState().snapshotDiffers).toBe(false);
+});

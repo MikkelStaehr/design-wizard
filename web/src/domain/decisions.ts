@@ -126,6 +126,15 @@ export const STOPS = [
 export type StopId = (typeof STOPS)[number]["id"];
 const STOP_IDS: readonly StopId[] = STOPS.map((s) => s.id);
 
+/** The step a stop belongs to (from STOPS, not from the id string). */
+export function stepOfStop(id: StopId): StepId {
+  return (STOPS.find((s) => s.id === id)?.step ?? "profile") as StepId;
+}
+
+export function isStopId(id: string): id is StopId {
+  return (STOP_IDS as readonly string[]).includes(id);
+}
+
 export function isStopDecided(p: ProjectFile, id: StopId): boolean {
   switch (id) {
     case "profile.identity":

@@ -164,3 +164,15 @@ test("step 2 placeholder: a visible button reopens the profile (touch has no rai
   await back.click();
   await expect(h1(page, "Component library")).toBeVisible();
 });
+
+test("filling name and type never moves the user away from the form mid-step", async ({ page }) => {
+  await page.goto("/");
+  await expect(h1(page, "Name and product type")).toBeVisible();
+  await page.getByLabel("Project name", { exact: true }).fill("Harbour");
+  await page.keyboard.press("Tab");
+  await page.getByLabel("Product type", { exact: true }).fill("Clinic booking");
+  await page.keyboard.press("Tab");
+  // Both are now saved, so platform is the first open stop; the user must still be on the form, in notes.
+  await expect(h1(page, "Name and product type")).toBeVisible();
+  await expect(page.getByLabel(/Notes/)).toBeFocused();
+});

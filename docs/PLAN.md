@@ -135,6 +135,11 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 
 *Slice 3b: UX principles picker (step 2). Build 40 min.*
 
+0. **Carried over from the slice 3a review** (reviewer Shoulds):
+   - `components/wizard/steps/profile/model.ts` re-derives which profile stops are decided. Use `isStopDecided` and count from `DECISIONS`.
+   - The name-check sample is a lone, inert `role="radio"` plate. Give `Plate` a non-interactive mode.
+   - `Rail.tsx` still works out a stop's step from its id string. Use `stepOfStop` from `domain/decisions.ts`.
+
 3. **The laws as cards,** with the do/don't preview side by side as in `design/content-review/`. Choosing a law opens its params with the suggested values. Zero laws is an explicit choice (`principles: []`), never a default.
    - **Params:** parsed with `domain/parse-input.ts`, which accepts units and comma decimals. 0 is allowed only where min ≤ 0. The rendered rule sentence (from `domain/rules.ts`) updates live, and the rule count shows.
    - **Done when:**

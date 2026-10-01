@@ -30,6 +30,11 @@ const describe = (v: unknown): string => {
 /** Control characters (line breaks, tabs, U+007F–U+009F) are not allowed in single-line text. */
 const CONTROL = /[\u0000-\u001f\u007f-\u009f]/;
 
+/** Profile text limits (CONTRACTS §1). The profile form uses these, so it can never save what this parser rejects. */
+export const PROFILE_TEXT_LIMITS = { name: 80, productType: 60, notes: 2000 } as const;
+/** True if single-line text holds a line break, tab or other control character. */
+export const hasControlChars = (s: string) => CONTROL.test(s);
+
 class Collector {
   readonly errors: ParseError[] = [];
   add(path: string, code: ParseErrorCode, message: string) {
@@ -139,10 +144,10 @@ export function parse(text: string): ParseResult {
       case "profile": {
         const prof: Partial<ProjectFile["profile"]> = {};
         c.object(p, v, ["name", "productType", "platform", "notes", "componentLibrary"], (k, val, pp) => {
-          if (k === "name") prof.name = c.text(pp, val, 80, true) as string | null;
-          if (k === "productType") prof.productType = c.text(pp, val, 60, true) as string | null;
+          if (k === "name") prof.name = c.text(pp, val, PROFILE_TEXT_LIMITS.name, true) as string | null;
+          if (k === "productType") prof.productType = c.text(pp, val, PROFILE_TEXT_LIMITS.productType, true) as string | null;
           if (k === "platform") prof.platform = c.oneOf(pp, val, PLATFORMS, true) as ProjectFile["profile"]["platform"];
-          if (k === "notes") prof.notes = c.text(pp, val, 2000, false, true) as string;
+          if (k === "notes") prof.notes = c.text(pp, val, PROFILE_TEXT_LIMITS.notes, false, true) as string;
           if (k === "componentLibrary") prof.componentLibrary = c.oneOf(pp, val, COMPONENT_LIBRARIES, false) as ProjectFile["profile"]["componentLibrary"];
         }, "profile");
         out.profile = prof as ProjectFile["profile"];
