@@ -2,6 +2,7 @@
 // The CSS block is mapped from the tokens object, never from the store (C4).
 import { COLOR_ROLES, type FontRef, type ProjectFile } from "@/contracts/project";
 import { checkPairs } from "@/domain/color/pairs";
+import { assertExportable } from "@/domain/decisions";
 import { formatRatio } from "@/domain/color/contrast";
 import { mdEscape } from "@/lib/md-escape";
 import { slug } from "@/lib/slug";
@@ -29,10 +30,11 @@ function loading(fonts: FontRef[]): string {
 }
 
 export function designMd(p: ProjectFile): string {
+  assertExportable(p);
   const r = requireResolved(p);
   const tokens = buildTokens(p);
   const n = r.rules.length;
-  const notes = p.profile.notes === "" ? "none" : p.profile.notes.split("\n").map(mdEscape).join("\\\n  ");
+  const notes = p.profile.notes === "" ? "none" : p.profile.notes.split(/\r\n|\r|\n/).map(mdEscape).join("\\\n  ");
   const lines: string[] = [
     `# Design system – ${mdEscape(r.name)}`,
     "",
@@ -42,7 +44,7 @@ export function designMd(p: ProjectFile): string {
     "",
     "## Product profile",
     "",
-    `- **Product type:** ${mdEscape(p.profile.productType ?? "")}`,
+    `- **Product type:** ${mdEscape(p.profile.productType)}`,
     `- **Platform:** ${p.profile.platform}`,
     `- **Notes:** ${notes}`,
     "",
@@ -53,6 +55,8 @@ export function designMd(p: ProjectFile): string {
     ...open("References"),
     "",
     ...open("Pattern packs"),
+    "",
+    "# Part B – Direction (per project)",
     "",
     "## Personality",
     "",

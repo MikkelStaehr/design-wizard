@@ -27,7 +27,7 @@
 | `profile.platform` | `"desktop"`, `"mobile"`, `"both"` or null | open | – | |
 | `profile.notes` | string | never | `""` valid | ≤ 2000 chars. Not a decision |
 | `profile.componentLibrary` | `"shadcn"` or `"none"` | never | – | New projects start at `"shadcn"`, the user's default target (Next.js + Tailwind v4 + shadcn/ui), shown selected and changeable in the profile step. `"none"` (Tailwind or plain CSS without shadcn) leaves out the shadcn layer and exports the role-named CSS block (§4.2a). tokens.json is the same either way |
-| `principles` | array or null | open | **`[]` valid** (decided: zero laws) | Content order, no duplicate `lawId` |
+| `principles` | array or null | open | **`[]` valid** (decided: zero laws) | No duplicate `lawId`. The serializer writes principles and `resolved.rules` in catalogue (content) order, whatever order a file uses |
 | `principles[].lawId` | string | never | – | Must be a known id in `content/laws` |
 | `principles[].params` | object of string → number | never | per param `min` (§5) | Keys exactly equal the law's params |
 | `visual.fontPair` | string or null | open | – | Must be a known id in `content/font-pairs` |

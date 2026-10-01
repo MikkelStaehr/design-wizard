@@ -4,7 +4,9 @@ import type { ProjectFile } from "@/contracts/project";
 import type { Rule } from "@/contracts/rules";
 import { requireResolved } from "./tokens-json";
 
-const q = (s: string) => JSON.stringify(s);
+/** JSON escaping, plus \u escapes for U+007F–U+009F, which YAML 1.2 does not allow raw. */
+const q = (s: string) =>
+  JSON.stringify(s).replace(/[\u007f-\u009f]/g, (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`);
 
 function ruleLines(r: Rule): string[] {
   const { kind, selector, params, viewports, question } = r.check;

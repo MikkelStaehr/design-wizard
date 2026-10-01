@@ -20,6 +20,8 @@
 **Pattern packs**
 > **open: design-lead** – not decided in Design Wizard.
 
+# Part B – Direction (per project)
+
 ## Personality
 
 > **open: design-lead** – not decided in Design Wizard.

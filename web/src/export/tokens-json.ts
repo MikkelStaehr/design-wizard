@@ -2,6 +2,7 @@
 // Pure: ProjectFile → text. Reads `resolved` only and is stack-agnostic.
 import { COLOR_ROLES, FONT_SIZE_KEYS, SPACE_KEYS, type FontRef, type ProjectFile, type Resolved } from "@/contracts/project";
 import { hexToRgb } from "@/domain/color/hex";
+import { assertExportable } from "@/domain/decisions";
 import { stableJson } from "@/lib/stable-json";
 
 export const NS = "com.github.mikkelstaehr.design-wizard";
@@ -53,8 +54,9 @@ function font(f: FontRef): FontFamilyToken {
   };
 }
 
+/** Runs the export gate (domain/decisions.ts), then returns the snapshot and the project name. */
 export function requireResolved(p: ProjectFile): Resolved & { name: string } {
-  if (p.resolved === null || p.profile.name === null) throw new Error("Export is blocked until every decision is made.");
+  assertExportable(p);
   return { ...p.resolved, name: p.profile.name };
 }
 

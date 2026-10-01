@@ -15,6 +15,8 @@ export interface ProjectState {
   errors: ParseError[];
   savedAt: string | null;
   downloadedAt: string | null;
+  /** True when the last autosave to this browser failed (full or blocked storage); the download is then the only copy. */
+  saveFailed: boolean;
 }
 
 export interface ProjectStore {
@@ -27,14 +29,21 @@ export interface ProjectStore {
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
     listeners.forEach((l) => l());
   };
-  const persist = (project: ProjectFile, downloadedAt: string | null) =>
-    storage ? save(storage, serialize(project), now(), downloadedAt).savedAt : null;
+  /** Returns the new savedAt and whether saving failed; never throws (quota or blocked storage). */
+  const persist = (project: ProjectFile, downloadedAt: string | null): { savedAt: string | null; saveFailed: boolean } => {
+    if (!storage) return { savedAt: state.savedAt, saveFailed: false };
+    try {
+      return { savedAt: save(storage, serialize(project), now(), downloadedAt).savedAt, saveFailed: false };
+    } catch {
+      return { savedAt: state.savedAt, saveFailed: true };
+    }
+  };
 
   if (storage) {
     const restored = restore(storage);
@@ -57,21 +66,21 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
         emit({ ...state, errors: result.errors });
         return result.errors;
       }
-      emit({ project: result.project, errors: [], savedAt: persist(result.project, null), downloadedAt: null });
+      emit({ ...state, project: result.project, errors: [], downloadedAt: null, ...persist(result.project, null) });
       return [];
     },
     replace(project) {
-      emit({ ...state, project, errors: [], savedAt: persist(project, state.downloadedAt) });
+      emit({ ...state, project, errors: [], ...persist(project, state.downloadedAt) });
     },
     markDownloaded() {
       const downloadedAt = now().toISOString();
-      emit({ ...state, downloadedAt, savedAt: persist(state.project, downloadedAt) });
+      emit({ ...state, downloadedAt, ...persist(state.project, downloadedAt) });
     },
   };
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {

@@ -30,7 +30,11 @@ export function restore(storage: Storage): Restored {
   let envelope: Envelope | null = null;
   try {
     const raw: unknown = JSON.parse(text);
-    if (typeof raw === "object" && raw !== null && typeof (raw as Envelope).file === "string") envelope = raw as Envelope;
+    const e = raw as Partial<Envelope> | null;
+    const isEnvelope =
+      typeof e === "object" && e !== null && typeof e.file === "string" && typeof e.savedAt === "string" &&
+      (e.downloadedAt === null || typeof e.downloadedAt === "string");
+    if (isEnvelope) envelope = e as Envelope;
   } catch {
     envelope = null;
   }

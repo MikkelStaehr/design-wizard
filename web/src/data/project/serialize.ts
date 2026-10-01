@@ -2,7 +2,7 @@
 // so the bytes never depend on how a file was parsed or edited.
 import { COLOR_ROLES, FONT_SIZE_KEYS, SPACE_KEYS, type FontRef, type ProjectFile, type Resolved } from "@/contracts/project";
 import type { Rule } from "@/contracts/rules";
-import { LAW_BY_ID } from "@/content/laws";
+import { LAW_BY_ID, LAWS } from "@/content/laws";
 import { stableJson } from "@/lib/stable-json";
 
 function byKeys<T extends string, V>(keys: readonly T[], source: Partial<Record<T, V>>): Record<T, V> {
@@ -10,6 +10,13 @@ function byKeys<T extends string, V>(keys: readonly T[], source: Partial<Record<
   for (const k of keys) if (source[k] !== undefined) out[k] = source[k] as V;
   return out;
 }
+
+/** Content order (docs/CONTRACTS.md §1): principles and rules are written in catalogue order. */
+const lawIndex = (lawId: string) => {
+  const i = LAWS.findIndex((l) => l.id === lawId);
+  return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+};
+const byLaw = <T>(items: T[], id: (t: T) => string) => [...items].sort((a, b) => lawIndex(id(a)) - lawIndex(id(b)));
 
 function lawParams(lawId: string, params: Record<string, number>): Record<string, number> {
   const order = LAW_BY_ID.get(lawId)?.params.map((p) => p.key) ?? Object.keys(params);
@@ -47,7 +54,7 @@ function resolved(r: Resolved): Resolved {
     lineHeight: { text: r.lineHeight.text, display: r.lineHeight.display },
     space: byKeys(SPACE_KEYS, r.space),
     radius: r.radius,
-    rules: r.rules.map(canonicalRule),
+    rules: byLaw(r.rules, (x) => x.law).map(canonicalRule),
   };
 }
 
@@ -58,7 +65,7 @@ export function canonical(p: ProjectFile): ProjectFile {
     schemaVersion: p.schemaVersion,
     format: p.format,
     profile: { name, productType, platform, notes, componentLibrary },
-    principles: p.principles === null ? null : p.principles.map((x) => ({ lawId: x.lawId, params: lawParams(x.lawId, x.params) })),
+    principles: p.principles === null ? null : byLaw(p.principles, (x) => x.lawId).map((x) => ({ lawId: x.lawId, params: lawParams(x.lawId, x.params) })),
     visual: {
       fontPair: v.fontPair,
       spacingBase: v.spacingBase,

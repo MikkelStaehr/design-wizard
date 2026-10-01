@@ -12,13 +12,23 @@ import { LAW_BY_ID } from "@/content/laws";
 import { normalizeHex } from "@/domain/color/hex";
 import { checkPairs } from "@/domain/color/pairs";
 import { formatRatio } from "@/domain/color/contrast";
+import { openDecisions } from "@/domain/decisions";
 import { migrate } from "./migrate";
 
 export type ParseResult = { ok: true; project: ProjectFile } | { ok: false; errors: ParseError[] };
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
-const describe = (v: unknown) => (v === null ? "null" : Array.isArray(v) ? "a list" : typeof v === "string" ? `"${v}"` : String(v));
+/** Short, safe description of a bad value for messages: never echoes long text, never calls toString on objects. */
+const describe = (v: unknown): string => {
+  if (v === null) return "null";
+  if (Array.isArray(v)) return "a list";
+  if (typeof v === "object") return "an object";
+  if (typeof v === "string") return v.length > 40 ? `text of ${v.length} characters` : JSON.stringify(v);
+  return String(v);
+};
+/** Control characters (line breaks, tabs, U+007F–U+009F) are not allowed in single-line text. */
+const CONTROL = /[\u0000-\u001f\u007f-\u009f]/;
 
 class Collector {
   readonly errors: ParseError[] = [];
@@ -43,11 +53,13 @@ class Collector {
     return true;
   }
 
-  text(path: string, v: unknown, max: number, nullable: boolean): string | null | undefined {
+  /** Single-line, non-empty text unless `multiline` (only notes: may be empty and contain line breaks). */
+  text(path: string, v: unknown, max: number, nullable: boolean, multiline = false): string | null | undefined {
     if (v === null && nullable) return null;
     if (typeof v !== "string") return void this.add(path, "type", `${path} must be text${nullable ? " or null if undecided" : ""}. Found ${describe(v)}.`);
-    if (nullable && v.trim() === "") return void this.add(path, "empty", `${path} is empty. Enter a value, or use null if undecided.`);
+    if (!multiline && v.trim() === "") return void this.add(path, "empty", `${path} is empty. Enter a value${nullable ? ", or use null if undecided" : ""}.`);
     if (v.length > max) return void this.add(path, "too-long", `${path} is ${v.length} characters; the limit is ${max}.`);
+    if (!multiline && CONTROL.test(v)) return void this.add(path, "type", `${path} must be one line of text, without line breaks or tabs.`);
     return v;
   }
 
@@ -85,10 +97,15 @@ const join = (path: string, key: string) => (path ? `${path}.${key}` : key);
 
 function jsonSyntax(text: string, err: unknown): ParseError {
   const msg = err instanceof Error ? err.message : String(err);
+  // V8 gives "(line L column C)" for most errors, "position N" for some, and nothing at the end of input.
+  const lc = /line (\d+) column (\d+)/.exec(msg);
   const pos = /position (\d+)/.exec(msg);
-  const at = pos ? Number(pos[1]) : text.length;
-  const before = text.slice(0, at).split("\n");
-  const where = `line ${before.length}:${before[before.length - 1].length + 1}`;
+  let where: string;
+  if (lc) where = `line ${lc[1]}:${lc[2]}`;
+  else {
+    const before = text.slice(0, pos ? Number(pos[1]) : text.length).split("\n");
+    where = `line ${before.length}:${before[before.length - 1].length + 1}`;
+  }
   return { path: "", code: "json-syntax", message: `The file is not valid JSON (${where}). It may be cut off or edited by hand; open an earlier copy.` };
 }
 
@@ -110,10 +127,6 @@ export function parse(text: string): ParseResult {
 
   const c = new Collector();
   const out: Partial<ProjectFile> = {};
-  let decisionOpen = false;
-  const decide = (v: unknown) => {
-    if (v === null) decisionOpen = true;
-  };
 
   c.object("", migrated.value, ["schemaVersion", "format", "profile", "principles", "visual", "resolved"], (key, v, p) => {
     switch (key) {
@@ -129,45 +142,37 @@ export function parse(text: string): ParseResult {
           if (k === "name") prof.name = c.text(pp, val, 80, true) as string | null;
           if (k === "productType") prof.productType = c.text(pp, val, 60, true) as string | null;
           if (k === "platform") prof.platform = c.oneOf(pp, val, PLATFORMS, true) as ProjectFile["profile"]["platform"];
-          if (k === "notes") prof.notes = c.text(pp, val, 2000, false) as string;
+          if (k === "notes") prof.notes = c.text(pp, val, 2000, false, true) as string;
           if (k === "componentLibrary") prof.componentLibrary = c.oneOf(pp, val, COMPONENT_LIBRARIES, false) as ProjectFile["profile"]["componentLibrary"];
-          if (k !== "notes" && k !== "componentLibrary") decide(val);
         }, "profile");
         out.profile = prof as ProjectFile["profile"];
         return;
       }
       case "principles":
-        decide(v);
         out.principles = v === null ? null : parsePrinciples(c, p, v);
         return;
       case "visual": {
         const vis: Partial<ProjectFile["visual"]> = {};
         c.object(p, v, ["fontPair", "spacingBase", "radius", "density", "brandHex", "paletteVariant", "colorOverrides"], (k, val, pp) => {
           if (k === "fontPair") {
-            decide(val);
             if (val === null) vis.fontPair = null;
             else if (typeof val !== "string") c.add(pp, "type", `${pp} must be a font pair id or null. Found ${describe(val)}.`);
             else if (!FONT_PAIR_BY_ID.has(val)) c.add(pp, "unknown-id", `${pp} "${val}" is not in this version's font catalogue. Choose another font pair.`);
             else vis.fontPair = val;
           }
           if (k === "spacingBase") {
-            decide(val);
             vis.spacingBase = c.integer(pp, val, 2, 16, true) as number | null;
           }
           if (k === "radius") {
-            decide(val);
             vis.radius = c.integer(pp, val, 0, 32, true) as number | null;
           }
           if (k === "density") {
-            decide(val);
             vis.density = c.oneOf(pp, val, DENSITIES, true) as ProjectFile["visual"]["density"];
           }
           if (k === "brandHex") {
-            decide(val);
             vis.brandHex = c.hex(pp, val, true) as string | null;
           }
           if (k === "paletteVariant") {
-            decide(val);
             vis.paletteVariant = c.oneOf(pp, val, PALETTE_VARIANTS, true) as ProjectFile["visual"]["paletteVariant"];
           }
           if (k === "colorOverrides") {
@@ -189,7 +194,7 @@ export function parse(text: string): ParseResult {
       }
       case "resolved":
         if (v === null) out.resolved = null;
-        else if (decisionOpen) c.add(p, "inconsistent", "resolved is filled in while a decision is still open. Set it to null, or decide every step first.");
+        else if (openDecisions(out as ProjectFile).length > 0) c.add(p, "inconsistent", "resolved is filled in while a decision is still open. Set it to null, or decide every step first.");
         else out.resolved = parseResolved(c, p, v, out as ProjectFile);
         return;
     }
@@ -292,7 +297,7 @@ function parseResolved(c: Collector, path: string, v: unknown, decided: ProjectF
     if (key === "space") {
       const space: Partial<Resolved["space"]> = {};
       c.object(p, val, SPACE_KEYS, (k, n, pp) => {
-        const px = c.integer(pp, n, 0, 1024, false);
+        const px = c.integer(pp, n, 2, 1024, false);
         if (typeof px !== "number") return;
         const base = decided.visual?.spacingBase;
         if (typeof base === "number" && px !== Number(k) * base) {
@@ -304,12 +309,14 @@ function parseResolved(c: Collector, path: string, v: unknown, decided: ProjectF
     }
     if (key === "radius") {
       const radius = c.integer(p, val, 0, 32, false);
-      if (typeof radius === "number" && radius !== decided.visual?.radius) {
-        c.add(p, "inconsistent", `${p} is ${radius} but the chosen radius is ${decided.visual?.radius}. Recompute the snapshot.`);
+      const chosen = decided.visual?.radius;
+      // Only compare against a valid chosen radius; an invalid one is already reported under visual.radius.
+      if (typeof radius === "number" && typeof chosen === "number" && radius !== chosen) {
+        c.add(p, "inconsistent", `${p} is ${radius} but the chosen radius is ${chosen}. Recompute the snapshot.`);
       }
       if (typeof radius === "number") r.radius = radius;
     }
-    if (key === "rules") r.rules = parseRules(c, p, val, decided.principles ?? []);
+    if (key === "rules") r.rules = parseRules(c, p, val, Array.isArray(decided.principles) ? decided.principles : null);
   }, path);
   return r as Resolved;
 }
@@ -356,18 +363,19 @@ function parseFontRef(c: Collector, path: string, v: unknown): FontRef | null {
   return ok && ref.catalogueId ? (ref as FontRef) : null;
 }
 
-function parseRules(c: Collector, path: string, v: unknown, principles: Principle[]): Rule[] {
+/** `principles` is null when the chosen laws are invalid (already reported); consistency is then not checked. */
+function parseRules(c: Collector, path: string, v: unknown, principles: Principle[] | null): Rule[] {
   if (!Array.isArray(v)) {
     c.add(path, "type", `${path} must be a list. Found ${describe(v)}.`);
     return [];
   }
-  if (v.length !== principles.length) {
+  if (principles && v.length !== principles.length) {
     c.add(path, "inconsistent", `${path} has ${v.length} rules but ${principles.length} laws are chosen. Recompute the snapshot.`);
   }
   return v.map((item, i) => {
     const p = `${path}[${i}]`;
     const rule: Partial<Rule> = {};
-    const principle = principles[i];
+    const principle = principles?.[i];
     c.object(p, item, ["id", "law", "when", "rule", "severity", "check"], (k, val, pp) => {
       if (k === "id" || k === "when" || k === "rule") rule[k] = c.text(pp, val, 500, false) as string;
       if (k === "law") {
@@ -396,10 +404,11 @@ function parseCheck(c: Collector, path: string, v: unknown, principle: Principle
     if (k === "params") {
       if (!isObj(val) || Object.values(val).some((n) => typeof n !== "number")) c.add(p, "type", `${p} must map names to numbers.`);
       else {
-        if (principle && JSON.stringify(val) !== JSON.stringify(principle.params)) {
-          c.add(p, "inconsistent", `${p} differs from the chosen law's values. Recompute the snapshot.`);
-        }
-        check.params = val as Record<string, number>;
+        // Compared key by key (file key order is irrelevant); the stored copy takes the law's key order.
+        const want = principle?.params;
+        const same = want !== undefined && Object.keys(val).length === Object.keys(want).length && Object.entries(want).every(([key, n]) => val[key] === n);
+        if (want !== undefined && !same) c.add(p, "inconsistent", `${p} differs from the chosen law's values. Recompute the snapshot.`);
+        check.params = same ? { ...want } : (val as Record<string, number>);
       }
     }
     if (k === "viewports") {

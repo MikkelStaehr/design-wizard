@@ -49,6 +49,32 @@ describe("C6 project file", () => {
     expect(result.ok ? [] : result.errors.map(({ path, code }) => `${path}:${code}`)).toContain("visual.radius:type");
   });
 
+  test("never throws on hostile values: an object with its own toString is a type error", () => {
+    const text = read("harbour.project.json").replace('"name": "Harbour",', '"name": { "toString": 1 },');
+    const result = parse(text);
+    expect(result.ok ? [] : result.errors.map(({ path, code }) => `${path}:${code}`)).toEqual(["profile.name:type"]);
+  });
+
+  test("an invalid decision does not cause follow-on errors in the snapshot", () => {
+    const text = read("harbour.project.json").replace('"radius": 8,\n    "density"', '"radius": "8",\n    "density"');
+    const result = parse(text);
+    expect(result.ok ? [] : result.errors.map(({ path, code }) => `${path}:${code}`)).toEqual(["visual.radius:type"]);
+  });
+
+  test("single-line text rejects line breaks; notes may contain them", () => {
+    const bad = parse(read("harbour.project.json").replace('"productType": "Clinic booking"', '"productType": "Booking\\n## Colour"'));
+    expect(bad.ok ? [] : bad.errors.map(({ path, code }) => `${path}:${code}`)).toEqual(["profile.productType:type"]);
+    expect(parse(read("edge-name.project.json")).ok).toBe(true);
+  });
+
+  test("laws listed out of catalogue order are written back in catalogue order", () => {
+    const result = parse(read("harbour.project.json"));
+    if (!result.ok) throw new Error("harbour must parse");
+    const p = result.project;
+    const shuffled = { ...p, principles: [...p.principles!].reverse(), resolved: { ...p.resolved!, rules: [...p.resolved!.rules].reverse() } };
+    expect(serialize(shuffled)).toBe(read("harbour.project.json"));
+  });
+
   test("another JSON file is rejected by format", () => {
     const result = parse('{"$description": "tokens"}');
     expect(result.ok ? [] : result.errors.map((e) => e.code)).toEqual(["format"]);
