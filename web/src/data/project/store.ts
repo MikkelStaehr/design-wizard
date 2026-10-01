@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 import type { ParseError } from "@/contracts/errors";
 import type { Principle, ProjectFile, Profile, Visual } from "@/contracts/project";
 import { resolveSnapshot } from "@/domain/tokens/resolve";
+import { devFixtureName, devFixtureText } from "./dev-fixtures";
 import { emptyProject } from "./empty";
 import { parse } from "./parse";
 import { serialize } from "./serialize";
@@ -31,6 +32,8 @@ export interface ProjectStore {
   setPrinciples(principles: Principle[] | null): void;
   setVisual<K extends keyof Visual>(key: K, value: Visual[K]): void;
   markDownloaded(): void;
+  /** Dev only (?fixture=): open fixture text and pretend it was saved at `savedAt`. */
+  openDevFixture(text: string, savedAt: string | null): void;
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
@@ -92,6 +95,10 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     setVisual(key, value) {
       decide({ ...state.project, visual: { ...state.project.visual, [key]: value } });
     },
+    openDevFixture(text, savedAt) {
+      const errors = this.open(text);
+      if (errors.length === 0) emit({ ...state, savedAt });
+    },
     markDownloaded() {
       const downloadedAt = now().toISOString();
       emit({ ...state, downloadedAt, ...persist(state.project, downloadedAt) });
@@ -104,6 +111,14 @@ const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {
+    const fixture = devFixtureName(window.location.search);
+    if (fixture) {
+      // A fixture never touches the real autosave: in-memory store, no storage.
+      const store = createProjectStore(null);
+      browserStore = store;
+      void devFixtureText(fixture).then(({ text, savedAt }) => store.openDevFixture(text, savedAt));
+      return store;
+    }
     let storage: Storage | null = null;
     try {
       storage = window.localStorage;
