@@ -124,12 +124,13 @@
   *:not([data-v-root] *) {
     @apply border-border;
   }
+  /* The root stays at the browser's 16px: rem-based sizes (44px targets, --v-fs-* in plates) depend on it. */
   html {
-    @apply font-sans text-body;
+    @apply font-sans;
     -webkit-font-smoothing: antialiased;
   }
   body {
-    @apply min-h-dvh bg-dw-bg text-dw-text;
+    @apply min-h-dvh bg-dw-bg text-body text-dw-text;
   }
   :focus-visible:not([data-v-root] *) {
     outline: 2px solid var(--dw-focus);
@@ -147,5 +148,88 @@
   *::after {
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/*
+ * Viewing plate (DESIGN.md signature element): --plate surround, 18px padding, 0 radius, four 12px
+ * L-shaped crop marks (1px muted) inset 6px; selected = 16px, 2px black brackets. Chrome only:
+ * nothing here reaches inside [data-v-root].
+ */
+@layer components {
+  .dw-plate {
+    position: relative;
+    background: var(--dw-plate);
+    padding: 18px;
+    cursor: pointer;
+  }
+  .dw-plate[aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+  .dw-plate::before,
+  .dw-plate::after,
+  .dw-plate > .dw-cm::before,
+  .dw-plate > .dw-cm::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--dw-text-muted);
+    transition:
+      border-color 120ms ease-out,
+      opacity 120ms ease-out;
+  }
+  .dw-plate::before {
+    top: 6px;
+    left: 6px;
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .dw-plate::after {
+    bottom: 6px;
+    right: 6px;
+    border-left: 0;
+    border-top: 0;
+  }
+  .dw-plate > .dw-cm::before {
+    top: 6px;
+    right: 6px;
+    border-left: 0;
+    border-bottom: 0;
+  }
+  .dw-plate > .dw-cm::after {
+    bottom: 6px;
+    left: 6px;
+    border-right: 0;
+    border-top: 0;
+  }
+  .dw-plate[aria-checked="true"]::before,
+  .dw-plate[aria-checked="true"]::after,
+  .dw-plate[aria-checked="true"] > .dw-cm::before,
+  .dw-plate[aria-checked="true"] > .dw-cm::after {
+    width: 16px;
+    height: 16px;
+    border-color: var(--dw-accent);
+    border-width: 2px;
+  }
+  .dw-plate[aria-checked="true"]::before,
+  .dw-plate[aria-checked="true"] > .dw-cm::after {
+    border-right-width: 0;
+  }
+  .dw-plate[aria-checked="true"]::after,
+  .dw-plate[aria-checked="true"] > .dw-cm::before {
+    border-left-width: 0;
+  }
+  .dw-plate[aria-checked="true"]::before,
+  .dw-plate[aria-checked="true"] > .dw-cm::before {
+    border-bottom-width: 0;
+  }
+  .dw-plate[aria-checked="true"]::after,
+  .dw-plate[aria-checked="true"] > .dw-cm::after {
+    border-top-width: 0;
+  }
+  .dw-plate:focus-visible {
+    outline: 2px solid var(--dw-focus);
+    outline-offset: 3px;
   }
 }

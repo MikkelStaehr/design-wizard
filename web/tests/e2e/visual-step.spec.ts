@@ -1,0 +1,108 @@
+import { expect, test, type Page } from "@playwright/test";
+
+// Runs against the built export (no ?fixture=), so each test starts from a fresh, empty project.
+const isMobile = () => test.info().project.name === "mobile-390";
+
+async function openSpacing(page: Page) {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
+  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  // J reaches the next sub-decision on the keyboard; on 390 the rail is hidden, so use the decision list there.
+  if (isMobile()) await page.getByRole("navigation", { name: "Visual decisions" }).getByRole("button", { name: /Spacing/ }).click();
+  else await page.keyboard.press("j");
+  await expect(page.getByRole("heading", { level: 1, name: "Spacing" })).toBeVisible();
+}
+
+async function chromeH1Style(page: Page) {
+  return page.locator("main h1").evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { fontFamily: cs.fontFamily, color: cs.color, bodyBg: getComputedStyle(document.body).backgroundColor };
+  });
+}
+
+test("spacing shows 3 plates side by side at 1280 and stacked at 390, with no horizontal overflow", async ({ page }) => {
+  await openSpacing(page);
+  const radios = page.getByRole("radiogroup", { name: "Spacing variants" }).getByRole("radio");
+  await expect(radios).toHaveCount(3);
+  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  const boxes = await radios.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
+  if (isMobile()) {
+    expect(boxes[1].top).toBeGreaterThan(boxes[0].bottom);
+    expect(boxes[2].top).toBeGreaterThan(boxes[1].bottom);
+    await expect(page.getByLabel("Keyboard shortcuts")).toBeHidden();
+  } else {
+    expect(Math.abs(boxes[0].top - boxes[1].top)).toBeLessThan(1);
+    expect(Math.abs(boxes[1].top - boxes[2].top)).toBeLessThan(1);
+    expect(boxes[1].left).toBeGreaterThan(boxes[0].right);
+  }
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  expect(overflow).toBe(false);
+});
+
+test("leak: choosing another palette or font pair leaves the chrome h1 font and colour unchanged", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
+  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  const before = await chromeH1Style(page);
+  expect(before.fontFamily).not.toContain("dwv-");
+
+  // Font pair: select and choose the second pair.
+  await page.getByRole("radio").nth(1).click();
+  await page.getByRole("button", { name: /^Choose / }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Spacing" })).toBeVisible();
+  expect(await chromeH1Style(page)).toEqual(before);
+
+  // Palette: enter a brand colour, then choose Deep (the most different palette).
+  await page.goto("/?step=visual.palette");
+  await page.getByLabel("Brand colour").fill("#0F766E");
+  await page.getByLabel("Brand colour").blur();
+  const palettes = page.getByRole("radiogroup", { name: "Palette variants" }).getByRole("radio");
+  await expect(palettes).toHaveCount(3);
+  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  await palettes.nth(2).click();
+  await page.getByRole("button", { name: /^Choose / }).click();
+  expect(await chromeH1Style(page)).toEqual(before);
+});
+
+test("keyboard: 1/2/3 then Enter records a decision; J and K move between sub-decisions", async ({ page }) => {
+  test.skip(isMobile(), "The keyboard flow is a desktop feature; the rail that shows it is hidden at 390.");
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
+  const radios = page.getByRole("radiogroup", { name: "Font pair variants" }).getByRole("radio");
+  // The radios exist in the static HTML; a loaded plate root only appears once the client has hydrated.
+  await expect(page.locator("[data-v-root]")).toHaveCount(2);
+
+  await page.keyboard.press("2");
+  await expect(radios.nth(1)).toHaveAttribute("aria-checked", "true");
+  await page.keyboard.press("1");
+  await expect(radios.nth(0)).toHaveAttribute("aria-checked", "true");
+  await expect(radios.nth(1)).toHaveAttribute("aria-checked", "false");
+  await page.keyboard.press("Enter");
+
+  // Recorded: the rail shows the value, and the step moved to the next open sub-decision.
+  await expect(page.getByRole("heading", { level: 1, name: "Spacing" })).toBeVisible();
+  const rail = page.getByRole("navigation", { name: "Wizard steps" });
+  await expect(rail.getByRole("button", { name: /Font pair\s*Sora \+ Inter/ })).toBeVisible();
+  await expect(rail.getByRole("button", { name: /Spacing\s*now/ })).toHaveAttribute("aria-current", "true");
+
+  await page.keyboard.press("j");
+  await expect(page.getByRole("heading", { level: 1, name: "Radius" })).toBeVisible();
+  await page.keyboard.press("k");
+  await page.keyboard.press("k");
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
+  await page.keyboard.press("j");
+  await page.keyboard.press("e");
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
+});
+
+test("font 404: a failed variant font shows 'Font failed' and cannot be chosen", async ({ page }) => {
+  await page.route("**/fonts/sora/**", (route) => route.fulfill({ status: 404, body: "" }));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
+  await expect(page.getByText("Font failed: Sora + Inter")).toBeVisible();
+  const failed = page.getByRole("radio", { name: /Sora \+ Inter/ });
+  await expect(failed).toHaveAttribute("aria-disabled", "true");
+  await page.keyboard.press("1");
+  await expect(failed).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("button", { name: /^Choose / })).toBeDisabled();
+});

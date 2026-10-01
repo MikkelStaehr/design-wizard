@@ -8,7 +8,7 @@ test("the shell renders and makes no request outside localhost", async ({ page }
   });
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Project profile" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
   await page.waitForLoadState("networkidle");
 
   expect(external).toEqual([]);
