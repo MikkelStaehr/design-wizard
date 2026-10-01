@@ -106,7 +106,7 @@ The real serializer writes one key per line with a 2-space indent; the compact l
 
 ## 2. tokens.json
 
-**Followed: W3C DTCG Design Tokens Format Module 2025.10 and its Color Module 2025.10** (final Community Group reports, October 2025). These were checked from memory because this session had no network access. Slice 1, step 3 re-checks the shapes below against the published spec before the goldens are frozen.
+**Followed: W3C DTCG Design Tokens Format Module 2025.10 and its Color Module 2025.10** (final Community Group reports, October 2025). Verified against the published spec on 2026-10-01 (slice 1, step 3): colour `{colorSpace, components, alpha, hex}` with `hex` in 6-digit CSS notation, dimension `{value, unit}`, fontFamily as a string or an array of names, number as a JSON number, and `$description`/`$extensions` (reverse-domain keys) allowed on groups. The JSON Schema is `web/src/contracts/schemas/tokens.v1.schema.json`.
 
 | Token type | `$value` shape used |
 |---|---|

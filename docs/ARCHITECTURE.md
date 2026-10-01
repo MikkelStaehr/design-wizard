@@ -61,7 +61,7 @@ web/
 │  │  ├─ css-vars.ts      role-named CSS block + Tailwind v4 @theme (when componentLibrary = "none")
 │  │  ├─ design-md.ts     Part B markdown
 │  │  ├─ ux-rules-yaml.ts YAML via its own small emitter (closed shape, byte control)
-│  │  └─ index.ts         exportAll → the 4 named files
+│  │  └─ index.ts         exportAll → DESIGN.md, tokens.json, ux-rules.yaml (the export step adds <slug>.dwproj.json from data/serialize)
 │  ├─ fonts/              loader.ts (FontFace as "dwv-<id>", cache, document.fonts.load) · use-font-pair.ts
 │  ├─ app/                layout.tsx (CSP meta, chrome fonts) · page.tsx (the only route) · fonts.ts (next/font/local) · globals.css (chrome tokens + shadcn theme)
 │  └─ components/
