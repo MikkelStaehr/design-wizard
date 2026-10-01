@@ -1,0 +1,93 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { expect, test } from "vitest";
+import { COLOR_ROLES, FONT_SIZE_KEYS, SPACE_KEYS } from "@/contracts/project";
+import { emptyProject } from "@/data/project/empty";
+import { parse } from "@/data/project/parse";
+import { createProjectStore } from "@/data/project/store";
+import { plateVars } from "@/domain/tokens/plate-vars";
+import { PREVIEW_NEUTRALS, resolveForPlate, resolveSnapshot } from "@/domain/tokens/resolve";
+import { spaceScale, typeScale } from "@/domain/tokens/scales";
+
+const harbourText = readFileSync(join(__dirname, "..", "..", "fixtures", "harbour.project.json"), "utf8");
+const harbour = () => {
+  const r = parse(harbourText);
+  if (!r.ok) throw new Error("harbour must parse");
+  return r.project;
+};
+
+test("compact density gives the Harbour type scale; space is key × base", () => {
+  expect(typeScale("compact").fontSize).toEqual(harbour().resolved!.fontSize);
+  expect(spaceScale(4)).toEqual(harbour().resolved!.space);
+  for (const d of ["compact", "balanced", "airy"] as const) {
+    const sizes = FONT_SIZE_KEYS.map((k) => typeScale(d).fontSize[k]);
+    expect(sizes).toEqual([...sizes].sort((a, b) => a - b));
+  }
+});
+
+test("resolveSnapshot is null while any decision is open and complete otherwise", () => {
+  expect(resolveSnapshot(emptyProject())).toBeNull();
+  const p = harbour();
+  expect(resolveSnapshot({ ...p, visual: { ...p.visual, density: null } })).toBeNull();
+  const r = resolveSnapshot(p)!;
+  expect(r.radius).toBe(8);
+  expect(r.font.display.catalogueId).toBe("sora");
+  expect(r.rules.map((x) => x.id)).toEqual(p.resolved!.rules.map((x) => x.id));
+  expect(Object.keys(r.color.light)).toEqual([...COLOR_ROLES]);
+});
+
+test("plates use the candidate, then the decisions made, then preview-only neutrals", () => {
+  const visual = { ...emptyProject().visual, radius: 0 };
+  const t = resolveForPlate(visual, { spacingBase: 8 });
+  expect(t.radius).toBe(0);
+  expect(t.space["1"]).toBe(8);
+  expect(t.font.display.catalogueId).toBe("inter");
+  expect(t.fontSize).toEqual(typeScale(PREVIEW_NEUTRALS.density).fontSize);
+});
+
+test("plateVars sets every --v-* variable of CONTRACTS §6 and nothing else", () => {
+  const vars = plateVars(resolveForPlate(harbour().visual, {}));
+  const expected = [
+    ...COLOR_ROLES.map((r) => `--v-${r}`),
+    "--v-font-display", "--v-font-text", "--v-weight-display", "--v-weight-text", "--v-weight-strong",
+    ...FONT_SIZE_KEYS.map((k) => `--v-fs-${k}`), "--v-lh-text", "--v-lh-display",
+    ...SPACE_KEYS.map((k) => `--v-space-${k}`), "--v-radius",
+  ];
+  expect(Object.keys(vars).sort()).toEqual(expected.sort());
+  expect(vars["--v-font-display"]).toBe('"dwv-sora", sans-serif');
+  expect(vars["--v-radius"]).toBe("8px");
+});
+
+test("store decision actions keep resolved null until the last decision, then resolve it", () => {
+  const store = createProjectStore(null);
+  const p = harbour();
+  store.setProfile("name", "Harbour");
+  store.setProfile("productType", "Clinic booking");
+  store.setProfile("platform", "desktop");
+  store.setPrinciples(p.principles);
+  for (const key of ["fontPair", "spacingBase", "radius", "density", "brandHex"] as const) {
+    store.setVisual(key, p.visual[key] as never);
+    expect(store.getState().project.resolved).toBeNull();
+  }
+  store.setVisual("paletteVariant", "tinted");
+  const resolved = store.getState().project.resolved!;
+  expect(resolved.color.light.accent).toBe("#0F766E");
+  store.setVisual("radius", null);
+  expect(store.getState().project.resolved).toBeNull();
+});
+
+test("form input accepts the ways people type values and rejects junk", async () => {
+  const { parseHexInput, parseNumberInput } = await import("@/domain/parse-input");
+  expect(parseHexInput("0f766e")).toEqual({ ok: true, value: "#0F766E" });
+  expect(parseHexInput(" #abc ")).toEqual({ ok: true, value: "#AABBCC" });
+  expect(parseHexInput("teal").ok).toBe(false);
+  const px = { min: 0, max: 32, integer: true, unit: "px" };
+  expect(parseNumberInput("8", px)).toEqual({ ok: true, value: 8 });
+  expect(parseNumberInput("8px", px)).toEqual({ ok: true, value: 8 });
+  expect(parseNumberInput("8,0", px)).toEqual({ ok: true, value: 8 });
+  expect(parseNumberInput("0", px)).toEqual({ ok: true, value: 0 });
+  expect(parseNumberInput("8.5", px).ok).toBe(false);
+  expect(parseNumberInput("40", px).ok).toBe(false);
+  expect(parseNumberInput("eight", px).ok).toBe(false);
+  expect(parseNumberInput("4,5", { min: 3, max: 7, integer: false })).toEqual({ ok: true, value: 4.5 });
+});

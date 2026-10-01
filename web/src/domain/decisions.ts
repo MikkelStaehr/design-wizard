@@ -32,6 +32,23 @@ export function assertExportable(p: ProjectFile): asserts p is ProjectFile & {
   if (p.resolved === null) throw new Error("Export is blocked: the design snapshot has not been resolved yet.");
 }
 
+/** The visual-system sub-decisions in wizard order (step 3), and the variants each shows side by side. */
+export const VISUAL_SUBDECISIONS = [
+  { key: "fontPair", label: "Font pair" },
+  { key: "spacingBase", label: "Spacing" },
+  { key: "radius", label: "Radius" },
+  { key: "paletteVariant", label: "Brand colour → palette" },
+  { key: "density", label: "Density" },
+] as const;
+export type VisualKey = (typeof VISUAL_SUBDECISIONS)[number]["key"];
+
+/** Fixed candidates shown as 3 variants. Font pairs and palettes come from content/ and palette.ts. */
+export const VISUAL_CANDIDATES = {
+  spacingBase: [4, 6, 8],
+  radius: [0, 6, 14],
+  density: ["compact", "balanced", "airy"],
+} as const;
+
 export type StepId = "profile" | "principles" | "visual" | "preview" | "export";
 
 export interface Step {

@@ -35,3 +35,6 @@ export const FONTS: readonly FontEntry[] = [
 ];
 
 export const FONT_BY_ID: ReadonlyMap<string, FontEntry> = new Map(FONTS.map((f) => [f.id, f]));
+
+/** The FontFace name a variant font is registered under, so it can never match a chrome font. */
+export const variantFace = (catalogueId: string) => `dwv-${catalogueId}`;

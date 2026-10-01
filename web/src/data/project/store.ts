@@ -3,7 +3,8 @@
 // Slice 2 adds decision actions and resolving `resolved` once every decision is set.
 import { useSyncExternalStore } from "react";
 import type { ParseError } from "@/contracts/errors";
-import type { ProjectFile } from "@/contracts/project";
+import type { Principle, ProjectFile, Profile, Visual } from "@/contracts/project";
+import { resolveSnapshot } from "@/domain/tokens/resolve";
 import { emptyProject } from "./empty";
 import { parse } from "./parse";
 import { serialize } from "./serialize";
@@ -25,6 +26,10 @@ export interface ProjectStore {
   /** Parses `text`; on success it replaces the project, otherwise only `errors` change. */
   open(text: string): ParseError[];
   replace(project: ProjectFile): void;
+  /** Decision actions: each recomputes `resolved` (null while any decision is open) and autosaves. */
+  setProfile<K extends keyof Profile>(key: K, value: Profile[K]): void;
+  setPrinciples(principles: Principle[] | null): void;
+  setVisual<K extends keyof Visual>(key: K, value: Visual[K]): void;
   markDownloaded(): void;
 }
 
@@ -43,6 +48,12 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     } catch {
       return { savedAt: state.savedAt, saveFailed: true };
     }
+  };
+
+  /** Every decision change goes through here: recompute the snapshot, then save. */
+  const decide = (next: ProjectFile) => {
+    const project = { ...next, resolved: resolveSnapshot(next) };
+    emit({ ...state, project, errors: [], ...persist(project, state.downloadedAt) });
   };
 
   if (storage) {
@@ -71,6 +82,15 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     },
     replace(project) {
       emit({ ...state, project, errors: [], ...persist(project, state.downloadedAt) });
+    },
+    setProfile(key, value) {
+      decide({ ...state.project, profile: { ...state.project.profile, [key]: value } });
+    },
+    setPrinciples(principles) {
+      decide({ ...state.project, principles });
+    },
+    setVisual(key, value) {
+      decide({ ...state.project, visual: { ...state.project.visual, [key]: value } });
     },
     markDownloaded() {
       const downloadedAt = now().toISOString();
