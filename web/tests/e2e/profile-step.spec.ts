@@ -153,3 +153,14 @@ test("AC5: a platform plate box is the same before and after the fonts load", as
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   expect(await boxes()).toEqual(loading);
 });
+
+test("step 2 placeholder: a visible button reopens the profile (touch has no rail and no E key)", async ({ page }) => {
+  await seedHarbour(page);
+  await page.goto("/?step=principles");
+  const back = page.getByRole("button", { name: /Reopen the profile/ });
+  await expect(back).toBeVisible();
+  const box = await back.boundingBox();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  await back.click();
+  await expect(h1(page, "Component library")).toBeVisible();
+});

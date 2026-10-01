@@ -32,7 +32,7 @@ const stepOf = (id: StopId) => (id.startsWith("visual.") ? "visual" : id === "pr
 // Layout from DESIGN.md "Space & density": ≥1101px rail 232 | main | preview 340;
 // 761–1100px rail 200 + main with the preview below; ≤760px one column, rail and legend hidden.
 export function WizardShell() {
-  const { project, errors, saveFailed } = useProject();
+  const { project, errors, saveFailed, hydrated } = useProject();
   const visual = project.visual;
   const productName = project.profile.name;
   const [picked, setPicked] = useState<StopId | null>(null);
@@ -62,14 +62,15 @@ export function WizardShell() {
   // On arriving at a stop, focus its h1; a new project's identity stop focuses the first empty field instead.
   const arrived = useRef<StopId | null>(null);
   useEffect(() => {
-    if (arrived.current === stop) return;
+    // Wait for the real project: before hydration main holds only a status line, nothing to focus.
+    if (!hydrated || arrived.current === stop) return;
     arrived.current = stop;
     const { name, productType } = project.profile;
     if (stop === "profile.identity" && (name === null || productType === null)) {
       const inputs = [...document.querySelectorAll<HTMLInputElement>("main form input")];
       (inputs.find((i) => i.value === "") ?? inputs[0])?.focus();
     } else document.querySelector<HTMLElement>("main h1")?.focus();
-  }, [stop, project.profile]);
+  }, [stop, project.profile, hydrated]);
 
   const visualSub = (current === "visual" ? stop.slice("visual.".length) : SUB_KEYS[0]) as VisualKey;
 
@@ -85,6 +86,13 @@ export function WizardShell() {
         <Rail project={project} stop={stop} onPick={setPicked} />
       </aside>
       <main className="min-w-0 px-4 pt-5 pb-8 min-[761px]:px-6">
+        {/* Before hydration the server snapshot is an empty project: show nothing to type into. */}
+        {!hydrated ? (
+          <p role="status" className="text-dw-text-muted">
+            Opening your project…
+          </p>
+        ) : (
+          <>
         {errors.length > 0 && (
           <section role="alert" aria-labelledby="file-errors-title" className="mb-5 border border-dw-ctl bg-dw-surface px-4 py-3">
             <h2 id="file-errors-title" className="font-medium">
@@ -129,8 +137,19 @@ export function WizardShell() {
                 Continue to visual system
                 <kbd className="border-dw-on-accent bg-transparent text-dw-on-accent">Enter</kbd>
               </button>
-              <p className="text-small text-dw-text-muted">Press E to reopen the profile.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const to = lastDecidedStopBefore(project, "principles");
+                  if (to) setPicked(to);
+                }}
+                className="inline-flex min-h-11 items-center gap-2 text-small text-dw-text underline underline-offset-4"
+              >
+                Reopen the profile <kbd>E</kbd>
+              </button>
             </div>
+          </>
+        )}
           </>
         )}
       </main>

@@ -22,6 +22,8 @@ export interface ProjectState {
   downloadedAt: string | null;
   /** True when the last autosave to this browser failed (full or blocked storage); the download is then the only copy. */
   saveFailed: boolean;
+  /** False only in the server snapshot (static HTML before hydration); the UI waits for the real project. */
+  hydrated: boolean;
   /** The opened file's stored snapshot differs from a fresh computation: the UI asks keep or recompute. */
   snapshotDiffers: boolean;
 }
@@ -45,7 +47,7 @@ export interface ProjectStore {
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, snapshotDiffers: false };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
@@ -145,7 +147,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, snapshotDiffers: false };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {

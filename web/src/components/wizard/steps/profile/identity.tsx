@@ -189,20 +189,21 @@ function TextField({
   children: ReactNode;
 }) {
   const limit = LIMIT[field];
-  const over = draft.length - limit;
+  const n = draft.trim().length;
+  const over = n - limit;
   return (
-    <div className={`border-l-2 pl-2.5 ${error ? "border-l-dw-accent" : "border-l-transparent"}`}>
+    <div className={`-ml-3 border-l-2 pl-2.5 ${error ? "border-l-dw-accent" : "border-l-transparent"}`}>
       <div className="mb-1 flex items-baseline justify-between gap-3">
         <label htmlFor={`${uid}-${field}`} className="font-mono text-label font-medium tracking-[0.08em] uppercase">
           {label}
         </label>
         <span className={`font-mono text-label tabular-nums ${over > 0 ? "font-medium text-dw-text" : "text-dw-text-muted"}`}>
-          {draft.length} / {limit}
+          {n} / {limit}
           {over > 0 ? ` · ${over} over` : ""}
         </span>
       </div>
       {children}
-      <p id={`${uid}-${field}-msg`} className={`mt-1 text-small ${error ? "text-dw-text" : "text-dw-text-muted"}`}>
+      <p id={`${uid}-${field}-msg`} aria-live="polite" className={`mt-1 text-small ${error ? "text-dw-text" : "text-dw-text-muted"}`}>
         {error ?? hint ?? ""}
       </p>
     </div>
