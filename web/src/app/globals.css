@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Chrome theme from DESIGN.md Part B (Grading Suite, light only).
+ * Chrome tokens are prefixed --dw-* in code because shadcn's --accent means "hover background",
+ * while DESIGN.md's --accent is the black accent. Variants never read these: plates set --v-* inline.
+ * Every grey is R=G=B: the chrome never carries a hue.
+ */
+:root {
+  --dw-bg: #e6e6e6;
+  --dw-surface: #f2f2f2;
+  --dw-plate: #cccccc;
+  --dw-line: #cccccc;
+  --dw-ctl: #6b6b6b;
+  --dw-text: #141414;
+  --dw-text-muted: #4f4f4f;
+  --dw-accent: #000000;
+  --dw-on-accent: #ffffff;
+  --dw-focus: #000000;
+  --dw-hover: #dadada;
+
+  /* shadcn/ui mapping (DESIGN.md "shadcn/ui mapping"). Never the library default. */
+  --background: var(--dw-bg);
+  --foreground: var(--dw-text);
+  --card: var(--dw-surface);
+  --card-foreground: var(--dw-text);
+  --popover: var(--dw-surface);
+  --popover-foreground: var(--dw-text);
+  --primary: var(--dw-accent);
+  --primary-foreground: var(--dw-on-accent);
+  --secondary: var(--dw-surface);
+  --secondary-foreground: var(--dw-text);
+  --muted: var(--dw-surface);
+  --muted-foreground: var(--dw-text-muted);
+  --accent: var(--dw-hover);
+  --accent-foreground: var(--dw-text);
+  --destructive: var(--dw-accent);
+  --border: var(--dw-line);
+  --input: var(--dw-ctl);
+  --ring: var(--dw-focus);
+  --radius: 2px;
+  --sidebar: var(--dw-bg);
+  --sidebar-foreground: var(--dw-text);
+  --sidebar-primary: var(--dw-accent);
+  --sidebar-primary-foreground: var(--dw-on-accent);
+  --sidebar-accent: var(--dw-hover);
+  --sidebar-accent-foreground: var(--dw-text);
+  --sidebar-border: var(--dw-line);
+  --sidebar-ring: var(--dw-focus);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Chrome colours for utilities: bg-dw-plate, text-dw-text-muted, border-dw-ctl … */
+  --color-dw-bg: var(--dw-bg);
+  --color-dw-surface: var(--dw-surface);
+  --color-dw-plate: var(--dw-plate);
+  --color-dw-line: var(--dw-line);
+  --color-dw-ctl: var(--dw-ctl);
+  --color-dw-text: var(--dw-text);
+  --color-dw-text-muted: var(--dw-text-muted);
+  --color-dw-accent: var(--dw-accent);
+  --color-dw-on-accent: var(--dw-on-accent);
+
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist), system-ui, sans-serif;
+
+  /* DESIGN.md type scale 11 / 12 / 13 / 25. No other sizes in the chrome. */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.45;
+  --text-small: 0.75rem;
+  --text-small--line-height: 1.5;
+  --text-body: 0.8125rem;
+  --text-body--line-height: 1.5;
+  --text-title: 1.5625rem;
+  --text-title--line-height: 1.2;
+
+  /* 2px for every chrome control; plates, panels and the rail use rounded-none. */
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+
+  /* No shadows anywhere in the chrome. */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+}
+
+@layer base {
+  /* Scoped so the chrome's base rules never reach inside a variant plate. */
+  *:not([data-v-root] *) {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans text-body;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply min-h-dvh bg-dw-bg text-dw-text;
+  }
+  :focus-visible:not([data-v-root] *) {
+    outline: 2px solid var(--dw-focus);
+    outline-offset: 2px;
+  }
+  kbd {
+    @apply inline-flex min-w-5 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-1 font-mono text-label font-medium leading-none;
+    height: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

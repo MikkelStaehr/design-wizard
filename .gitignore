@@ -13,3 +13,6 @@ coverage/
 # Local tooling
 .claude/settings.local.json
 .vercel/
+
+# Real Design Wizard project files (fixtures use *.project.json)
+*.dwproj.json

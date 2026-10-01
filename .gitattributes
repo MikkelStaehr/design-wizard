@@ -1,0 +1,3 @@
+# Golden contract tests compare bytes: fixtures and goldens are LF on every OS.
+web/fixtures/** text eol=lf
+web/tests/contract/golden/** text eol=lf
