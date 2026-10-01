@@ -1,0 +1,15 @@
+# Secrets: only .env.example is committed
+.env*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local tooling
+.claude/settings.local.json
+.vercel/
