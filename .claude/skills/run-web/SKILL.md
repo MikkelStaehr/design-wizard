@@ -1,6 +1,6 @@
 ---
 name: run-web
-description: Run the Next.js app in web/ on port 3100 (dev mode) and take exact-width screenshots (390 px, 1280 px, reduced motion, 200 % text). Use for any "run it", "show me", screenshot or visual check of the web app. The only screenshot method in this repo.
+description: Run the Next.js app in web/ on port 3110 (dev mode) and take exact-width screenshots (390 px, 1280 px, reduced motion, 200 % text). Use for any "run it", "show me", screenshot or visual check of the web app. The only screenshot method in this repo.
 ---
 
 # run-web
@@ -8,7 +8,8 @@ description: Run the Next.js app in web/ on port 3100 (dev mode) and take exact-
 > **Template from PROJECT START** (originally built in Famprove), adapted for Design Wizard: dev mode only
 > (the app is a static export, so `next start` cannot serve it) and no date override.
 
-Start the web app on **port 3100** (agents' port; 3000 is the user's, never touch it), run a
+Start the web app on **port 3110** (design-wizard's own agent port; 3000 is the user's and other
+projects' agents have their own ports: never touch or stop those), run a
 command against it, and always stop it again. Screenshots come from Edge through the DevTools
 protocol, in real time and at an exact viewport width.
 
@@ -34,7 +35,7 @@ to the session scratchpad or `%TEMP%`, never into the repo.
 `shoot.mjs` options: `--out <png>` (required) · `--path /?fixture=harbour` (default `/`) ·
 `--width 390` · `--open` (open every `<details>`) · `--dark` · `--reduce-motion` (emulates
 `prefers-reduced-motion: reduce`) · `--zoom200` (root font 200 %) ·
-`--base http://localhost:3100`. It prints one JSON line (height, horizontal overflow, console
+`--base http://localhost:3110`. It prints one JSON line (height, horizontal overflow, console
 errors) and exits 1 on overflow, console errors or a page that never got ready (it waits for
 `main h1`). Then **Read the PNG**: a screenshot you haven't looked at proves nothing.
 
@@ -43,6 +44,6 @@ e2e tests start themselves (`pnpm e2e`). Next ≥ 16 keeps dev output in `.next/
 not disturb a dev server on port 3000.
 
 ## Rules
-- Port 3100 only. The script refuses to start if 3100 is taken and always stops its server.
+- Port 3110 only. The script refuses to start if 3110 is taken and always stops its server.
 - The app reads no environment variables; there is no `.env.local` to protect.
 - Edge lives at the default Windows path; set `EDGE_PATH` if not.

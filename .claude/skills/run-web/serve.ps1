@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Start the web app in dev mode on port 3100 (agents' port), run a command against it, always stop it.
+  Start the web app in dev mode on port 3110 (agents' port), run a command against it, always stop it.
 .EXAMPLE
   .claude/skills/run-web/serve.ps1 -Cmd "node .claude/skills/run-web/shoot.mjs --out $env:TEMP\shell-390.png"
 #>
@@ -8,7 +8,7 @@ param(
   [Parameter(Mandatory = $true)][string]$Cmd
 )
 $ErrorActionPreference = 'Stop'
-$Port = 3100
+$Port = 3110
 $web = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\web')).Path
 $pnpm = (Get-Command pnpm.cmd -ErrorAction SilentlyContinue).Source
 if (-not $pnpm) { $pnpm = Join-Path $env:APPDATA 'npm\pnpm.cmd' }

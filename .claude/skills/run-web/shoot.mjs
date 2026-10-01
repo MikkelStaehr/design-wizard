@@ -1,6 +1,6 @@
 // Exact-width, real-time screenshot of the web app through Edge's DevTools protocol (CDP).
 // node .claude/skills/run-web/shoot.mjs --out <file.png> [--path /load] [--width 390]
-//   [--open] [--dark] [--reduce-motion] [--zoom200] [--base http://localhost:3100]
+//   [--open] [--dark] [--reduce-motion] [--zoom200] [--base http://localhost:3110]
 // Prints one JSON line; exits 1 on horizontal overflow, console errors or a page that never got ready.
 import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -13,7 +13,7 @@ const { values: opt } = parseArgs({
     out: { type: "string" },
     path: { type: "string", default: "/" },
     width: { type: "string", default: "390" },
-    base: { type: "string", default: process.env.BASE_URL ?? "http://localhost:3100" },
+    base: { type: "string", default: process.env.BASE_URL ?? "http://localhost:3110" },
     open: { type: "boolean", default: false },
     dark: { type: "boolean", default: false },
     "reduce-motion": { type: "boolean", default: false },

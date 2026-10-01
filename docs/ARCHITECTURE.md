@@ -32,7 +32,7 @@ web/
 ├─ next.config.ts         output: 'export', images.unoptimized. Nothing else.
 ├─ eslint.config.mjs      import boundaries + banned APIs (§6)
 ├─ tsconfig.json (strict) · vitest.config.ts · playwright.config.ts · components.json (shadcn)
-├─ scripts/serve-out.mjs  ~30-line node:http static server for out/ on 3100 (e2e only, no dependency)
+├─ scripts/serve-out.mjs  ~30-line node:http static server for out/ on 3110 (e2e only, no dependency)
 ├─ scripts/golden.mjs     `pnpm golden`: regenerates golden files on purpose. Tests never write them.
 ├─ public/fonts/<id>/     THE font folder: every woff2 (chrome + variants, Fontsource names) + OFL.txt
 ├─ fixtures/              fictional *.project.json files, shared by the contract tests and ?fixture=
@@ -136,11 +136,11 @@ Tests call these owners. The only independent re-implementation is a set of hand
 
 | Command | Does |
 |---|---|
-| `pnpm dev` | `next dev` (the user runs it on 3000; agents use run-web on 3100) |
+| `pnpm dev` | `next dev` (the user runs it on 3000; agents use run-web on 3110) |
 | `pnpm build` | `next build` → static `out/` |
 | `pnpm lint` · `pnpm typecheck` | ESLint · `tsc --noEmit` |
 | `pnpm test` | Vitest: `tests/unit` + `tests/contract` |
-| `pnpm e2e` | Playwright. Its `webServer` runs `node scripts/serve-out.mjs --port 3100` on an existing `out/` and fails with "run pnpm build first" if it is missing. `reuseExistingServer: false`, so an occupied port 3100 fails loudly. |
+| `pnpm e2e` | Playwright. Its `webServer` runs `node scripts/serve-out.mjs --port 3110` on an existing `out/` and fails with "run pnpm build first" if it is missing. `reuseExistingServer: false`, so an occupied port 3110 fails loudly. |
 | `pnpm golden` | Regenerates the golden files; the diff is reviewed in the commit |
 
 **run-web: dev mode only.** `serve.ps1 -Mode prod` calls `next start`, which does not serve `output: 'export'`. Screenshot a state with `--path "/?fixture=harbour&step=visual.palette"`. Slice 1 also removes `DEV_TODAY` and the stale Supabase line from `SKILL.md`. Next ≥ 16 keeps dev output in `.next/dev`, so `pnpm build` does not clobber the user's dev server; verify this in slice 1, step 1.

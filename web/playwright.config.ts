@@ -1,9 +1,9 @@
 import { defineConfig } from "@playwright/test";
 
-// Agents use 3100 (CLAUDE.md). E2E_PORT overrides it when another project's agent already holds 3100.
-const port = Number(process.env.E2E_PORT ?? 3100);
+// design-wizard's own agent port (CLAUDE.md, Environment).
+const port = 3110;
 
-// e2e runs against the built static export (pnpm build first), served on the agents' port 3100.
+// e2e runs against the built static export (pnpm build first), served on the agent port.
 // Edge is used because it is installed on the dev machine; no browser download is needed.
 export default defineConfig({
   testDir: "tests/e2e",

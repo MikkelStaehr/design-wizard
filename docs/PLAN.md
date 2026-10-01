@@ -2,7 +2,7 @@
 
 > **Status:** approved 2026-10-01, with the decisions at the bottom. Slice 1 has the go; the user gives the go before each later slice.
 
-**Size & budget:** Project start (45 min), then the v0.1 build as **three L slices of 60 min each**, with the user's go before each. Total about 3 h 45 min of agent time.
+**Size & budget:** Project start (45 min), then the v0.1 build as **L slices of 60 min each** (40 build + 20 review and test), with the user's go before each: slice 1, slice 2, and slice 3 split into **3a–3d**, one UI surface each (2026-10-01). Total about 6 h 45 min of agent time.
 
 **Decision:** v0.1 is a **local-only, static Next.js app in `web/`**: no backend, DB, auth or hosting. Its state is **one versioned project file**, autosaved to localStorage and downloaded with the exports. Variants are same-document plates isolated by a `--v-*` custom-property namespace. Their fonts are a **committed set of OFL woff2 files loaded on demand via the FontFace API**.
 
@@ -111,21 +111,58 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 7. Font pair, spacing, radius and density decisions.
 8. Brand colour → 3 palettes that pass AA, with the contrast table.
 
-*Slice 3 (60 min):*
+*Slice 3 is split into 3a–3d, one new UI surface each* (team rule, 2026-10-01: plan an L slice's build against 40 of its 60 minutes; design-lead review, polish, tester and reviewer take about 20). **Status: proposed 2026-10-01, waiting for the user's go.** Every slice runs the same L flow: design-lead spec-lite (not for 3c, which the mock covers) → ui build → design-lead review (Must only, checked against the ACs below) → polish → commit → tester ∥ reviewer → push.
 
-0. **Carried over from the slice 2 review** (reviewer Shoulds, deferred by the user on 2026-10-01):
+*Slice 3a: carry-over fixes + project profile (step 1). Build 40 min: fixes ~12, profile ~28.*
+
+1. **Carried over from the slice 2 review** (reviewer Shoulds, deferred by the user on 2026-10-01):
    - Move the open-decision and progress helpers in `components/wizard/steps/visual/model.ts` (`SUB_KEYS`, `isDecided`, `firstOpen`, `nextOpenAfter`, `lastDecidedBefore`) into `domain/decisions.ts`, the one owner (ARCHITECTURE §4).
    - Use one decision order everywhere: `DECISIONS` lists density before palette, but the wizard shows palette first.
    - `fonts/loader.ts`: a failed face is cached forever. On failure, remove the face and the cache entry so a remount retries.
    - `PlateGrid`: the ResizeObserver reconnects on every render (the `options` dependency). Key it on the option ids.
-   - Store: `decide()` recomputes `resolved` on any action, so editing notes replaces an opened file's snapshot without the "Stored values differ from the current algorithm: keep or recompute" notice (CONTRACTS §1). Add a `snapshotDiffers` state on open, and only recompute when a decision changes. This is needed by the profile step.
+   - Store: `decide()` recomputes `resolved` on any action, so editing notes replaces an opened file's snapshot without the "Stored values differ from the current algorithm: keep or recompute" notice (CONTRACTS §1). Add a `snapshotDiffers` state on open, and only recompute when a decision changes. The profile step needs this.
    - Nice: make `PlateGrid` generic over the id type (removes casts); move `ownsKey` into `wizard/use-shortcuts.ts`.
-9. Profile step.
-10. UX laws picker.
-11. Live preview.
-12. Export step: block on open decisions, then 4 downloads.
-13. Keyboard-only e2e test at 1280 and 390.
-14. Update ARCHITECTURE.md, and write the ProjectStart consumer proposal plus a LESSONS row (text only).
+2. **Profile step (step 1):**
+   - **Form fields:** name, product type and notes, as text fields. They validate on blur, show errors next to the field, and keep the input.
+   - **Variants:** platform (desktop / mobile / both) and component library (shadcn / none) as 2–3 variants side by side, rendered on the generic sample. componentLibrary starts at "shadcn", shown selected.
+   - **Rail:** the step 1 row becomes live; E and J/K reach it.
+   - **Done when:**
+     - the profile decisions stay open (null) until set
+     - a reload restores them (AC10)
+     - editing notes never changes `resolved`
+     - an opened file whose snapshot differs shows "keep or recompute"
+     - every clickable row is at least 44px, and step 1 works by keyboard alone (AC6, step 1)
+
+*Slice 3b: UX principles picker (step 2). Build 40 min.*
+
+3. **The laws as cards,** with the do/don't preview side by side as in `design/content-review/`. Choosing a law opens its params with the suggested values. Zero laws is an explicit choice (`principles: []`), never a default.
+   - **Params:** parsed with `domain/parse-input.ts`, which accepts units and comma decimals. 0 is allowed only where min ≤ 0. The rendered rule sentence (from `domain/rules.ts`) updates live, and the rule count shows.
+   - **Done when:**
+     - principles stay null until decided
+     - each card's rule sentence equals what the export writes
+     - bad param input is reported next to the field and kept
+     - step 2 works by keyboard alone (AC6, step 2)
+     - every clickable row is at least 44px
+
+*Slice 3c: live preview (step 4 and the preview column). Build 40 min; probably less, because the mock covers it.*
+
+4. **A generic `SampleScreen`** in `components/samples/`: it reads only `--v-*`, and only the product name comes from the profile. The preview column shows the focused variant on top of every earlier decision, in every step. Step 4 shows the same screen full size.
+   - **Done when:**
+     - AC4 (the leak test) and AC5 (the box doesn't change while fonts load) hold for the preview too
+     - AC2 holds: fonts are local only
+     - the preview updates within 100 ms of focusing a variant
+     - no overflow at 390
+
+*Slice 3d: export (step 5), the keyboard-only e2e, and docs. Build 40 min.*
+
+5. **The export step:**
+   - Open decisions are listed by name, each with a way back to it (AC8).
+   - Each file has its own download button, plus "Download all": `<slug>.dwproj.json`, `DESIGN.md`, `tokens.json`, `ux-rules.yaml`.
+   - A hint says to commit the project file to the target repo's `design/` folder.
+   - `markDownloaded()` is recorded.
+6. **A keyboard-only e2e test** through the whole wizard, profile to export, at 1280 and 390 (AC6), plus a full AC1–AC11 run.
+7. **Docs:** update `docs/ARCHITECTURE.md`. Write the ProjectStart consumer proposal and a LESSONS row (text only, for `C:\dev\waan\teams`): how ui, tester and reviewer read DESIGN.md Part B, tokens.json and ux-rules.yaml.
+   - **Done when:** AC1, AC6, AC8, AC9, AC10 (at the UI level) and AC11 all hold.
 
 ## Acceptance criteria (tester)
 

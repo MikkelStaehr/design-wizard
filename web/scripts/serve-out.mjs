@@ -1,10 +1,10 @@
-// Static server for the built export in out/ (e2e only). node scripts/serve-out.mjs --port 3100
+// Static server for the built export in out/ (e2e only). node scripts/serve-out.mjs --port 3110
 import { createServer } from "node:http";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize, sep } from "node:path";
 import { parseArgs } from "node:util";
 
-const { values } = parseArgs({ options: { port: { type: "string", default: "3100" } } });
+const { values } = parseArgs({ options: { port: { type: "string", default: "3110" } } });
 const root = join(import.meta.dirname, "..", "out");
 if (!existsSync(join(root, "index.html"))) {
   console.error("out/index.html is missing: run pnpm build first");

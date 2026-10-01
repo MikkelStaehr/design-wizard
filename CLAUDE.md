@@ -16,7 +16,7 @@ Planned; they exist once slice 1, step 1 has scaffolded `web/`. Run them from `w
 - **Run & screenshot:** use the `run-web` skill (`.claude/skills/run-web/`). Never invent a new screenshot method.
 
 ## Environment
-- Ports: **3000 = the user's dev server, 3100 = agents.** Agents never touch 3000.
+- Ports: **3000 = the user's dev server, 3110 = design-wizard's own agent port** (each project has its own; run-web, serve-out and Playwright all use 3110). Agents never touch 3000 or another project's port, and never stop another project's server.
 - Stop every server you started before the session ends.
 - `PYTHONIOENCODING=utf-8` is set. Write commit messages via a file (`git commit -F`), not inline quoting.
 
