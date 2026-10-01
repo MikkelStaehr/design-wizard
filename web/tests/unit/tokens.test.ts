@@ -127,3 +127,19 @@ test("a brand colour change never stores grey preview colours", async () => {
   expect(resolveSnapshot(p)).toBeNull();
   spy.mockRestore();
 });
+
+test("stops run across steps in wizard order; E finds the nearest decided stop", async () => {
+  const { STOPS, firstOpenStop, isStopDecided, lastDecidedStopBefore, nextStop, prevStop } = await import("@/domain/decisions");
+  expect(STOPS.map((s) => s.id)).toEqual([
+    "profile.identity", "profile.platform", "profile.library", "principles",
+    "visual.fontPair", "visual.spacingBase", "visual.radius", "visual.paletteVariant", "visual.density",
+  ]);
+  const empty = emptyProject();
+  expect(firstOpenStop(empty)).toBe("profile.identity");
+  expect(isStopDecided(empty, "profile.library")).toBe(true);
+  expect(nextStop("profile.library")).toBe("principles");
+  expect(prevStop("visual.fontPair")).toBe("principles");
+  expect(nextStop("visual.density")).toBeNull();
+  expect(lastDecidedStopBefore(empty, "visual.fontPair")).toBe("profile.library");
+  expect(firstOpenStop(harbour())).toBeNull();
+});

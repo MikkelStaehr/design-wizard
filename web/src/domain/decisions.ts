@@ -112,6 +112,57 @@ export function lastDecidedBefore(v: Visual, from: VisualKey): VisualKey | null 
   return null;
 }
 
+/**
+ * Every stop the user moves through with J/K/E, across steps, in wizard order (design/specs/step-1-profile.md).
+ * Step 2 is one stop until the laws picker exists. componentLibrary is never null, so it is always decided.
+ */
+export const STOPS = [
+  { id: "profile.identity", step: "profile", label: "Name & type" },
+  { id: "profile.platform", step: "profile", label: "Platform" },
+  { id: "profile.library", step: "profile", label: "Component library" },
+  { id: "principles", step: "principles", label: "UX principles" },
+  ...VISUAL_SUBDECISIONS.map((s) => ({ id: `visual.${s.key}` as const, step: "visual" as const, label: s.label })),
+] as const;
+export type StopId = (typeof STOPS)[number]["id"];
+const STOP_IDS: readonly StopId[] = STOPS.map((s) => s.id);
+
+export function isStopDecided(p: ProjectFile, id: StopId): boolean {
+  switch (id) {
+    case "profile.identity":
+      return p.profile.name !== null && p.profile.productType !== null;
+    case "profile.platform":
+      return p.profile.platform !== null;
+    case "profile.library":
+      return true;
+    case "principles":
+      return p.principles !== null;
+    default:
+      return isDecided(p.visual, id.slice("visual.".length) as VisualKey);
+  }
+}
+
+/** The stop after `id` in order (choosing moves on in order, so every stop is seen once); null at the end. */
+export function nextStop(id: StopId): StopId | null {
+  return STOP_IDS[STOP_IDS.indexOf(id) + 1] ?? null;
+}
+
+export function prevStop(id: StopId): StopId | null {
+  const i = STOP_IDS.indexOf(id);
+  return i > 0 ? STOP_IDS[i - 1] : null;
+}
+
+/** E across steps: the nearest decided stop before `id`, else the last decided one after it. */
+export function lastDecidedStopBefore(p: ProjectFile, id: StopId): StopId | null {
+  const i = STOP_IDS.indexOf(id);
+  for (let n = i - 1; n >= 0; n--) if (isStopDecided(p, STOP_IDS[n])) return STOP_IDS[n];
+  for (let n = STOP_IDS.length - 1; n > i; n--) if (isStopDecided(p, STOP_IDS[n])) return STOP_IDS[n];
+  return null;
+}
+
+export function firstOpenStop(p: ProjectFile): StopId | null {
+  return STOP_IDS.find((id) => !isStopDecided(p, id)) ?? null;
+}
+
 export type StepId = "profile" | "principles" | "visual" | "preview" | "export";
 
 export interface Step {
