@@ -91,3 +91,13 @@ test("form input accepts the ways people type values and rejects junk", async ()
   expect(parseNumberInput("eight", px).ok).toBe(false);
   expect(parseNumberInput("4,5", { min: 3, max: 7, integer: false })).toEqual({ ok: true, value: 4.5 });
 });
+
+test("a saved spacing or radius outside the fixed candidates is always shown", async () => {
+  const { numericCandidates } = await import("@/domain/decisions");
+  expect(numericCandidates("radius", null)).toEqual([0, 6, 14]);
+  expect(numericCandidates("radius", 6)).toEqual([0, 6, 14]);
+  expect(numericCandidates("radius", 8)).toEqual([0, 8, 14]);
+  expect(numericCandidates("radius", 32)).toEqual([0, 6, 32]);
+  expect(numericCandidates("radius", 1)).toEqual([1, 6, 14]);
+  expect(numericCandidates("spacingBase", 5)).toEqual([5, 6, 8]);
+});

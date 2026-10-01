@@ -116,9 +116,13 @@ try {
     `({ height: Math.ceil(document.documentElement.scrollHeight),` +
       ` scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth })`,
   );
-  await metrics(page.height); // full page in one shot
-  await sleep(300);
-  const shot = await send("Page.captureScreenshot", { format: "png" });
+  // Full page without resizing the viewport: resizing to the page height made headless Edge on
+  // Windows intermittently return a tiled 2×2 image (seen in design-wizard slice 1 and 2).
+  const shot = await send("Page.captureScreenshot", {
+    format: "png",
+    captureBeyondViewport: true,
+    clip: { x: 0, y: 0, width, height: page.height, scale: 1 },
+  });
   writeFileSync(opt.out, Buffer.from(shot.data, "base64"));
 
   const horizontalOverflow = page.scrollWidth > page.clientWidth;

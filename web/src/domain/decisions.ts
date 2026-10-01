@@ -49,6 +49,21 @@ export const VISUAL_CANDIDATES = {
   density: ["compact", "balanced", "airy"],
 } as const;
 
+/**
+ * The 3 values shown for spacing or radius. A saved value that isn't a fixed candidate (a file may hold
+ * any valid value) replaces the nearest candidate, so the user's choice is always on screen.
+ */
+export function numericCandidates(key: "spacingBase" | "radius", saved: number | null): number[] {
+  const fixed: number[] = [...VISUAL_CANDIDATES[key]];
+  if (saved === null || fixed.includes(saved)) return fixed;
+  let nearest = 0;
+  fixed.forEach((v, i) => {
+    if (Math.abs(v - saved) < Math.abs(fixed[nearest] - saved)) nearest = i;
+  });
+  fixed[nearest] = saved;
+  return fixed.sort((a, b) => a - b);
+}
+
 export type StepId = "profile" | "principles" | "visual" | "preview" | "export";
 
 export interface Step {
