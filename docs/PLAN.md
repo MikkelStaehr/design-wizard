@@ -113,6 +113,13 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 
 *Slice 3 (60 min):*
 
+0. **Carried over from the slice 2 review** (reviewer Shoulds, deferred by the user on 2026-10-01):
+   - Move the open-decision and progress helpers in `components/wizard/steps/visual/model.ts` (`SUB_KEYS`, `isDecided`, `firstOpen`, `nextOpenAfter`, `lastDecidedBefore`) into `domain/decisions.ts`, the one owner (ARCHITECTURE §4).
+   - Use one decision order everywhere: `DECISIONS` lists density before palette, but the wizard shows palette first.
+   - `fonts/loader.ts`: a failed face is cached forever. On failure, remove the face and the cache entry so a remount retries.
+   - `PlateGrid`: the ResizeObserver reconnects on every render (the `options` dependency). Key it on the option ids.
+   - Store: `decide()` recomputes `resolved` on any action, so editing notes replaces an opened file's snapshot without the "Stored values differ from the current algorithm: keep or recompute" notice (CONTRACTS §1). Add a `snapshotDiffers` state on open, and only recompute when a decision changes. This is needed by the profile step.
+   - Nice: make `PlateGrid` generic over the id type (removes casts); move `ownsKey` into `wizard/use-shortcuts.ts`.
 9. Profile step.
 10. UX laws picker.
 11. Live preview.
