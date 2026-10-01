@@ -37,6 +37,7 @@ Planned; they exist once slice 1, step 1 has scaffolded `web/`. Run them from `w
 - **Variants never inherit the chrome.** Sample components inside a plate read only `--v-*` custom properties, and a test enforces it.
 - **Export formats are contracts.** The project file, tokens.json and ux-rules.yaml all carry `schemaVersion`. Exports are byte-stable (no timestamps) and covered by golden contract tests. Changing a format means bumping the version.
 - **No default fills an open decision.** Export is blocked while any decision is `null`, and the open decisions are listed by name. Radius 0 is a valid value.
+- **Owners before callers.** A module that `docs/ARCHITECTURE.md` §4 names as the owner of a calculation or decision is built before any code that needs its answer. No inline stand-ins. (Retro slice 1: the exporters grew a partial export gate because `domain/decisions.ts` didn't exist yet.)
 - Curated content (UX laws, font catalogue) is static typed content in the repo, changed by commit. Project files store only ids, and an unknown id is a loud error.
 - Public repo: fixtures are fictional, and real project files are gitignored.
 
@@ -93,7 +94,7 @@ After every L task, and whenever something went wrong, the main session writes a
 
 The user approves. Then:
 - **Project-specific rules** go into this repo's CLAUDE.md.
-- **Rules for every project** are only *proposed* here: exact wording, target file, and a `LESSONS.md` row. **This session never edits ProjectStart** (`C:\dev\project-start`: the team's agents, templates and skills). The user applies the proposal there in a separate session, pushes, and runs `install.sh`.
+- **Rules for every project** are only *proposed* here: exact wording, target file, and a `LESSONS.md` row. **This session never edits ProjectStart** (`C:\dev\waan\teams`: the team's agents, templates and skills). The user applies the proposal there in a separate session, pushes, and runs `install.sh`.
 
 A lesson that only lives in a chat is lost.
 
