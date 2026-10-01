@@ -21,8 +21,8 @@ export interface PlateProps {
   children: ReactNode;
 }
 
-/** Fixed specimen height, so nothing shifts while fonts load or between candidates. */
-const SPECIMEN_HEIGHT = "h-[360px]";
+/** Fixed height for the loading and failed placeholder only; a loaded variant takes its natural height (PlateGrid evens the row). */
+const PLACEHOLDER_HEIGHT = "h-[360px]";
 
 /**
  * A viewing plate: chrome surround with crop marks (brackets when selected) around one variant.
@@ -57,11 +57,11 @@ export function Plate({ tokens, fontPairId, fontLabel, selected, tabbable, ariaL
     >
       <span className="dw-cm" aria-hidden="true" />
       {fontState === "loaded" ? (
-        <div data-v-root="" style={rootStyle} className={`${SPECIMEN_HEIGHT} overflow-hidden`}>
+        <div data-v-root="" style={rootStyle} className="h-auto overflow-hidden">
           {children}
         </div>
       ) : (
-        <div className={`${SPECIMEN_HEIGHT} flex items-center justify-center px-3 text-center`}>
+        <div className={`${PLACEHOLDER_HEIGHT} flex items-center justify-center px-3 text-center`}>
           <p className="font-mono text-label text-dw-text-muted">{failed ? `Font failed: ${fontLabel}` : "Loading fonts…"}</p>
         </div>
       )}

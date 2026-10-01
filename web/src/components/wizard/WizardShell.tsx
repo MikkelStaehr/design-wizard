@@ -18,6 +18,12 @@ function subFromSearch(search: string): VisualKey | null {
 
 const noSubscribe = () => () => {};
 
+/** Display only: the row already shows the path, so drop a leading "<path> " and capitalise. Parser messages are unchanged. */
+function withoutPath(path: string, message: string): string {
+  const rest = path !== "" && message.startsWith(`${path} `) ? message.slice(path.length + 1) : message;
+  return rest.charAt(0).toUpperCase() + rest.slice(1);
+}
+
 // Layout from DESIGN.md "Space & density": ≥1101px rail 232 | main | preview 340;
 // 761–1100px rail 200 + main with the preview below; ≤760px one column, rail and legend hidden.
 export function WizardShell({ current }: { current: StepId }) {
@@ -68,7 +74,7 @@ export function WizardShell({ current }: { current: StepId }) {
               {errors.map((err, i) => (
                 <li key={`${err.path}:${i}`} className="grid grid-cols-1 gap-x-4 border-t border-dw-line py-1.5 min-[761px]:grid-cols-[minmax(0,14rem)_1fr]">
                   <code className="font-mono text-label break-all">{err.path === "" ? "(whole file)" : err.path}</code>
-                  <span className="text-small">{err.message}</span>
+                  <span className="text-small">{withoutPath(err.path, err.message)}</span>
                 </li>
               ))}
             </ul>

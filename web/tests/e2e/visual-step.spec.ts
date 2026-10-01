@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 // Runs against the built export (no ?fixture=), so each test starts from a fresh, empty project.
@@ -105,4 +107,21 @@ test("font 404: a failed variant font shows 'Font failed' and cannot be chosen",
   await page.keyboard.press("1");
   await expect(failed).toHaveAttribute("aria-checked", "true");
   await expect(page.getByRole("button", { name: /^Choose / })).toBeDisabled();
+});
+
+test("harbour: a saved radius of 8 (not a fixed candidate) is on screen as chosen, and can be chosen again", async ({ page }) => {
+  test.skip(isMobile(), "Checked at 1280.");
+  // The built export ignores ?fixture= (development only), so the harbour file is seeded as the browser's autosave.
+  const file = readFileSync(resolve("fixtures/harbour.project.json"), "utf8");
+  const envelope = JSON.stringify({ savedAt: "2026-10-01T09:00:00.000Z", downloadedAt: null, file });
+  await page.addInitScript(([key, value]) => window.localStorage.setItem(key, value), ["design-wizard:v1:project", envelope]);
+
+  await page.goto("/?step=visual.radius");
+  await expect(page.getByRole("heading", { level: 1, name: "Radius" })).toBeVisible();
+  const radios = page.getByRole("radiogroup", { name: "Radius variants" }).getByRole("radio");
+  await expect(radios).toHaveCount(3);
+  const eight = page.getByRole("radio", { name: /8 px/ });
+  await expect(eight).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByText("Corner radius 8px, from your file.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Choose 8 px/ })).toBeEnabled();
 });

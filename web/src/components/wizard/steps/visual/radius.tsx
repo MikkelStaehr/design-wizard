@@ -1,5 +1,5 @@
 "use client";
-import { VISUAL_CANDIDATES } from "@/domain/decisions";
+import { numericCandidates, VISUAL_CANDIDATES } from "@/domain/decisions";
 import { PREVIEW_NEUTRALS, resolveForPlate } from "@/domain/tokens/resolve";
 import { PlateGrid } from "@/components/plate/PlateGrid";
 import { fontPairLabel, radiusLabel, type DecisionProps } from "./model";
@@ -12,10 +12,12 @@ const DESCRIPTIONS: Record<number, string> = {
 
 export function RadiusDecision({ visual, productName, onChoose }: DecisionProps) {
   const fontPairId = visual.fontPair ?? PREVIEW_NEUTRALS.fontPair;
-  const options = VISUAL_CANDIDATES.radius.map((n) => ({
+  const fixed: readonly number[] = VISUAL_CANDIDATES.radius;
+  // A saved value outside the fixed candidates replaces the nearest one, so the user's choice is always on screen.
+  const options = numericCandidates("radius", visual.radius).map((n) => ({
     id: String(n),
     label: radiusLabel(n),
-    description: DESCRIPTIONS[n] ?? `Corner radius ${n}px.`,
+    description: fixed.includes(n) ? (DESCRIPTIONS[n] ?? `Corner radius ${n}px.`) : `Corner radius ${n}px, from your file.`,
     tokens: resolveForPlate(visual, { radius: n }),
     fontPairId,
     fontLabel: fontPairLabel(fontPairId),

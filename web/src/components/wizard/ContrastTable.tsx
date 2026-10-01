@@ -16,15 +16,15 @@ export function ContrastTable({ caption, results }: { caption: string; results: 
       </thead>
       <tbody>
         {results.map((r) => (
-          <tr key={`${r.fg}/${r.bg}`} className="border-t border-dw-line">
-            <th scope="row" className="py-[5px] pr-2 text-left font-normal">
+          <tr key={`${r.fg}/${r.bg}`} className="h-8 border-t border-dw-line">
+            <th scope="row" className="py-0 pr-2 text-left align-middle leading-[1.3] font-normal">
               {r.fg} / {r.bg}
             </th>
-            <td className="py-[5px] text-right">{formatRatio(r.ratio)}</td>
-            <td className="w-[52px] py-[5px] pl-2">
+            <td className="py-0 text-right align-middle">{formatRatio(r.ratio)}</td>
+            <td className="w-[52px] py-0 pl-2 align-middle">
               <span
-                className={`block w-11 rounded-sm py-0.5 text-center font-medium tracking-[0.04em] ${
-                  r.pass ? "border border-dw-line text-dw-text-muted" : "bg-dw-accent text-dw-on-accent"
+                className={`block w-11 rounded-sm py-0.5 text-center tracking-[0.04em] ${
+                  r.pass ? "border border-dw-line text-dw-text-muted" : "bg-dw-accent font-medium text-dw-on-accent"
                 }`}
               >
                 {r.pass ? "PASS" : "FAIL"}

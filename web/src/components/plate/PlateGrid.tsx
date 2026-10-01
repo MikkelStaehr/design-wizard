@@ -93,9 +93,27 @@ export function PlateGrid({ label, decision, options, chosenId, productName, onC
   );
   const tabIndexId = selected?.id ?? options[0]?.id;
 
+  // Equal plates: one ResizeObserver measures each variant's content; every root gets the tallest as min-height,
+  // so columns stay level and nothing shifts between candidates. Re-runs as plates finish loading their fonts.
+  const groupRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const group = groupRef.current;
+    if (!group) return;
+    const roots = [...group.querySelectorAll<HTMLElement>("[data-v-root]")];
+    const contents = roots.map((r) => r.firstElementChild).filter((c): c is HTMLElement => c instanceof HTMLElement);
+    if (contents.length === 0) return;
+    const sync = () => {
+      const tallest = Math.max(...contents.map((c) => c.offsetHeight));
+      for (const r of roots) r.style.minHeight = `${tallest}px`;
+    };
+    const observer = new ResizeObserver(sync);
+    contents.forEach((c) => observer.observe(c));
+    return () => observer.disconnect();
+  }, [fontStates, options]);
+
   return (
     <>
-      <div role="radiogroup" aria-label={label} className="mt-5 grid grid-cols-1 gap-6 min-[761px]:grid-cols-3 min-[761px]:gap-5">
+      <div ref={groupRef} role="radiogroup" aria-label={label} className="mt-5 grid grid-cols-1 gap-6 min-[761px]:grid-cols-3 min-[761px]:gap-5">
         {options.map((o, i) => (
           <section key={o.id} className="flex min-w-0 flex-col gap-2.5">
             <div className="flex min-h-5 items-center justify-between gap-2" aria-hidden="true">
@@ -125,12 +143,12 @@ export function PlateGrid({ label, decision, options, chosenId, productName, onC
                 </Plate>
               )}
             </PlateSlot>
-            <p className="text-small text-dw-text-muted">{o.description}</p>
+            <p className="min-h-9 text-small text-dw-text-muted">{o.description}</p>
             {o.footer}
           </section>
         ))}
       </div>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-dw-line pt-4">
+      <div className="mt-5 flex flex-col items-start gap-3 border-t border-dw-line pt-4">
         <p className="max-w-[56ch] text-dw-text-muted">
           {selected === null
             ? `Pick a ${decision} variant with a number key or a click.`
