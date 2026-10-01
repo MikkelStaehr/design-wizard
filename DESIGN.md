@@ -50,14 +50,19 @@ Contract between `design-lead` (owns this file) and `ui` (builds).
 
 # Part B – Direction (per project)
 
-**Direction: Grading Suite, light by default.** Reference sample: `design/directions/grading-suite-geist.html` (step 3, Brand colour → palette). Font choice record: `design/directions/font-compare.html`.
+**Direction: Grading Suite, light by default.** Reference sample: `design/directions/grading-suite-geist.html` (step 3, Brand colour → palette). Font choice record: `design/directions/font-compare.html`. The sample is a frozen record: it also shows diff pins (planned for v0.2) and an "Apply fix" box (cut from v0.1). This file is what counts where the two differ.
 
 ## Personality
 **Neutral, exact, colour-critical.** It should feel like a colour-grading suite: a quiet grey room where the only hue on screen belongs to the user's project, so every judgement about colour, type and radius is made without the tool influencing it.
 
 ## Signature element(s)
 1. **Viewing plates with crop marks.** Every variant sits on a `--plate` (#CCCCCC) surround, 18px padding, 0 radius, with four 12×12px L-shaped crop marks (1px `--muted`) inset 6px from the corners. When a variant is selected the marks become 16×16px, 2px `--accent` (black) brackets. Chrome never draws inside the 18px margin's inner edge.
-2. **Diff pins.** 18px circles, fill #FFFFFF, 1.5px `--accent` ring, letter in Plex Mono 500 10px. They straddle the plate's left edge (`left: -9px`) on the selected variant, vertically anchored to the element that differs (compute from the element's position; never fixed px). Never over specimen content, at any width. A legend (pin + **bold** name + one plain sentence) sits under the plates.
+
+### Planned v0.2 (not a current signature element, not built in v0.1)
+
+Plate samples already carry `data-v-part` attributes, so pins can be anchored later without changing the samples.
+
+- **Diff pins.** 18px circles, fill #FFFFFF, 1.5px `--accent` ring, letter in Plex Mono 500 10px. They straddle the plate's left edge (`left: -9px`) on the selected variant, vertically anchored to the element that differs (compute from the element's position; never fixed px). Never over specimen content, at any width. A legend (pin + **bold** name + one plain sentence) sits under the plates.
 
 ## Type
 - **Text (chrome sans): Geist** 400 / 500 / 600. Body 13px/1.5, small 12px/1.5, step and item titles 13px/500, h1 25px/600, line-height 1.2, letter-spacing −0.025em. Primary button 13px/600.
@@ -75,7 +80,7 @@ Light is the default and the only theme built. Every chrome grey is R=G=B. Ratio
 | `--surface` | #F2F2F2 | inputs, kbd, command button, current sub-decision | – |
 | `--plate` | #CCCCCC | viewing plates behind variants and preview | – |
 | `--line` | #CCCCCC | decorative hairlines and dividers only (not control borders) | – |
-| `--ctl` | #6B6B6B | control borders (inputs, buttons, kbd, dashed fix box) | 4.27 on bg, 4.76 on surface |
+| `--ctl` | #6B6B6B | control borders (inputs, buttons, kbd) | 4.27 on bg, 4.76 on surface |
 | `--text` | #141414 | text | 14.76 on bg, 16.46 on surface, 11.47 on plate |
 | `--text-muted` | #4F4F4F | secondary text, labels, crop marks | 6.56 on bg, 7.32 on surface, 5.10 on plate |
 | `--accent` | #000000 | primary button fill, selection brackets, current-item rule | 16.83 on bg, 13.08 on plate |
@@ -87,7 +92,7 @@ Light is the default and the only theme built. Every chrome grey is R=G=B. Ratio
 - **Dark theme: later option, not built.** bg #181818, surface #222222, plate #3A3A3A, ctl #8C8C8C, text #EDEDED, muted #A6A6A6, accent and focus #FFFFFF, on-accent #141414. Ratios: text 15.17, muted 7.29, focus 17.76, ctl 5.28 on bg, muted on plate 4.67.
 
 ### Contrast check presentation
-Each row reads `<pair name>  <ratio, 2 decimals, tabular>  <tag>`, set in Plex Mono 11px. PASS is a 44px-wide tag with `--muted` text and a 1px `--line` inset outline. FAIL is the same tag inverted (`--accent` fill, `--on-accent` text, 500). Every FAIL is followed by a dashed `--ctl` fix box: "Use #527370: 4.73" plus an "Apply F" button (44px). Never colour alone, never ✓/✕ glyphs.
+Each row reads `<pair name>  <ratio, 2 decimals, tabular>  <tag>`, set in Plex Mono 11px. PASS is a 44px-wide tag with `--muted` text and a 1px `--line` inset outline. FAIL is the same tag inverted (`--accent` fill, `--on-accent` text, 500). Never colour alone, never ✓/✕ glyphs. v0.1 offers only palettes where every pair passes, so FAIL should not appear in the palette step; the style exists for any check that fails. There is no fix box and no "Apply fix" in v0.1.
 
 ### shadcn/ui mapping (never ship the default theme)
 `--background` = `--bg` · `--foreground` = `--text` · `--card` / `--popover` = `--surface` · `--card-foreground` / `--popover-foreground` = `--text` · `--primary` = #000000 · `--primary-foreground` = #FFFFFF · `--secondary` = `--surface` · `--secondary-foreground` = `--text` · `--muted` = `--surface` · `--muted-foreground` = `--text-muted` · `--accent` (hover/highlight bg) = #DADADA with `--accent-foreground` = `--text` (13.18:1; muted on it 5.86:1) · `--destructive` = #000000 (destructive actions are told apart by wording and undo, not colour) · `--border` = `--line` · `--input` = `--ctl` · `--ring` = #000000 · `--radius` = 2px. Remove all component shadows (`shadow-none`); popovers, dialogs and the command palette use a 1px `--ctl` border instead.
@@ -120,8 +125,8 @@ Each row reads `<pair name>  <ratio, 2 decimals, tabular>  <tag>`, set in Plex M
 - **Variants are live, never abstract:** every decision is presented as 2–3 variants side by side, each rendered as real sample UI in its own tokens (not a swatch or a font name alone). The live preview reflects the focused variant plus every earlier decision.
 - **Chrome never contaminates variants:** the wizard's own fonts, accent and radii never appear inside a variant frame, and a variant's tokens never leak into the chrome. The chosen Direction defines exactly how that boundary is drawn.
 - **Every decision is editable later:** earlier steps and sub-decisions stay visible with their current value and can be edited in place (`E`) without losing later decisions.
-- **Keyboard flow:** `1`/`2`/`3` pick a variant, `J`/`K` next/previous decision, `E` edit an earlier step, `F` apply a suggested contrast fix, `Enter` choose, `⌘K`/`Ctrl+K` command bar. Shortcut hints are always visible on desktop, never on hover only.
-- **Contrast check is a product feature:** each palette variant shows its ratios as numbers with the words PASS/FAIL (not colour alone), and every failure comes with a concrete fix (the new hex and the resulting ratio) that can be applied in one key.
+- **Keyboard flow:** `1`/`2`/`3` pick a variant, `J`/`K` next/previous decision, `E` edit an earlier step, `Enter` choose, `⌘K`/`Ctrl+K` command bar. Shortcut hints are always visible on desktop, never on hover only.
+- **Contrast check is a product feature:** each palette variant shows its ratios as numbers with the words PASS/FAIL (not colour alone). Only palettes where every checked pair passes AA are offered. "Apply fix" is cut from v0.1.
 - **Variants never inherit chrome tokens.** Variant and preview content is styled only from the user's project tokens, scoped to the variant container; no chrome CSS variable, font or radius may cascade into it.
 - **Font limit scope:** "max 2 families" applies to the chrome only (Geist + IBM Plex Mono), not to variant content, which renders whatever font pair the user picks.
 - **Glyph rule:** never use characters outside the shipped font subsets. Arrows are inline SVG with a visually hidden text label. Ticks and crosses are words (PASS/FAIL) or CSS shapes. Verify with a font check that every chrome node renders in web fonts only.

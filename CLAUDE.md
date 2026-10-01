@@ -1,17 +1,18 @@
-# Project: <NAME>
+# Project: Design Wizard v0.1
 
-<One paragraph: what this is, who uses it, what "done" looks like.>
+A desktop wizard where the owner makes a project's design and UX decisions: profile → UX principles (curated laws that become checkable rules) → visual system (font pair, spacing, radius, brand colour → palette with contrast check, density) → live preview → export. Every choice is shown as 2–3 live variants side by side, and every decision can be changed later. It exports DESIGN.md (Part B), tokens.json and ux-rules.yaml, which an AI dev team (the ProjectStart agents) builds and tests against. Single user, one machine. "Done" for v0.1 is the acceptance criteria in `docs/PLAN.md`. Channels, bots and feeds are out of scope; they belong to the later W.A.A.N. control room.
 
 ## Stack
-- Frontend: <Next.js + Tailwind + shadcn/ui / Power Apps / none>
-- Backend/DB: <Supabase / MSSQL / FastAPI / ...>
-- Hosting: <Vercel / Azure VM / ...>
-- Package manager: <pnpm / uv / pip>
-- Tests: <Vitest / pytest / Playwright for e2e>
+- Frontend: Next.js static export (`output: 'export'`, no server code) + Tailwind v4 + shadcn/ui themed from DESIGN.md, in `web/`
+- Backend/DB: none. State is one versioned project file (autosaved to localStorage, downloaded with the exports)
+- Hosting: none. Local only (see `docs/PLAN.md` for why)
+- Package manager: pnpm
+- Tests: Vitest (unit + export contract tests) / Playwright for e2e
 
 ## Commands
-- dev: `<...>`   build: `<...>`   lint: `<...>`   typecheck: `<...>`
-- test: `<...>`   e2e: `<...>`
+Planned; they exist once slice 1, step 1 has scaffolded `web/`. Run them from `web/`.
+- dev: `pnpm dev`   build: `pnpm build`   lint: `pnpm lint`   typecheck: `pnpm typecheck`
+- test: `pnpm test`   e2e: `pnpm e2e`
 - **Run & screenshot:** use the `run-web` skill (`.claude/skills/run-web/`). Never invent a new screenshot method.
 
 ## Environment
@@ -21,7 +22,7 @@
 
 ## Conventions
 - Strict types. No `any` / untyped dict without a comment.
-- All DB access goes through one data layer (`src/lib/db/*` or `app/db/*`).
+- All project-file reads, writes and parsing go through one data layer: `web/src/data/project/`. The store is the only writer.
 - Secrets only in env files or a vault. `.env.example` lists every variable.
 - Small commits with conventional-commit messages.
 - Prefer boring **code**. No new dependency without a one-line justification.
@@ -32,7 +33,12 @@
 - **Real-data fixtures.** Features that read external data are also tested against a current slice of real data (anonymised if the repo is public). Refresh it when the source changes (new block, season, file).
 - Every data view can be rendered in its empty / stale / error states via a dev fixture flag (e.g. `DEV_FIXTURE=empty`), so those states can be screenshotted without breaking the database.
 - Store external source rows raw once (e.g. a `raw jsonb` column) so new views don't need new migrations.
-- <project-specific rules here>
+- **Local only, no third-party requests.** The app makes zero requests to hosts other than localhost, including fonts: variant fonts are committed OFL woff2 files (each with its licence) loaded with the FontFace API, and chrome fonts load via `next/font/local`.
+- **Variants never inherit the chrome.** Sample components inside a plate read only `--v-*` custom properties, and a test enforces it.
+- **Export formats are contracts.** The project file, tokens.json and ux-rules.yaml all carry `schemaVersion`. Exports are byte-stable (no timestamps) and covered by golden contract tests. Changing a format means bumping the version.
+- **No default fills an open decision.** Export is blocked while any decision is `null`, and the open decisions are listed by name. Radius 0 is a valid value.
+- Curated content (UX laws, font catalogue) is static typed content in the repo, changed by commit. Project files store only ids, and an unknown id is a loud error.
+- Public repo: fixtures are fictional, and real project files are gitignored.
 
 ## First deploy (before any push that can deploy)
 1. **Protection first:** turn on access protection (e.g. Vercel Authentication, All Deployments) before the host is connected or before the first push. Verify a logged-out request gets 401 or a login redirect.

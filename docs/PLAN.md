@@ -1,0 +1,171 @@
+# Design Wizard v0.1 – plan (tech-lead one-pager)
+
+> **Status:** approved 2026-10-01, with the decisions at the bottom. Slice 1 has the go; the user gives the go before each later slice.
+
+**Size & budget:** Project start (45 min), then the v0.1 build as **three L slices of 60 min each**, with the user's go before each. Total about 3 h 45 min of agent time.
+
+**Decision:** v0.1 is a **local-only, static Next.js app in `web/`**: no backend, DB, auth or hosting. Its state is **one versioned project file**, autosaved to localStorage and downloaded with the exports. Variants are same-document plates isolated by a `--v-*` custom-property namespace. Their fonts are a **committed set of OFL woff2 files loaded on demand via the FontFace API**.
+
+## Tradeoffs considered
+
+1. **Local vs hosted.** Hosting only buys access from a second machine. It costs Vercel Authentication, the first-deploy steps and exposure next to a public repo. Single user, one machine, so local wins. `output: 'export'` mechanically forbids server code, and hosting later is a deploy step, not a rewrite. Next.js is heavier than Vite for a client-only app; we keep it because it's the team default, `run-web` expects it and shadcn targets it.
+2. **How fonts chosen in the wizard load inside the variants.** We use committed OFL woff2 files (latin subset, only the weights used, the OFL licence per family, sourced from Fontsource), loaded with `new FontFace()` when a decision opens.
+   - **Rejected: runtime Google Fonts.** The corporate network may block it, every load sends the user's IP to Google (GDPR), and tests become non-deterministic.
+   - **Rejected: `next/font` for variant fonts.** It is build-time only, so it can't load a font the user picks at runtime, and it would preload the whole catalogue. It is used for the **chrome only** (Geist + IBM Plex Mono via `next/font/local`).
+   - **Layout shift.** Plates have fixed dimensions and show a loading state until `document.fonts.load()` resolves.
+   - **Failure.** A failed font shows "Font failed: X" and disables that plate's Choose action. A plate never silently falls back, because the user would be judging the wrong font.
+   - **Export.** The font token names the Fontsource package, weights, subset and licence. DESIGN.md says to load it with `next/font/local` from vendored files, which works on blocked networks. `next/font/google` is listed only as an alternative.
+3. **Isolating variants from the chrome.** We use scoped custom properties. The plate root sets every `--v-*` value inline and explicitly sets font-family, colour and line-height, so nothing is inherited from the chrome. Sample components read only `--v-*`, and a test enforces it.
+   - **Rejected: shadow DOM.** It isolates nothing that matters here: custom properties and inherited font and colour pass through it, and Tailwind would have to be injected again.
+   - **Rejected: iframes.** They mean four documents, fonts registered in each one, and focus and shortcuts breaking across frames. They are only worth it if a variant must render at a true 390px viewport (v0.2).
+   - The approved mock already uses the scoped approach.
+
+## Data check (no DB: the project file is the store)
+
+| Value | Status |
+|---|---|
+| Profile: name, product type, platform, notes | missing → `profile.*` |
+| Chosen laws (ids) + params (e.g. 44px) | missing → `principles[]`. Law text missing → static `content/laws` |
+| Font pair id | missing → `visual.fontPair`. Catalogue partly exists (6 families in `design/directions/fonts/`) → `content/fonts` |
+| Spacing base, radius (0 is valid), density, brand hex, palette variant | missing → `visual.*`, with missing as `null` |
+| The 10 Part B colour roles (`--bg` … `--focus`), type scale, space scale | missing → stored `resolved` snapshot, so re-exports are byte-stable |
+| positive / warning / negative | missing and not in the spec. Generated from fixed hues and checked against AA |
+| Dark theme values | **cut**. The export says explicitly "not defined" |
+| Contrast ratios | derived at render, not stored |
+| Part B Personality, Signature, Motion, Icons, Elevation, Max width | not decided by the wizard. Exported as explicit "open: design-lead" markers |
+
+**Migration: none.** The equivalent is **one project-file schema v1** holding all the fields above, committed before any UI, with `schemaVersion` from day one.
+
+## Export formats
+
+- **tokens.json** uses the W3C DTCG 2025.10 format (`$type`/`$value`).
+  - Groups are named exactly after the Part B roles in `design/DESIGN.template.md` (`color.bg`, `color.text-muted`, …, `font.display`, `font.text`, `radius`, `space`). Font metadata goes in `$extensions`.
+  - The exported DESIGN.md Part B carries a role → shadcn variable table (`--text`→`--foreground`, `--accent`→`--primary`, `--focus`→`--ring`, `--negative`→`--destructive`, …) plus a CSS block generated from tokens.json. So the file is standard and still maps 1:1.
+- **ux-rules.yaml v1** has `schemaVersion` and a list of `rules`.
+  - Each rule has `id`, `law`, `when`, `rule` (one imperative sentence), `severity` (must/should) and `check {kind, selector, params, viewports}`.
+  - `kind` is a closed list: `min-target-size`, `max-count`, `contrast`, `response-time`, `focus-visible`, `manual` (with a `question` for reviewer).
+  - Rules that can't be automated are honestly marked `manual`.
+- **Contract tests:**
+  - **C1 golden:** `fixtures/harbour.project.json` (fictional) produces export files byte-equal to the committed golden files. Exports contain no timestamps.
+  - **C2 edge cases:** radius 0, brand `#FFFF00`, a single-family pair, project name `Nørrebro: "Ida's" #1`, zero laws chosen.
+  - **C3:** tokens.json passes its schema, every alias resolves, and every Part B role appears exactly once.
+  - **C4:** the DESIGN.md CSS block equals the mapper's output, and the stated contrast ratios match values recomputed from the tokens.
+  - **C5:** ux-rules.yaml passes its schema, ids are unique, `kind` is in the list, and numeric params are numbers.
+  - **C6:** the project file round-trips, and an invalid file lists every problem.
+
+## Content
+
+The UX laws and the font catalogue are **static typed content in the repo**, changed by commit. design-lead drafts them and the user approves. Project files store ids only, and an unknown id on load is a loud error, never a default.
+
+## Cut from v0.1
+
+- Backend, DB, auth and hosting
+- Dark theme
+- The Ctrl K command menu
+- The A/B/C diff pins (planned v0.2)
+- **"Apply fix" on contrast.** The palette generator only offers palettes that pass AA, and the ratios are still shown.
+- Font upload and Google Fonts search
+- Writing directly into a target folder (v0.1 uses downloads only)
+- A multi-project list
+- Importing an existing DESIGN.md
+- An undo stack
+- Domain-specific sample screens
+- Bundling font files into the export
+
+## Domain assumptions
+
+1. Single user on one machine. *Verified (user).* Nothing Chromium-only is used.
+2. Target projects use Next.js + Tailwind v4 + shadcn/ui. *Needs the user.*
+3. The exported pair has at most 2 families, with no third mono family. The 2-family limit is *verified* (Part A); "no mono" *needs the user*.
+4. The contrast bar is WCAG 2.2 AA: 4.5:1 for text, 3:1 for UI and borders. *Verified* (Part A).
+5. v0.1 is light theme only. *Needs the user.*
+6. The sample screen is generic; only the product name comes from the profile. *Needs the user.*
+7. "Change later" means reopening the project file, which is committed in the target repo next to the exports. *Needs the user.*
+8. design-lead curates about 12 laws and about 8 font families. *Needs the user's approval.*
+9. Every catalogue font is OFL-1.1 and on Fontsource. *Not yet verified*; a catalogue test enforces it.
+
+## Risks
+
+- **Biggest product risk: nobody consumes the exports.** tester, reviewer and ui are defined in ProjectStart, which this repo's sessions never edit. The last step writes a proposal for the user to apply there. Until then, the exports are inert.
+- **Formats are hard to change once agents consume them.** `schemaVersion` is in all four files from v1, and the golden tests guard them.
+- **Public repo.** Fixtures are fictional, real `*.dwproj.json` files are gitignored, screenshots go to the scratchpad, and the OFL licence ships with each font.
+- **Nothing to sequence.** There is no migration and no scheduled job, so go-live order and `check-config` don't apply. If the app is ever hosted, Vercel Authentication comes before the repo is connected.
+- **run-web.** `serve.ps1 -Mode prod` uses `next start`, which doesn't work with a static export, so v0.1 uses dev mode only. The `DEV_TODAY` option goes away (slice 1).
+- **localStorage can be lost.** The downloaded project file is the durable copy, and the UI shows "unsaved since".
+
+## Plan (one commit per step; no building until the user says go)
+
+*Project start:* fill in CLAUDE.md, design-lead finishes DESIGN.md, and architect writes `docs/ARCHITECTURE.md`.
+
+*Slice 1, contract first (60 min):*
+
+1. Scaffold `web/`: static export, strict TypeScript, Tailwind v4, shadcn themed from the chrome tokens, Vitest, Playwright, chrome fonts via `next/font/local`, `.gitignore`, and an empty shell screenshotted at 390 and 1280.
+2. Project-file schema v1 (all fields), a parser that lists every error, autosave, and open/download.
+3. The three exporters plus their schemas and contract tests C1–C6.
+
+*Slice 2, variants (60 min):*
+
+4. Font catalogue (woff2 files, OFL licences, manifest) and the laws content, with catalogue tests. design-lead drafts both, and the user approves them from side-by-side previews before they are committed.
+5. Plate component: `--v-*` mapping, FontFace loader with loading and error states, and a leak test.
+6. Wizard shell: rail, keyboard keys 1/2/3, J/K, Enter and E, and editing an earlier step.
+7. Font pair, spacing, radius and density decisions.
+8. Brand colour → 3 palettes that pass AA, with the contrast table.
+
+*Slice 3 (60 min):*
+
+9. Profile step.
+10. UX laws picker.
+11. Live preview.
+12. Export step: block on open decisions, then 4 downloads.
+13. Keyboard-only e2e test at 1280 and 390.
+14. Update ARCHITECTURE.md, and write the ProjectStart consumer proposal plus a LESSONS row (text only).
+
+## Acceptance criteria (tester)
+
+1. `pnpm build` produces a static export, and lint, typecheck, test and e2e all pass.
+2. A full e2e run makes **0 requests to hosts other than localhost**, and every variant font still renders.
+3. Every decision shows 3 plates side by side at 1280px. At 390px they stack and `shoot.mjs` exits 0 (no overflow).
+4. Changing a variant's tokens leaves the chrome's computed font-family and colours unchanged, and sample CSS reads only `--v-*`.
+5. A plate's bounding box is identical before and after its font loads. When a font file returns 404, the plate shows "Font failed" and Choose is disabled.
+6. Every clickable row is at least 44px at both widths. The whole wizard can be completed by keyboard only, through to export.
+7. Every offered palette passes AA for 50 seeded brand colours (including `#FFFF00`, `#000`, `#FFF` and `#777`). Recomputing a palette after a brand-colour input takes under 100 ms.
+8. Export is blocked while any decision is `null`, and every open decision is listed by name. No defaults are filled in.
+9. After export, changing radius from 8 to 0 and exporting again changes only the radius lines. 0 is exported as 0.
+10. Reopening a saved project file restores every decision and produces byte-identical exports. An invalid file lists every problem and leaves the current state unchanged.
+11. Contract tests C1–C6 pass.
+
+## Agents
+
+- **Each slice runs the L flow:** design-lead spec (only for the screens the mock doesn't cover: profile, laws, export) → ui build → design-lead review (Must only) → commit → tester ∥ reviewer.
+- **Skipped: the separate data check and migration.** There is no DB; step 2 replaces them.
+- **Skipped: security.** There is no auth, server, secrets or personal data, and tester verifies zero external requests.
+
+## Amendments from architect (2026-10-01)
+
+Details are in `docs/ARCHITECTURE.md` and `docs/CONTRACTS.md`. These amendments override the sections above.
+
+- **11 colour roles, not 10.** `on-accent` is added because shadcn's `--primary-foreground` needs it and the mock checks it. C3 checks for 11.
+- **Ratios round down** to 2 decimals for display, so a failing ratio can never show as a pass. The mock's 4.73 is exactly 4.728, so it shows as 4.72.
+- **tokens.json `schemaVersion`** goes under the root `$extensions`, because a plain key would be read as a token. The DTCG 2025.10 shapes were pinned from memory, so verify them against the published spec in slice 1, step 3, before freezing the goldens.
+- **Export:** one button per file plus "Download all", because 4 downloads from one click triggers Chromium's multiple-downloads prompt.
+- **Slice 1 repo changes:**
+  - `.gitattributes` with `eol=lf` for fixtures and goldens (Windows CRLF breaks byte equality)
+  - `*.dwproj.json` in `.gitignore`
+  - remove `DEV_TODAY` and the stale Supabase line from `run-web`'s SKILL.md
+- **Dev fixture flag** `?fixture=empty|harbour|stale|invalid-many` (required by CLAUDE.md, missing above).
+- **The `resolved` snapshot** also stores the rendered rules and the font metadata. `visual.colorOverrides` exists from v1 (empty `{}` if "Apply fix" is cut).
+- **Planned dev-only dependencies:** `ajv` and `yaml`, used only by the C3 and C5 tests.
+
+## Decisions (user, 2026-10-01)
+
+These answer the open questions and override anything above that says otherwise.
+
+1. **Light theme only in v0.1.** "Deep" stays as a project palette option: it is the project's palette, not the wizard's theme.
+2. **Default target is Next.js + Tailwind v4 + shadcn/ui,** but tokens.json stays stack-agnostic. The shadcn mapping is an **optional export layer**, chosen with `profile.componentLibrary` (`"shadcn"` or `"none"`), because some projects use Tailwind without shadcn.
+3. **"Apply fix" is cut.** Only palettes that pass are offered, and the ratios are shown.
+4. **Generic sample screen,** with only the product name taken from the profile.
+5. **The project file is committed in the target repo's `design/` folder.**
+6. **The user approves the lists of laws and fonts.** design-lead presents them **as side-by-side previews** where possible (slice 2, step 4).
+7. **Diff pins are cut from v0.1.** DESIGN.md marks them "planned v0.2"; they are no longer a current signature element.
+
+**Status:** go given for slice 1.
