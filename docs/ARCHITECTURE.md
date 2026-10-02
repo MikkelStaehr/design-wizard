@@ -23,7 +23,7 @@ flowchart LR
 - **The store is the only writer.** UI dispatches actions. The store recomputes `resolved` and autosaves. A file that fails to parse never replaces the current state.
 - **`resolved` is stored, not derived on export.** It is `null` while any decision is open. A reopened file therefore re-exports byte-identically even after the palette algorithm changes. If the stored snapshot differs from a fresh computation, the user is told; it is never replaced silently.
 - **Plates** get their tokens from `resolveForPlate(decisions, candidate)`. Later decisions that are still open are filled with **preview-only neutrals**, which are never stored or exported.
-- **One transition for the snapshot.** Every decision action goes through the store's `transition(next, impact)`. While a decision is open the snapshot is parked with the strongest pending impact, and it comes back recomputed as needed when the decision closes. `store-invariants.test.ts` checks this after every action in seeded random sequences, with failing storage and frozen clocks in the mix.
+- **One transition for the snapshot.** Every decision action goes through the store's `transition(next, impact, label)`. While a decision is open the snapshot is parked with the strongest pending impact, and it comes back recomputed as needed when the decision closes. `store-invariants.test.ts` checks this after every action in seeded random sequences, with failing storage and frozen clocks in the mix.
 - **Two times describe the durable copy** (CONTRACTS §1). `savedAt` moves only when the canonical text changes; `downloadedAt` is the last time a file on disk matched (a project-file download or an open). `fileStatus()` reads them as none, current or behind. Opening a file is undone with `undoOpen()`, which restores the previous project, both times and the autosave byte for byte until the next change.
 - **Exporters are pure** (`ProjectFile → string`) and read only `profile`, `principles`, `visual` and `resolved`. tokens.json is built first. The DESIGN.md CSS block is mapped from that tokens object, never from the store.
 
@@ -110,7 +110,7 @@ These rules are enforced by `import/no-restricted-paths` zones and `import/no-cy
 | Role → shadcn variable, and the shadcn CSS block | `export/shadcn-map.ts` (one const table) | DESIGN.md table + CSS block, C4 |
 | Role-named CSS block (no shadcn) | `export/css-vars.ts` | DESIGN.md CSS block, C4 |
 | Law + params → rule text and check | `domain/rules.ts` | resolve (`resolved.rules`), principles step |
-| Open decisions, progress, export gate, the stop that reopens each | `domain/decisions.ts` | Rail, ExportStep, export/index |
+| Open decisions, progress, export gate, the stop that reopens each | `domain/decisions.ts` | Rail, ExportStep, export/design-md, export/tokens-json |
 | Rule count line ("4 RULES · 3 MUST · 1 SHOULD") | `domain/rules.ts` | principles step, ExportStep |
 | File status (none, current, behind), Undo open | `data/project/store.ts` | ExportStep bar, OpenedNotice |
 | Is the project untouched | `data/project/empty.ts` | OpenedNotice (replaced-work warning) |

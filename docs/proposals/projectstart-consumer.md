@@ -9,13 +9,13 @@ Design Wizard v0.1 exports four files per project. Today ProjectStart's agents d
 | File | Where it goes in the target repo | Contract |
 |---|---|---|
 | `<slug>.dwproj.json` | `design/<slug>.dwproj.json` | the source; reopen it in Design Wizard to change a decision |
-| `DESIGN.md` | merged into the repo's DESIGN.md as Part B (Part A stays the template's) | CONTRACTS §4 |
+| `DESIGN.md` | merged into the repo's DESIGN.md: its title and `## Product profile` replace the template's, its `# Part B` replaces Part B; Part A stays the template's | CONTRACTS §4 |
 | `tokens.json` | `design/tokens.json` | W3C DTCG 2025.10, CONTRACTS §2 |
 | `ux-rules.yaml` | `design/ux-rules.yaml` | `schemaVersion: 1`, CONTRACTS §3 |
 
 ## The rule, per agent
 
-**design-lead (Mode 0).** When `design/tokens.json` exists, Part B's type, colour, shape and space sections come from the export and are not rewritten by hand. design-lead fills only the lines marked `> **open: design-lead** – not decided in Design Wizard.` (personality, signature, motion, iconography, project rules and the profile's open items). To change a decided value, reopen `design/<slug>.dwproj.json` in Design Wizard and export again; never edit the exported values in place.
+**design-lead (Mode 0).** When `design/tokens.json` exists, the decided values in DESIGN.md (fonts, type scale, colours and contrast, radius, spacing, density, the CSS block) come from the export and are not rewritten by hand. design-lead fills every item marked `open: design-lead`; search for that text to find them all. Most are whole lines (`> **open: design-lead** – not decided in Design Wizard.`), also inside the decided sections (for example Numerals, Accent usage, Borders vs. shadows, Max content width); some are cells in the shadcn variable table. To change a decided value, reopen `design/<slug>.dwproj.json` in Design Wizard and export again; never edit the exported values in place.
 
 **ui.** Colours, radius, spacing, type scale and line heights come from `design/tokens.json` (or the CSS block in DESIGN.md Part B, which is generated from the same tokens), never typed by hand. With `componentLibrary: "shadcn"` the Part B table maps each role to its shadcn variable. A value that is missing from the tokens is a question for design-lead, not a guess.
 

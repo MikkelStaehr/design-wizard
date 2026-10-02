@@ -4,7 +4,6 @@ import { projectStore } from "@/data/project/store";
 import { readFileText } from "@/data/project/file-io";
 import { SECONDARY } from "./classes";
 
-
 /**
  * Opens a .dwproj.json (design/specs/step-5-export.md §6). One tab stop: the visible button clicks the hidden
  * input. A valid file shows the shell's opened notice; an invalid one fills the errors panel and focuses its h2.
