@@ -16,14 +16,16 @@
 
 ## 1. Project file v1 (`*.dwproj.json`)
 
+**Text lengths ("chars") are UTF-16 code units, i.e. JavaScript `length`** (decided 2026-10-01: an internal tool, so emoji edge cases don't matter). The parser, the profile form and its counter all count this way.
+
 **`null` means the decision is open.** Export is blocked while any decision is `null`. A value is never `0` or `""` as a stand-in for missing.
 
 | Field | Type | `null` | Is 0 / empty valid? | Rule |
 |---|---|---|---|---|
 | `schemaVersion` | integer | never | no | Must be `1` |
 | `format` | `"design-wizard-project"` | never | – | Rejects other JSON (e.g. a tokens.json opened by mistake) |
-| `profile.name` | string or null | open | `""` invalid | 1–80 chars after trim |
-| `profile.productType` | string or null | open | `""` invalid | Free text, 1–60 chars. Nothing branches on it in v1 |
+| `profile.name` | string or null | open | `""` invalid | 1–80 chars after trim, one line (no control characters) |
+| `profile.productType` | string or null | open | `""` invalid | Free text, 1–60 chars after trim, one line. Nothing branches on it in v1 |
 | `profile.platform` | `"desktop"`, `"mobile"`, `"both"` or null | open | – | |
 | `profile.notes` | string | never | `""` valid | ≤ 2000 chars. Not a decision |
 | `profile.componentLibrary` | `"shadcn"` or `"none"` | never | – | New projects start at `"shadcn"`, the user's default target (Next.js + Tailwind v4 + shadcn/ui), shown selected and changeable in the profile step. `"none"` (Tailwind or plain CSS without shadcn) leaves out the shadcn layer and exports the role-named CSS block (§4.2a). tokens.json is the same either way |
