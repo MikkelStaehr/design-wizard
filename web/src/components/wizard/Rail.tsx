@@ -23,7 +23,9 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
               ? `${profileDecidedCount(project)} of 3 decided`
               : step.id === "visual"
                 ? `${visualDecided} of ${SUB_KEYS.length} decided`
-                : "Not built yet";
+                : step.id === "principles"
+                  ? `${project.principles === null ? 0 : 1} of 1 decided`
+                  : "Not built yet";
           return (
             <li
               key={step.id}
@@ -43,7 +45,7 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                 )}
                 {step.id === "principles" && (
                   <span className="mt-1.5 -ml-1.5 block">
-                    <StopList rows={[{ id: "principles" as const, label: "Laws", value: null }]} current={isCurrent ? "principles" : null} onPick={onPick} />
+                    <StopList rows={[{ id: "principles" as const, label: "Laws", value: lawsValue(project) }]} current={isCurrent ? "principles" : null} onPick={onPick} />
                   </span>
                 )}
                 {step.id === "visual" && (
@@ -60,7 +62,14 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
           );
         })}
       </ol>
-      <ShortcutLegend className="mt-auto pt-6" />
+      <ShortcutLegend className="mt-auto pt-6" laws={current === "principles"} />
     </nav>
   );
+}
+
+/** The rail sub-row value for step 2: "4 rules", "1 rule", "No rules", or null while open. */
+function lawsValue(p: ProjectFile): string | null {
+  if (p.principles === null) return null;
+  const n = p.principles.length;
+  return n === 0 ? "No rules" : `${n} ${n === 1 ? "rule" : "rules"}`;
 }

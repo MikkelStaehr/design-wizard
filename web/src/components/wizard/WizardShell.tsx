@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { firstOpen, firstOpenStop, isStopId, lastDecidedStopBefore, nextStop, prevStop, stepOfStop, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
+import { firstOpenStop, isStopId, lastDecidedStopBefore, nextStop, prevStop, stepOfStop, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
 import { projectStore, useProject } from "@/data/project/store";
 import { ownsKey } from "./use-shortcuts";
 import { Rail } from "./Rail";
 import { SnapshotNotice } from "./SnapshotNotice";
 import { VisualStep } from "./steps/visual/VisualStep";
 import { ProfileStep } from "./steps/profile/ProfileStep";
+import { PrinciplesStep } from "./steps/principles/PrinciplesStep";
 import type { ProfileStop } from "./steps/profile/model";
 
 /** ?step=<stop id> opens a stop directly; "visual.palette" and "visual.spacing" stay accepted as aliases. */
@@ -47,11 +48,6 @@ export function WizardShell() {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || ownsKey(e.target, e.key)) return;
       const k = e.key.toLowerCase();
-      if (e.key === "Enter" && stepOfStop(stop) === "principles") {
-        e.preventDefault();
-        setPicked(`visual.${firstOpen(projectStore().getState().project.visual) ?? SUB_KEYS[0]}`);
-        return;
-      }
       const to = k === "j" ? nextStop(stop) : k === "k" ? prevStop(stop) : k === "e" ? lastDecidedStopBefore(projectStore().getState().project, stop) : null;
       if (to) setPicked(to);
     };
@@ -119,37 +115,7 @@ export function WizardShell() {
           <VisualStep sub={visualSub} visual={visual} productName={productName} onMove={(k) => setPicked(`visual.${k}`)} />
         )}
         {current === "profile" && <ProfileStep stop={stop as ProfileStop} project={project} onMove={setPicked} />}
-        {current === "principles" && (
-          <>
-            <p className="font-mono text-label font-medium tracking-[0.08em] text-dw-text-muted uppercase">Step 02 · UX principles</p>
-            <h1 id="stop-title" tabIndex={-1} className="mt-1.5 text-title font-semibold tracking-[-0.025em]">
-              UX principles
-            </h1>
-            <p role="status" className="mt-6 max-w-[60ch] border border-dashed border-dw-ctl px-4 py-6 text-dw-text-muted">
-              Step 2 isn’t built yet. Your profile is saved; UX principles stay open until this step arrives.
-            </p>
-            <div className="mt-5 flex flex-col items-start gap-3 border-t border-dw-line pt-4">
-              <button
-                type="button"
-                onClick={() => setPicked(`visual.${firstOpen(visual) ?? SUB_KEYS[0]}`)}
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2.5 rounded-sm bg-dw-accent px-4 font-semibold whitespace-nowrap text-dw-on-accent min-[761px]:w-auto"
-              >
-                Continue to visual system
-                <kbd className="border-dw-on-accent bg-transparent text-dw-on-accent">Enter</kbd>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const to = lastDecidedStopBefore(project, "principles");
-                  if (to) setPicked(to);
-                }}
-                className="inline-flex min-h-11 items-center gap-2 text-small text-dw-text underline underline-offset-4"
-              >
-                Reopen the profile <kbd>E</kbd>
-              </button>
-            </div>
-          </>
-        )}
+        {current === "principles" && <PrinciplesStep project={project} onMove={setPicked} />}
           </>
         )}
       </main>

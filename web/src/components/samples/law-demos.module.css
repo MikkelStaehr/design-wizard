@@ -1,0 +1,142 @@
+/*
+ * DO / DON'T specimens for step 2. Reads ONLY --v-* custom properties (CONTRACTS.md §6).
+ * Demo-only values (the failing grey, the 28px button, white) arrive as --v-demo-* from the step.
+ * Fixed height, not min-height: the box is identical before and after the font loads (AC5).
+ */
+.demo {
+  box-sizing: border-box;
+  height: 164px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-2);
+  padding: var(--v-space-3);
+  background: var(--v-demo-white);
+  color: var(--v-text);
+  font-family: var(--v-font-text);
+  font-weight: var(--v-weight-text);
+  font-size: var(--v-fs-xs);
+  line-height: var(--v-lh-text);
+}
+.h {
+  font-family: var(--v-font-display);
+  font-weight: var(--v-weight-display);
+  font-size: var(--v-fs-sm);
+  line-height: var(--v-lh-display);
+}
+.p {
+  margin: 0;
+}
+.meta {
+  margin-top: auto;
+  color: var(--v-text-muted);
+}
+.kick {
+  color: var(--v-text-muted);
+}
+.row {
+  display: flex;
+  gap: var(--v-space-2);
+}
+.btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  padding: 0 var(--v-space-3);
+  border-radius: var(--v-radius);
+  border: 1px solid var(--v-border);
+  background: var(--v-surface);
+  color: var(--v-text);
+  font-weight: var(--v-weight-strong);
+  white-space: nowrap;
+}
+.pri {
+  background: var(--v-accent);
+  border-color: var(--v-accent);
+  color: var(--v-on-accent);
+}
+.link {
+  border-color: transparent;
+  background: transparent;
+  text-decoration: underline;
+}
+.full {
+  width: 100%;
+}
+.target {
+  height: var(--v-demo-target);
+  min-width: var(--v-demo-target);
+}
+.tiny {
+  height: var(--v-demo-tiny);
+  padding: 0 var(--v-space-1);
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-1);
+}
+.grid2 .btn {
+  padding: 0;
+}
+.pass {
+  color: var(--v-demo-pass);
+}
+.fail {
+  color: var(--v-demo-fail);
+}
+.lbl {
+  font-weight: var(--v-weight-strong);
+}
+.input {
+  box-sizing: border-box;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--v-space-2);
+  border: 1px solid var(--v-border);
+  border-radius: var(--v-radius);
+  background: var(--v-bg);
+}
+.ring {
+  outline: 2px solid var(--v-focus);
+  outline-offset: 2px;
+}
+.err {
+  border-color: var(--v-negative);
+}
+.errText {
+  color: var(--v-negative);
+}
+.steps {
+  display: flex;
+  gap: var(--v-space-1);
+}
+.steps i {
+  flex: 1;
+  height: 4px;
+  background: var(--v-border);
+}
+.steps i.on {
+  background: var(--v-accent);
+}
+.dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--v-space-2);
+}
+.dl b {
+  font-weight: var(--v-weight-strong);
+}
+.tight {
+  row-gap: 2px;
+}
+.tight .g,
+.tight .g + b {
+  margin-top: 12px;
+}
+.even {
+  row-gap: 8px;
+}

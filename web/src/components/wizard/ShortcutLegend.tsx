@@ -7,10 +7,14 @@ const SHORTCUTS: readonly { keys: readonly string[]; label: string }[] = [
   { keys: ["E"], label: "Reopen last decision" },
 ];
 
-export function ShortcutLegend({ className = "" }: { className?: string }) {
+const LAWS_KEY = { keys: ["Space"], label: "Add or remove law" } as const;
+
+/** On step 2, Space replaces "1 2 3 Pick variant" (laws are not variants). */
+export function ShortcutLegend({ className = "", laws = false }: { className?: string; laws?: boolean }) {
+  const list = laws ? [LAWS_KEY, ...SHORTCUTS.slice(1)] : SHORTCUTS;
   return (
     <dl aria-label="Keyboard shortcuts" className={`grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 text-small ${className}`}>
-      {SHORTCUTS.map((s) => (
+      {list.map((s) => (
         <div key={s.label} className="contents">
           <dt className="flex gap-1">
             {s.keys.map((k) => (
