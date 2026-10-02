@@ -72,6 +72,15 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 - Domain-specific sample screens
 - Bundling font files into the export
 
+## v0.2 backlog
+
+Ideas only, no code yet (user, 2026-10-02). Each becomes a slice in § Slices when the user gives the go. Diff pins are also planned for v0.2 (see Cut from v0.1).
+
+- **Brand colour:** the swatch shows the colour live as soon as the hex is valid, with a hint that Enter applies it.
+- **More palettes:** "Show 3 new" steps through strategies (monochrome, analogous, complementary, triadic, muted, bold), still 3 side by side. Every palette offered still passes AA (AC7).
+- **Colours from an image:** upload an image or logo, extract its 5–6 dominant colours in the browser (nothing is sent anywhere), and pick one as the brand colour.
+- **Fonts:** the user's visual assessment of the 8 families (on `?step=visual.fontPair`).
+
 ## Domain assumptions
 
 1. Single user on one machine. *Verified (user).* Nothing Chromium-only is used.
