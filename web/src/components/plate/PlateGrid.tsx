@@ -57,7 +57,8 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
   useEffect(() => {
     previewRef.current = preview;
   });
-  useEffect(() => () => clearPreviewCandidate(), []);
+  const published = useRef<PreviewCandidate["key"] | undefined>(undefined);
+  useEffect(() => () => clearPreviewCandidate(published.current), []);
   const offered = options.some((o) => o.id === selectedId);
   useEffect(() => {
     if (!offered) clearPreviewCandidate();
@@ -68,7 +69,11 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
       const option = options[index];
       if (!option) return;
       setSelectedId(option.id);
-      if (previewRef.current) setPreviewCandidate(previewRef.current(option.id));
+      if (previewRef.current) {
+        const candidate = previewRef.current(option.id);
+        published.current = candidate.key;
+        setPreviewCandidate(candidate);
+      }
       if (focus) refs.current[index]?.focus();
     },
     [options],

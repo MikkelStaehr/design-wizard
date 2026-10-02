@@ -1,31 +1,11 @@
 "use client";
 import type { Visual } from "@/contracts/project";
 import { PREVIEW_NEUTRALS, resolveForPlate } from "@/domain/tokens/resolve";
-import { isDecided, SUB_KEYS, type VisualKey } from "@/domain/decisions";
+import { isDecided, SUB_KEYS } from "@/domain/decisions";
 import { Plate } from "@/components/plate/Plate";
 import { SampleScreen } from "@/components/samples/SampleScreen";
-import { fontPairLabel, valueLabel } from "./steps/visual/model";
+import { fontPairLabel, previewPart, valueLabel } from "./steps/visual/model";
 import { usePreviewCandidate, type PreviewCandidate } from "./preview-candidate";
-
-const PENDING: Record<VisualKey, string> = {
-  fontPair: "font pair pending",
-  spacingBase: "spacing pending",
-  radius: "radius pending",
-  paletteVariant: "palette pending",
-  density: "density pending",
-};
-
-/** One part of the footer line: the value as the rail shows it, named where the value alone is ambiguous. */
-export function previewPart(v: Visual, key: VisualKey): string {
-  const label = valueLabel(v, key);
-  if (label === null) return PENDING[key];
-  if (key === "radius") return `radius ${label}`;
-  if (key === "paletteVariant") return `${label} palette`;
-  if (key === "density") return `${label.toLowerCase()} density`;
-  return label;
-}
-
-const ORDER: readonly VisualKey[] = ["fontPair", "spacingBase", "radius", "paletteVariant", "density"];
 
 /** The decisions made so far with the candidate on top: what the preview plate renders. */
 export function withCandidate(visual: Visual, candidate: PreviewCandidate | null): Visual {
@@ -36,7 +16,7 @@ export function withCandidate(visual: Visual, candidate: PreviewCandidate | null
 export function PreviewPlate({ visual, candidate, productName }: { visual: Visual; candidate: PreviewCandidate | null; productName: string | null }) {
   const shown = withCandidate(visual, candidate);
   const fontPairId = shown.fontPair ?? PREVIEW_NEUTRALS.fontPair;
-  const line = ORDER.map((k) => previewPart(shown, k)).join(" · ");
+  const line = SUB_KEYS.map((k) => previewPart(shown, k)).join(" · ");
   return (
     <figure className="flex min-w-0 flex-col gap-3">
       <div data-preview-plate="">
@@ -53,7 +33,7 @@ export function PreviewPlate({ visual, candidate, productName }: { visual: Visua
         </Plate>
       </div>
       <figcaption aria-hidden="true" className="font-mono text-label text-dw-text-muted">
-        {ORDER.map((k, i) => (
+        {SUB_KEYS.map((k, i) => (
           <span key={k}>
             {i > 0 ? " · " : ""}
             <span className="whitespace-nowrap">{previewPart(shown, k)}</span>

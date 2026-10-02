@@ -42,3 +42,22 @@ export interface DecisionProps {
   productName: string | null;
   onChoose: <K extends VisualKey>(key: K, value: NonNullable<Visual[K]>) => void;
 }
+
+/** The footer line's word for an open decision. */
+const PENDING: Record<VisualKey, string> = {
+  fontPair: "font pair pending",
+  spacingBase: "spacing pending",
+  radius: "radius pending",
+  paletteVariant: "palette pending",
+  density: "density pending",
+};
+
+/** One part of the footer line: the value as the rail shows it, named where the value alone is ambiguous. */
+export function previewPart(v: Visual, key: VisualKey): string {
+  const label = valueLabel(v, key);
+  if (label === null) return PENDING[key];
+  if (key === "radius") return `radius ${label}`;
+  if (key === "paletteVariant") return `${label} palette`;
+  if (key === "density") return `${label.toLowerCase()} density`;
+  return label;
+}
