@@ -1,5 +1,5 @@
 // Owner of decisions → `resolved` (stored snapshot) and decisions + candidate → plate tokens.
-import type { ColorRole, FontRef, Hex, ProjectFile, Resolved, Visual } from "@/contracts/project";
+import type { ColorRole, FontRef, Hex, Principle, ProjectFile, Resolved, Visual } from "@/contracts/project";
 import { FONT_PAIR_BY_ID, FONT_PAIRS } from "@/content/font-pairs";
 import { FONT_BY_ID } from "@/content/fonts";
 import { LAW_BY_ID } from "@/content/laws";
@@ -61,16 +61,20 @@ export function resolveForPlate(visual: Visual, candidate: Partial<VisualDecisio
   return tokens(merged, visual.colorOverrides);
 }
 
+/** The rendered rules for a set of chosen laws, in the order given (the serializer writes catalogue order). */
+export function resolveRules(principles: Principle[]): Resolved["rules"] {
+  return principles.map((pr) => {
+    const law = LAW_BY_ID.get(pr.lawId);
+    if (!law) throw new Error(`Unknown law "${pr.lawId}"`);
+    return renderRule(law, pr.params);
+  });
+}
+
 /** The stored snapshot, or null while any decision is open. */
 export function resolveSnapshot(p: ProjectFile): Resolved | null {
   if (openDecisions(p).length > 0 || p.principles === null) return null;
   const v = p.visual as Required<{ [K in keyof VisualDecisions]: NonNullable<VisualDecisions[K]> }> & Visual;
   // A palette that can't pass for this brand colour is an open decision, never a grey stand-in.
   if (palette(v.brandHex, v.paletteVariant) === null) return null;
-  const rules = p.principles.map((pr) => {
-    const law = LAW_BY_ID.get(pr.lawId);
-    if (!law) throw new Error(`Unknown law "${pr.lawId}"`);
-    return renderRule(law, pr.params);
-  });
-  return { ...tokens(v, v.colorOverrides), rules };
+  return { ...tokens(v, v.colorOverrides), rules: resolveRules(p.principles) };
 }

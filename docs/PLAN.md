@@ -177,7 +177,7 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 
 1. `pnpm build` produces a static export, and lint, typecheck, test and e2e all pass.
 2. A full e2e run makes **0 requests to hosts other than localhost**, and every variant font still renders.
-3. Every decision shows 3 plates side by side at 1280px. At 390px they stack and `shoot.mjs` exits 0 (no overflow).
+3. Every decision shows 3 plates side by side at 1280px. At 390px they stack and `shoot.mjs` exits 0 (no overflow). *Scope (2026-10-02):* this applies to decisions that have variants (visual system, platform). Laws are independent yes/no choices, not variants. Step 2 shows each law's do/don't pair side by side instead (design/specs/step-2-principles.md). The component library shows 2 panels (decision 2026-10-01).
 4. Changing a variant's tokens leaves the chrome's computed font-family and colours unchanged, and sample CSS reads only `--v-*`.
 5. A plate's bounding box is identical before and after its font loads. When a font file returns 404, the plate shows "Font failed" and Choose is disabled.
 6. Every clickable row is at least 44px at both widths. The whole wizard can be completed by keyboard only, through to export.

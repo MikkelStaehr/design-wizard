@@ -143,3 +143,33 @@ test("stops run across steps in wizard order; E finds the nearest decided stop",
   expect(lastDecidedStopBefore(empty, "visual.fontPair")).toBe("profile.library");
   expect(firstOpenStop(harbour())).toBeNull();
 });
+
+test("law params parse as typed and report the range in the param's own units", async () => {
+  const { parseParamInput } = await import("@/domain/parse-input");
+  const { LAW_BY_ID } = await import("@/content/laws");
+  const minPx = LAW_BY_ID.get("fitts")!.params[0];
+  const ratio = LAW_BY_ID.get("wcag-contrast")!.params[0];
+  expect(parseParamInput("44", minPx)).toEqual({ ok: true, value: 44 });
+  expect(parseParamInput(" 48 px ", minPx)).toEqual({ ok: true, value: 48 });
+  expect(parseParamInput("44,5", minPx)).toEqual({ ok: false, message: "Enter a whole number from 24px to 64px." });
+  expect(parseParamInput("80", minPx)).toEqual({ ok: false, message: "Enter a whole number from 24px to 64px. You entered 80px." });
+  expect(parseParamInput("4,5", ratio)).toEqual({ ok: true, value: 4.5 });
+  expect(parseParamInput("7:1", ratio)).toEqual({ ok: true, value: 7 });
+  expect(parseParamInput("3", ratio)).toEqual({ ok: false, message: "Enter a number from 4.5:1 to 7:1. You entered 3:1." });
+  expect(parseParamInput("lots", ratio).ok).toBe(false);
+});
+
+test("changing laws updates only resolved.rules; a kept snapshot's colours stay", () => {
+  const store = createProjectStore(null);
+  store.open(harbourText);
+  store.keepSnapshot();
+  const before = store.getState().project.resolved!;
+  const principles = store.getState().project.principles!.map((p) => (p.lawId === "fitts" ? { ...p, params: { minPx: 48 } } : p));
+  store.setPrinciples(principles);
+  const after = store.getState().project.resolved!;
+  expect(after.color).toBe(before.color);
+  expect(after.fontSize).toBe(before.fontSize);
+  expect(after.rules.find((r) => r.law === "fitts")?.rule).toBe("Make every interactive element at least 48px by 48px.");
+  store.setPrinciples(null);
+  expect(store.getState().project.resolved).toBeNull();
+});

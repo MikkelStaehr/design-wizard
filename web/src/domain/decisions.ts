@@ -120,7 +120,7 @@ export const STOPS = [
   { id: "profile.identity", step: "profile", label: "Name & type" },
   { id: "profile.platform", step: "profile", label: "Platform" },
   { id: "profile.library", step: "profile", label: "Component library" },
-  { id: "principles", step: "principles", label: "UX principles" },
+  { id: "principles", step: "principles", label: "Laws" },
   ...VISUAL_SUBDECISIONS.map((s) => ({ id: `visual.${s.key}` as const, step: "visual" as const, label: s.label })),
 ] as const;
 export type StopId = (typeof STOPS)[number]["id"];

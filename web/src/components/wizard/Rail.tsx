@@ -43,7 +43,7 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                 )}
                 {step.id === "principles" && (
                   <span className="mt-1.5 -ml-1.5 block">
-                    <StopList rows={[{ id: "principles" as const, label: "UX principles", value: null }]} current={isCurrent ? "principles" : null} onPick={onPick} />
+                    <StopList rows={[{ id: "principles" as const, label: "Laws", value: null }]} current={isCurrent ? "principles" : null} onPick={onPick} />
                   </span>
                 )}
                 {step.id === "visual" && (

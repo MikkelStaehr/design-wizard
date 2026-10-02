@@ -7,7 +7,7 @@ import type { ParseError } from "@/contracts/errors";
 import type { Principle, ProjectFile, Profile, Resolved, Visual } from "@/contracts/project";
 import { palette } from "@/domain/color/palette";
 import { DECISIONS, openDecisions } from "@/domain/decisions";
-import { resolveSnapshot } from "@/domain/tokens/resolve";
+import { resolveRules, resolveSnapshot } from "@/domain/tokens/resolve";
 import { devFixtureName, devFixtureText } from "./dev-fixtures";
 import { emptyProject } from "./empty";
 import { parse } from "./parse";
@@ -129,9 +129,15 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       decide({ ...state.project, profile: { ...state.project.profile, [key]: value } }, false, labelOf(`profile.${String(key)}`));
     },
     setPrinciples(principles) {
-      // Re-choosing the same laws is not a change: it must not replace a stored snapshot.
-      const changed = JSON.stringify(state.project.principles) !== JSON.stringify(principles);
-      decide({ ...state.project, principles }, changed, labelOf("principles"));
+      // Re-choosing the same laws is not a change. A real change updates only resolved.rules, so a
+      // stored (kept) snapshot's colours, fonts and scales are never replaced by a law or param tweak.
+      if (JSON.stringify(state.project.principles) === JSON.stringify(principles)) return;
+      const next = { ...state.project, principles };
+      const open = openDecisions(next).length > 0;
+      const before = state.project.resolved;
+      const resolved = open || principles === null ? null : before !== null ? { ...before, rules: resolveRules(principles) } : resolveSnapshot(next);
+      const project = { ...next, resolved };
+      emit({ ...state, project, errors: [], snapshotDiffers: !open && state.snapshotDiffers, previousResolved: null, ...persist(project, state.downloadedAt) });
     },
     setVisual(key, value) {
       const visual = { ...state.project.visual, [key]: value };

@@ -3,7 +3,7 @@
 import { emptyProject } from "./empty";
 import { serialize } from "./serialize";
 
-export const DEV_FIXTURES = ["empty", "harbour", "stale", "invalid-many"] as const;
+export const DEV_FIXTURES = ["empty", "harbour", "stale", "invalid-many", "zero-laws"] as const;
 export type DevFixture = (typeof DEV_FIXTURES)[number];
 
 export function devFixtureName(search: string): DevFixture | null {
@@ -24,6 +24,8 @@ export async function devFixtureText(name: DevFixture): Promise<{ text: string; 
         text: JSON.stringify((await import("../../../fixtures/harbour.project.json")).default, null, 2),
         savedAt: "2026-09-24T09:00:00.000Z",
       };
+    case "zero-laws":
+      return { text: JSON.stringify((await import("../../../fixtures/edge-zero-laws.project.json")).default, null, 2), savedAt: null };
     case "invalid-many":
       return { text: JSON.stringify((await import("../../../fixtures/invalid-many.project.json")).default, null, 2), savedAt: null };
   }
