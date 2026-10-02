@@ -122,6 +122,8 @@ export const STOPS = [
   { id: "profile.library", step: "profile", label: "Component library" },
   { id: "principles", step: "principles", label: "Laws" },
   ...VISUAL_SUBDECISIONS.map((s) => ({ id: `visual.${s.key}` as const, step: "visual" as const, label: s.label })),
+  // Step 4 shows every decision on one sample screen; there is nothing to decide there.
+  { id: "preview", step: "preview", label: "Live preview" },
 ] as const;
 export type StopId = (typeof STOPS)[number]["id"];
 const STOP_IDS: readonly StopId[] = STOPS.map((s) => s.id);
@@ -142,6 +144,7 @@ export function isStopDecided(p: ProjectFile, id: StopId): boolean {
     case "profile.platform":
       return p.profile.platform !== null;
     case "profile.library":
+    case "preview":
       return true;
     case "principles":
       return p.principles !== null;
