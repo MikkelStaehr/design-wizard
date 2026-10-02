@@ -8,7 +8,7 @@ import { STORAGE_KEY } from "@/data/project/storage";
 import { createProjectStore, fileStatus } from "@/data/project/store";
 import { openDecisionStops } from "@/domain/decisions";
 import { countLine } from "@/domain/rules";
-import { designMd, OPEN_MARKER, openMarkerCount } from "@/export/design-md";
+import { designMd, OPEN, openMarkerCount } from "@/export/design-md";
 import { byteLength, clockTime, formatBytes } from "@/lib/format";
 
 const harbour = readFileSync(join(__dirname, "..", "..", "fixtures", "harbour.project.json"), "utf8");
@@ -201,7 +201,7 @@ test("openMarkerCount counts the exported DESIGN.md's open: design-lead lines", 
   const store = createProjectStore(null);
   store.open(harbour);
   const md = designMd(store.getState().project);
-  expect(openMarkerCount(md)).toBe(md.split(OPEN_MARKER).length - 1);
+  expect(openMarkerCount(md)).toBe(md.split(OPEN).length - 1);
   expect(openMarkerCount(md)).toBe(14);
   expect(openMarkerCount("no markers")).toBe(0);
 });

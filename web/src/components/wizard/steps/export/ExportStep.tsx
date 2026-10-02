@@ -10,6 +10,7 @@ import { exportAll, projectFileName, type ExportFiles } from "@/export";
 import { openMarkerCount } from "@/export/design-md";
 import { byteLength, clockTime, formatBytes } from "@/lib/format";
 import { ownsKey } from "@/components/wizard/use-shortcuts";
+import { SECONDARY } from "@/components/wizard/classes";
 import { OpenProjectButton } from "@/components/wizard/OpenProjectButton";
 
 // Step 5 (design/specs/step-5-export.md): a delivery manifest. Nothing to decide here.
@@ -19,7 +20,6 @@ const EXPORT_NAMES: readonly ExportName[] = ["DESIGN.md", "tokens.json", "ux-rul
 const TYPES: Record<ExportName, string> = { "DESIGN.md": "text/markdown", "tokens.json": "application/json", "ux-rules.yaml": "text/yaml" };
 
 const LABEL = "font-mono text-label font-medium tracking-[0.08em] text-dw-text-muted uppercase";
-const SECONDARY = "inline-flex min-h-11 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-4 font-medium whitespace-nowrap hover:bg-[var(--dw-hover)]";
 
 function Chevron({ className = "" }: { className?: string }) {
   return (
@@ -161,7 +161,9 @@ export function ExportStep({ project, onMove }: { project: ProjectFile; onMove: 
         Export
       </h1>
       <p className="mt-1 max-w-[60ch] text-dw-text-muted">
-        {blocked
+        {exports === "error"
+          ? "Every decision is made, but the exports could not be built. Your decisions are unchanged; download the project file and report it."
+          : blocked
           ? `Export writes DESIGN.md, tokens.json and ux-rules.yaml from your decisions. ${n === 1 ? "1 decision is" : `${n} decisions are`} still open. Nothing is filled in for you, so make each one first.`
           : `Every decision is made. Download the files and commit them to ${whose} repo. Downloading changes nothing here.`}
       </p>
@@ -217,7 +219,7 @@ export function ExportStep({ project, onMove }: { project: ProjectFile; onMove: 
 
       <section aria-labelledby="exports" className="mt-6">
         <h2 id="exports" className={LABEL}>
-          {blocked ? "EXPORTS · BLOCKED" : "EXPORTS · 3 FILES"}
+          {blocked ? "EXPORTS · BLOCKED" : exports === "error" ? "EXPORTS · NOT BUILT" : "EXPORTS · 3 FILES"}
         </h2>
         <ul className="mt-2 flex flex-col border-b border-dw-line">
           {EXPORT_NAMES.map((f) => (
@@ -304,7 +306,7 @@ function FileRow({
           </p>
         </div>
         {text !== null && (
-          <button type="button" onClick={onDownload} className={SECONDARY}>
+          <button type="button" onClick={onDownload} className={`${SECONDARY} whitespace-nowrap`}>
             Download<span className="sr-only"> {name}</span>
           </button>
         )}

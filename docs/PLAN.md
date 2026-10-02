@@ -178,6 +178,8 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 7. **Docs:** update `docs/ARCHITECTURE.md`. Write the ProjectStart consumer proposal and a LESSONS row (text only, for `C:\dev\waan\teams`): how ui, tester and reviewer read DESIGN.md Part B, tokens.json and ux-rules.yaml.
    - **Done when:** AC1–AC11 all hold in one run, and the docs match the code.
 
+*Task 3f: regenerate the Harbour fixture. Size **S**, after 3e (user decision 2026-10-02).* Harbour's stored colours were written by hand in slice 1, before the palette algorithm, so `?fixture=harbour` always shows "Stored values differ" and every edge fixture inherits it. Regenerate `resolved` with the current algorithm, run `pnpm golden`, update the hex values in CONTRACTS, and give the 3a/3b tests that rely on the difference their own fixture with deliberately differing stored values (like the `snapshot-differs` dev fixture). The `ready` dev fixture can then go.
+
 ## Acceptance criteria (tester)
 
 1. `pnpm build` produces a static export, and lint, typecheck, test and e2e all pass.

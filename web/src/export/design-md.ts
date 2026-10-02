@@ -10,8 +10,8 @@ import { roleCss } from "./css-vars";
 import { shadcnCss, shadcnTable } from "./shadcn-map";
 import { buildTokens, requireResolved } from "./tokens-json";
 
+/** The line that marks a Part B item Design Wizard leaves to design-lead. */
 export const OPEN = "> **open: design-lead** – not decided in Design Wizard.";
-export const OPEN_MARKER = OPEN;
 
 /** How many open: design-lead items an exported DESIGN.md holds (exact marker lines). */
 export function openMarkerCount(text: string): number {

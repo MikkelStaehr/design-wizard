@@ -5,8 +5,9 @@ import { downloadText } from "@/data/project/file-io";
 import { serialize } from "@/data/project/serialize";
 import { isEmptyProject } from "@/data/project/empty";
 import { projectFileName } from "@/export";
+import { SECONDARY } from "./classes";
 
-const SECONDARY = "inline-flex min-h-11 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-4 font-medium hover:bg-[var(--dw-hover)] [overflow-wrap:anywhere]";
+const BUTTON = `${SECONDARY} [overflow-wrap:anywhere]`;
 
 /** Project-level notice after opening a file, in every step (design/specs/step-5-export.md §6). Undo over confirm. */
 export function OpenedNotice() {
@@ -43,12 +44,12 @@ export function OpenedNotice() {
       )}
       {replaced !== null && (
         <div className="mt-3 flex flex-wrap gap-3">
-          <button type="button" className={SECONDARY} onClick={() => projectStore().undoOpen()}>
+          <button type="button" className={BUTTON} onClick={() => projectStore().undoOpen()}>
             Undo open
           </button>
           {unsaved && (
             // Saves the replaced work without undoing; it is not the current project, so no markDownloaded().
-            <button type="button" className={SECONDARY} onClick={() => downloadText(projectFileName(replaced.project), serialize(replaced.project))}>
+            <button type="button" className={BUTTON} onClick={() => downloadText(projectFileName(replaced.project), serialize(replaced.project))}>
               Download {projectFileName(replaced.project)}
             </button>
           )}

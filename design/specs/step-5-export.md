@@ -169,7 +169,7 @@ Making the last decision and returning shows the ready state without a reload.
   - A successful open sets `downloadedAt` to the open time, because the file on disk matches. **This widens the meaning of CONTRACTS §1's `downloadedAt` to "last time a file on disk matched"; architect should note it.**
   - Add a selector `fileStatus(state)` that returns `none`, `current(at)` or `behind(since = downloadedAt)`.
 - **(d) `lib/`:** `byteLength(text)` (UTF-8 via TextEncoder), `formatBytes(n)` → `6,412 bytes`, and `clockTime(iso, now)`.
-- **(e) `export/design-md.ts`:** export `OPEN_MARKER` and `openMarkerCount(text)`.
+- **(e) `export/design-md.ts`:** export the marker line (built as `OPEN`) and `openMarkerCount(text)`.
 - **(f) `data/project/file-io.ts`:**
   - Revoke the object URL after a delay (an immediate revoke cancels the download in Firefox and Safari).
   - Add `downloadMany(files)`, which sends them 150ms apart, in order.

@@ -2,9 +2,8 @@
 import { useRef, useState } from "react";
 import { projectStore } from "@/data/project/store";
 import { readFileText } from "@/data/project/file-io";
+import { SECONDARY } from "./classes";
 
-const SECONDARY =
-  "inline-flex min-h-11 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-4 font-medium whitespace-nowrap hover:bg-[var(--dw-hover)]";
 
 /**
  * Opens a .dwproj.json (design/specs/step-5-export.md §6). One tab stop: the visible button clicks the hidden
@@ -46,7 +45,7 @@ export function OpenProjectButton({
 
   return (
     <span className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${className}`}>
-      <button type="button" className={`${SECONDARY} ${buttonClass}`} onClick={() => input.current?.click()}>
+      <button type="button" className={`${SECONDARY} whitespace-nowrap ${buttonClass}`} onClick={() => input.current?.click()}>
         {label}
       </button>
       <input

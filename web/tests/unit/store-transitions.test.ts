@@ -72,6 +72,16 @@ test("recomputeSnapshot replaces it; undoRecompute restores it byte-identically"
   expect(JSON.stringify(store.getState().project.resolved)).toBe(snapshot);
 });
 
+test("undoOpen puts back the kept snapshot and its differs flag byte-identically", () => {
+  const { store, snapshot } = kept();
+  const before = store.getState();
+  store.open(harbour, "harbour.dwproj.json");
+  store.undoOpen();
+  expect(JSON.stringify(store.getState().project.resolved)).toBe(snapshot);
+  expect(store.getState().snapshotDiffers).toBe(before.snapshotDiffers);
+  expect(store.getState().savedAt).toBe(before.savedAt);
+});
+
 test("fileVersion changes when another file is opened or replaces the project, never on a decision", () => {
   const { store } = kept();
   const v = store.getState().fileVersion;
