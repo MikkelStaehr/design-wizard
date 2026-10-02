@@ -6,7 +6,7 @@ import { LAWS } from "@/content/laws";
 import { projectStore } from "@/data/project/store";
 import { lastDecidedStopBefore, nextStop, type StopId } from "@/domain/decisions";
 import { parseParamInput } from "@/domain/parse-input";
-import { formatParam, renderRule } from "@/domain/rules";
+import { formatParam, renderRule, ruleParts } from "@/domain/rules";
 import { PREVIEW_NEUTRALS, resolveForPlate } from "@/domain/tokens/resolve";
 import { Plate } from "@/components/plate/Plate";
 import { DEMO_VALUES, LAW_DEMO_VARS } from "@/components/plate/demo-vars";
@@ -312,16 +312,19 @@ function withError(e: Record<string, string>, k: string, message: string | null)
 }
 
 function RuleSentence({ law, params }: { law: LawEntry; params: Record<string, number> }) {
-  // Same template, same formatParam as renderRule: textContent equals the exported rule line.
-  const parts = law.rule.template.split(/\{(\w+)\}/);
+  // ruleParts is the same source renderRule joins, so textContent equals the exported rule line.
   const id = renderRule(law, params).id;
   return (
     <p className="text-body" data-rule-id={id}>
-      {parts.map((part, i) => {
-        if (i % 2 === 0) return part;
-        const p = law.params.find((x) => x.key === part)!;
-        return <strong key={i} className="font-semibold">{formatParam(params[part], p.unit)}</strong>;
-      })}
+      {ruleParts(law, params).map((part, i) =>
+        part.param ? (
+          <strong key={i} className="font-semibold">
+            {part.text}
+          </strong>
+        ) : (
+          part.text
+        ),
+      )}
     </p>
   );
 }

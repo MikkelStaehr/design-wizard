@@ -17,13 +17,19 @@ export function formatParam(value: number, unit: ParamUnit): string {
   }
 }
 
-export function renderRule(law: LawEntry, params: Record<string, number>): Rule {
-  const text = law.rule.template.replace(/\{(\w+)\}/g, (_, key: string) => {
-    const param = law.params.find((p) => p.key === key);
-    const value = params[key];
-    if (!param || value === undefined) throw new Error(`Law ${law.id}: no value for {${key}}`);
-    return formatParam(value, param.unit);
+/** The rule sentence as parts: plain text, and each filled param (so the UI can emphasise it). Joined, it is the exported rule. */
+export function ruleParts(law: LawEntry, params: Record<string, number>): { text: string; param: boolean }[] {
+  return law.rule.template.split(/\{(\w+)\}/).map((part, i) => {
+    if (i % 2 === 0) return { text: part, param: false };
+    const param = law.params.find((p) => p.key === part);
+    const value = params[part];
+    if (!param || value === undefined) throw new Error(`Law ${law.id}: no value for {${part}}`);
+    return { text: formatParam(value, param.unit), param: true };
   });
+}
+
+export function renderRule(law: LawEntry, params: Record<string, number>): Rule {
+  const text = ruleParts(law, params).map((p) => p.text).join("");
   const { kind, selector, viewports, question } = law.rule.check;
   // Key order is the contract order (docs/CONTRACTS.md §3).
   const checkParams: Record<string, number> = {};
