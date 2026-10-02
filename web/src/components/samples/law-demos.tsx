@@ -63,7 +63,7 @@ export function lawDemos(D: DemoValues): Record<string, { do: LawDemo; dont: Law
       <>
         <p className={`${s.p} ${s.h}`}>Confirm booking</p>
         <span className={s.grid2}>
-          <span className={`${s.btn} ${s.pri}`}>Confirm</span>
+          <span className={`${s.btn} ${s.pri}`}>OK</span>
           <span className={`${s.btn} ${s.pri}`}>Save</span>
           <span className={`${s.btn} ${s.pri}`}>Share</span>
           <span className={`${s.btn} ${s.pri}`}>Print</span>

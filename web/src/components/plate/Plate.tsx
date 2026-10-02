@@ -45,7 +45,7 @@ export function Plate({ tokens, fontPairId, fontLabel, selected, tabbable, ariaL
   return (
     <div
       ref={ref}
-      role={interactive ? "radio" : "figure"}
+      role={interactive ? "radio" : "img"}
       aria-checked={interactive ? selected : undefined}
       aria-disabled={(interactive && failed) || undefined}
       aria-label={failed ? `${ariaLabel.replace(/\.$/, "")}. Font failed: ${fontLabel}` : ariaLabel}

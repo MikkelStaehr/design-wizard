@@ -166,6 +166,9 @@
   .dw-plate[aria-disabled="true"] {
     cursor: not-allowed;
   }
+  .dw-plate[role="img"] {
+    cursor: default;
+  }
   .dw-plate::before,
   .dw-plate::after,
   .dw-plate > .dw-cm::before,

@@ -416,8 +416,8 @@ function LawCard(props: {
                     className="h-11 w-24 rounded-[2px] border border-dw-ctl bg-dw-bg px-3 text-body tabular-nums"
                   />
                   {UNIT_SUFFIX[p.unit] !== "" && <span className="font-mono text-label text-dw-text-muted">{UNIT_SUFFIX[p.unit]}</span>}
-                  <span id={`${id}-range`} className="font-mono text-label text-dw-text-muted tabular-nums">
-                    {formatParam(p.min, p.unit)}–{formatParam(p.max, p.unit)}
+                  <span id={`${id}-range`} className="ml-2 font-mono text-label text-dw-text-muted tabular-nums">
+                    Range {formatParam(p.min, p.unit)}–{formatParam(p.max, p.unit)}
                   </span>
                 </div>
                 {error && (
