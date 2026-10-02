@@ -23,6 +23,8 @@ flowchart LR
 - **The store is the only writer.** UI dispatches actions. The store recomputes `resolved` and autosaves. A file that fails to parse never replaces the current state.
 - **`resolved` is stored, not derived on export.** It is `null` while any decision is open. A reopened file therefore re-exports byte-identically even after the palette algorithm changes. If the stored snapshot differs from a fresh computation, the user is told; it is never replaced silently.
 - **Plates** get their tokens from `resolveForPlate(decisions, candidate)`. Later decisions that are still open are filled with **preview-only neutrals**, which are never stored or exported.
+- **One transition for the snapshot.** Every decision action goes through the store's `transition(next, impact)`. While a decision is open the snapshot is parked with the strongest pending impact, and it comes back recomputed as needed when the decision closes. `store-invariants.test.ts` checks this after every action in seeded random sequences, with failing storage and frozen clocks in the mix.
+- **Two times describe the durable copy** (CONTRACTS §1). `savedAt` moves only when the canonical text changes; `downloadedAt` is the last time a file on disk matched (a project-file download or an open). `fileStatus()` reads them as none, current or behind. Opening a file is undone with `undoOpen()`, which restores the previous project, both times and the autosave byte for byte until the next change.
 - **Exporters are pure** (`ProjectFile → string`) and read only `profile`, `principles`, `visual` and `resolved`. tokens.json is built first. The DESIGN.md CSS block is mapped from that tokens object, never from the store.
 
 ## 2. File structure (everything under `web/`)
@@ -38,23 +40,23 @@ web/
 ├─ fixtures/              fictional *.project.json files, shared by the contract tests and ?fixture=
 ├─ src/
 │  ├─ contracts/          types only + schemas/*.schema.json (tokens, ux-rules). Mirrors CONTRACTS.md.
-│  ├─ lib/                stable-json.ts · slug.ts · md-escape.ts (imports nothing from src)
+│  ├─ lib/                stable-json.ts · slug.ts · md-escape.ts · format.ts (bytes, clock time) · utils.ts (cn) (imports nothing from src)
 │  ├─ content/            curated, changed by commit: laws.ts · fonts.ts (catalogue) · font-pairs.ts
 │  ├─ domain/             pure TS, no React, no DOM
 │  │  ├─ color/           hex.ts · contrast.ts · pairs.ts · palette.ts   (palette/contrast module)
 │  │  ├─ tokens/          scales.ts · resolve.ts · plate-vars.ts
-│  │  ├─ rules.ts         law + params → rendered rule
-│  │  ├─ decisions.ts     ordered decision list, open decisions, export gate
+│  │  ├─ rules.ts         law + params → rendered rule; the rule count line
+│  │  ├─ decisions.ts     ordered decisions (each with its stop), STOPS for J/K/E, open decisions, export gate
 │  │  └─ parse-input.ts   defensive form input ("8px", "8,0", "0f766e")
 │  ├─ data/project/       THE data layer: every project-file read, write and parse goes through here
 │  │  ├─ parse.ts         text → ProjectFile, or every error
 │  │  ├─ serialize.ts     ProjectFile → canonical bytes
 │  │  ├─ migrate.ts       version switch (v1 only; the hook for v2)
-│  │  ├─ empty.ts         a new project: every decision null, componentLibrary "shadcn"
-│  │  ├─ store.ts         in-memory store + actions + useProject() (useSyncExternalStore, no library)
+│  │  ├─ empty.ts         a new project: every decision null, componentLibrary "shadcn"; isEmptyProject
+│  │  ├─ store.ts         in-memory store + actions (open/undoOpen, decisions, keep/recompute, markDownloaded) + fileStatus + useProject()
 │  │  ├─ storage.ts       localStorage envelope, "unsaved since", quarantine of unparseable text
-│  │  ├─ file-io.ts       open (File.text) and download (Blob URL)
-│  │  └─ dev-fixtures.ts  ?fixture=empty|harbour|stale|invalid-many (development build only)
+│  │  ├─ file-io.ts       open (File.text), download (Blob URL, delayed revoke), downloadMany (150 ms apart)
+│  │  └─ dev-fixtures.ts  ?fixture=empty|harbour|stale|invalid-many|zero-laws|behind|edge-name|snapshot-differs|ready (development build only)
 │  ├─ export/             pure: ProjectFile → file text
 │  │  ├─ tokens-json.ts   DTCG 2025.10
 │  │  ├─ shadcn-map.ts    role → shadcn table + CSS block. Optional layer, only when profile.componentLibrary = "shadcn"
@@ -66,9 +68,10 @@ web/
 │  ├─ app/                layout.tsx (CSP meta, chrome fonts) · page.tsx (the only route) · fonts.ts (next/font/local) · globals.css (chrome tokens + shadcn theme)
 │  └─ components/
 │     ├─ ui/              shadcn primitives, chrome theme only
-│     ├─ wizard/          WizardShell · Rail · ShortcutLegend · use-shortcuts · ContrastTable · ExportPanel
-│     │  └─ steps/        profile · principles · visual/{font-pair,spacing,radius,palette,density} · preview · export
-│     ├─ plate/           Plate (crop marks, brackets, fixed size, loading/failed) · PlateGrid (radiogroup, 1/2/3) (DiffPins is planned for v0.2. Samples already carry data-v-part.)
+│     ├─ wizard/          WizardShell · Rail · ShortcutLegend · use-shortcuts · ContrastTable · LivePreview · preview-candidate ·
+│     │                   SnapshotNotice · OpenedNotice · OpenProjectButton · SubDecisionList · ArrowText · classes (shared button classes)
+│     │  └─ steps/        profile · principles · visual/{font-pair,spacing,radius,palette,density} · preview · export/ExportStep
+│     ├─ plate/           Plate (crop marks, brackets, fixed size, loading/failed) · PlateGrid (radiogroup, 1/2/3) · demo-vars (DiffPins is planned for v0.2. Samples already carry data-v-part.)
 │     └─ samples/         SampleCard · SampleScreen · samples.module.css. These read only --v-*.
 └─ tests/
    ├─ unit/               domain, data, content catalogue, sample-isolation scan
@@ -107,10 +110,16 @@ These rules are enforced by `import/no-restricted-paths` zones and `import/no-cy
 | Role → shadcn variable, and the shadcn CSS block | `export/shadcn-map.ts` (one const table) | DESIGN.md table + CSS block, C4 |
 | Role-named CSS block (no shadcn) | `export/css-vars.ts` | DESIGN.md CSS block, C4 |
 | Law + params → rule text and check | `domain/rules.ts` | resolve (`resolved.rules`), principles step |
-| Open decisions, progress, export gate | `domain/decisions.ts` | Rail, ExportPanel, export/index |
+| Open decisions, progress, export gate, the stop that reopens each | `domain/decisions.ts` | Rail, ExportStep, export/index |
+| Rule count line ("4 RULES · 3 MUST · 1 SHOULD") | `domain/rules.ts` | principles step, ExportStep |
+| File status (none, current, behind), Undo open | `data/project/store.ts` | ExportStep bar, OpenedNotice |
+| Is the project untouched | `data/project/empty.ts` | OpenedNotice (replaced-work warning) |
+| UTF-8 byte length, byte and clock-time formatting | `lib/format.ts` | ExportStep |
+| Count of `open: design-lead` items in DESIGN.md | `export/design-md.ts` | ExportStep |
+| Secondary button classes | `components/wizard/classes.ts` | ExportStep, OpenedNotice, OpenProjectButton |
 | Project-file validation | `data/project/parse.ts` | open, restore, C6 |
 | Canonical JSON bytes | `lib/stable-json.ts` | serialize, tokens-json |
-| Download file names | `lib/slug.ts` | file-io, export/index |
+| Download file names | `lib/slug.ts` | export/index (`projectFileName`), design-md provenance line |
 
 Tests call these owners. The only independent re-implementation is a set of hand-computed contrast anchors in `tests/unit` (for example `#777777` on `#FFFFFF` = 4.47), which keep `contrast.ts` honest.
 
