@@ -56,7 +56,8 @@ export function ExportStep({ project, onMove }: { project: ProjectFile; onMove: 
   const open = openDecisionStops(project);
   const blocked = open.length > 0;
   const name = project.profile.name;
-  const whose = name ? `${name}’s` : "your project’s";
+  // A name ending in a digit or punctuation reads badly as a possessive ("Ida's" #1's).
+  const whose = name && /\p{L}$/u.test(name) ? `${name}’s` : "your project’s";
   const projectName = projectFileName(project);
   const projectText = useMemo(() => serialize(project), [project]);
   const exports = useMemo(() => buildExports(project), [project]);
@@ -133,9 +134,11 @@ export function ExportStep({ project, onMove }: { project: ProjectFile; onMove: 
     "DESIGN.md": "Part B for the repo’s DESIGN.md: type, colour, shape, space. Merge it in; Part A stays as it is.",
     "tokens.json": "Design tokens in W3C DTCG format, for code and design tools.",
     "ux-rules.yaml":
-      project.principles !== null && project.principles.length === 0
-        ? "No rules, as decided: an empty list."
-        : `${countLine(project.principles).toLowerCase()}: what tester and reviewer check.`,
+      project.principles === null
+        ? "The UX rules tester and reviewer check."
+        : project.principles.length === 0
+          ? "No rules, as decided: an empty list."
+          : `${countLine(project.principles).toLowerCase()}: what tester and reviewer check.`,
   };
 
   function exportMeta(f: ExportName): ReactNode {

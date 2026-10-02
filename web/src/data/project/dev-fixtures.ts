@@ -3,7 +3,7 @@
 import { emptyProject } from "./empty";
 import { serialize } from "./serialize";
 
-export const DEV_FIXTURES = ["empty", "harbour", "stale", "invalid-many", "zero-laws", "behind", "edge-name", "snapshot-differs"] as const;
+export const DEV_FIXTURES = ["empty", "harbour", "stale", "invalid-many", "zero-laws", "behind", "edge-name", "snapshot-differs", "ready"] as const;
 export type DevFixture = (typeof DEV_FIXTURES)[number];
 
 export function devFixtureName(search: string): DevFixture | null {
@@ -21,6 +21,13 @@ const harbourText = async () => JSON.stringify((await import("../../../fixtures/
  */
 export async function devFixtureText(name: DevFixture): Promise<{ text: string; savedAt: string | null; downloadedAt?: string | null }> {
   switch (name) {
+    case "ready": {
+      // Harbour's stored colours predate the palette algorithm, so it shows "Stored values differ". Without a
+      // stored snapshot the store resolves a fresh one: the clean ready state.
+      const p = structuredClone((await import("../../../fixtures/harbour.project.json")).default) as Record<string, unknown>;
+      p.resolved = null;
+      return { text: JSON.stringify(p, null, 2), savedAt: null };
+    }
     case "behind":
       return { text: await harbourText(), savedAt: local(10, 2, 9, 10), downloadedAt: local(10, 1, 14, 32) };
     case "edge-name":

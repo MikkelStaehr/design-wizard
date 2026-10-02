@@ -60,7 +60,7 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                 )}
                 {step.id === "export" && (
                   <span className="mt-1.5 -ml-1.5 block">
-                    <StopList rows={[{ id: "export" as const, label: "Files", value: exportValue }]} current={isCurrent ? "export" : null} onPick={onPick} />
+                    <StopList rows={[{ id: "export" as const, label: "Files", value: openCount === 0 ? "4 files" : "Blocked" }]} current={isCurrent ? "export" : null} onPick={onPick} />
                   </span>
                 )}
                 {step.id === "visual" && (
