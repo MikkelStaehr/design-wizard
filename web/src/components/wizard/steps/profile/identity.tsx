@@ -149,8 +149,8 @@ export function IdentityStop({ profile, visual, onDone }: { profile: Profile; vi
             fontLabel={fontPairLabel(fontPairId)}
             selected={false}
             tabbable={false}
+            interactive={false}
             ariaLabel={`Name check: the sample header reads ${draftName === "" ? "Harbour" : draftName}`}
-            onSelect={() => {}}
           >
             <SampleCard productName={draftName === "" ? null : draftName} />
           </Plate>

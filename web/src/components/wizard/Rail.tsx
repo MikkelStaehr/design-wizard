@@ -1,13 +1,13 @@
 "use client";
 import type { ProjectFile } from "@/contracts/project";
-import { isDecided, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
+import { isDecided, stepOfStop, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
 import { ShortcutLegend } from "./ShortcutLegend";
 import { StopList, SubDecisionList } from "./SubDecisionList";
 import { profileDecidedCount, profileRows, type ProfileStop } from "./steps/profile/model";
 
 export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: StopId; onPick: (id: StopId) => void }) {
   const productName = project.profile.name;
-  const current = stop.startsWith("visual.") ? "visual" : stop === "principles" ? "principles" : "profile";
+  const current = stepOfStop(stop);
   const visualDecided = SUB_KEYS.filter((k) => isDecided(project.visual, k)).length;
   return (
     <nav aria-label="Wizard steps" className="flex h-full flex-col gap-3.5 border-r border-dw-line px-3 py-4">

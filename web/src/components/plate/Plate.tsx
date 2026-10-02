@@ -14,7 +14,9 @@ export interface PlateProps {
   selected: boolean;
   tabbable: boolean;
   ariaLabel: string;
-  onSelect: () => void;
+  /** False for a plate that only shows something (e.g. the name check): a labelled figure, not a radio. */
+  interactive?: boolean;
+  onSelect?: () => void;
   onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
   onFontState?: (state: FontLoadState) => void;
   ref?: Ref<HTMLDivElement>;
@@ -26,7 +28,7 @@ export interface PlateProps {
  * The variant root sets every --v-* inline and takes font, colour, background and line-height
  * from them explicitly, so nothing from the chrome cascades into the sample.
  */
-export function Plate({ tokens, fontPairId, fontLabel, selected, tabbable, ariaLabel, onSelect, onKeyDown, onFontState, ref, children }: PlateProps) {
+export function Plate({ tokens, fontPairId, fontLabel, selected, tabbable, ariaLabel, interactive = true, onSelect, onKeyDown, onFontState, ref, children }: PlateProps) {
   const fontState = useFontPair(fontPairId);
   useEffect(() => onFontState?.(fontState), [fontState, onFontState]);
   const failed = fontState === "failed";
@@ -43,13 +45,13 @@ export function Plate({ tokens, fontPairId, fontLabel, selected, tabbable, ariaL
   return (
     <div
       ref={ref}
-      role="radio"
-      aria-checked={selected}
-      aria-disabled={failed || undefined}
+      role={interactive ? "radio" : "figure"}
+      aria-checked={interactive ? selected : undefined}
+      aria-disabled={(interactive && failed) || undefined}
       aria-label={failed ? `${ariaLabel.replace(/\.$/, "")}. Font failed: ${fontLabel}` : ariaLabel}
-      tabIndex={tabbable ? 0 : -1}
-      onClick={onSelect}
-      onKeyDown={onKeyDown}
+      tabIndex={interactive ? (tabbable ? 0 : -1) : undefined}
+      onClick={interactive ? onSelect : undefined}
+      onKeyDown={interactive ? onKeyDown : undefined}
       className="dw-plate"
     >
       <span className="dw-cm" aria-hidden="true" />
