@@ -132,7 +132,7 @@ test("stops run across steps in wizard order; E finds the nearest decided stop",
   const { STOPS, firstOpenStop, isStopDecided, lastDecidedStopBefore, nextStop, prevStop } = await import("@/domain/decisions");
   expect(STOPS.map((s) => s.id)).toEqual([
     "profile.identity", "profile.platform", "profile.library", "principles",
-    "visual.fontPair", "visual.spacingBase", "visual.radius", "visual.paletteVariant", "visual.density", "preview",
+    "visual.fontPair", "visual.spacingBase", "visual.radius", "visual.paletteVariant", "visual.density", "preview", "export",
   ]);
   const empty = emptyProject();
   expect(firstOpenStop(empty)).toBe("profile.identity");
@@ -140,7 +140,9 @@ test("stops run across steps in wizard order; E finds the nearest decided stop",
   expect(nextStop("profile.library")).toBe("principles");
   expect(prevStop("visual.fontPair")).toBe("principles");
   expect(nextStop("visual.density")).toBe("preview");
-  expect(nextStop("preview")).toBeNull();
+  expect(nextStop("preview")).toBe("export");
+  expect(nextStop("export")).toBeNull();
+  expect(isStopDecided(empty, "export")).toBe(true);
   expect(isStopDecided(empty, "preview")).toBe(true);
   expect(lastDecidedStopBefore(empty, "visual.fontPair")).toBe("profile.library");
   expect(firstOpenStop(harbour())).toBeNull();

@@ -19,3 +19,8 @@ export function emptyProject(): ProjectFile {
     resolved: null,
   };
 }
+
+/** True for a project nobody has touched (every decision open, no notes, the default library). */
+export function isEmptyProject(p: ProjectFile): boolean {
+  return JSON.stringify(p) === JSON.stringify(emptyProject());
+}

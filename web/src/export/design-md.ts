@@ -11,6 +11,12 @@ import { shadcnCss, shadcnTable } from "./shadcn-map";
 import { buildTokens, requireResolved } from "./tokens-json";
 
 export const OPEN = "> **open: design-lead** – not decided in Design Wizard.";
+export const OPEN_MARKER = OPEN;
+
+/** How many open: design-lead items an exported DESIGN.md holds (exact marker lines). */
+export function openMarkerCount(text: string): number {
+  return text.split("\n").filter((line) => line === OPEN).length;
+}
 
 const open = (label: string) => [`**${label}**`, OPEN];
 const trimNum = (n: number) => String(Math.round(n * 100) / 100);

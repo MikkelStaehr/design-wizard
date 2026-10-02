@@ -2,19 +2,24 @@
 // (docs/ARCHITECTURE.md §4). The parser and the exporters both ask this module.
 import type { ProjectFile, Visual } from "@/contracts/project";
 
-/** Every decision, in wizard order. `null` = open. notes and componentLibrary are not decisions. */
-export const DECISIONS: readonly { path: string; label: string; get: (p: ProjectFile) => unknown }[] = [
-  { path: "profile.name", label: "Project name", get: (p) => p.profile?.name },
-  { path: "profile.productType", label: "Product type", get: (p) => p.profile?.productType },
-  { path: "profile.platform", label: "Platform", get: (p) => p.profile?.platform },
-  { path: "principles", label: "UX principles", get: (p) => p.principles },
-  { path: "visual.fontPair", label: "Font pair", get: (p) => p.visual?.fontPair },
-  { path: "visual.spacingBase", label: "Spacing base", get: (p) => p.visual?.spacingBase },
-  { path: "visual.radius", label: "Radius", get: (p) => p.visual?.radius },
-  { path: "visual.brandHex", label: "Brand colour", get: (p) => p.visual?.brandHex },
-  { path: "visual.paletteVariant", label: "Palette", get: (p) => p.visual?.paletteVariant },
-  { path: "visual.density", label: "Density", get: (p) => p.visual?.density },
+/** Every decision (`null` = open; notes and componentLibrary are not decisions), in wizard order, with the stop that makes or changes it (the brand colour is decided on the palette stop). */
+export const DECISIONS: readonly { path: string; label: string; stop: StopId; get: (p: ProjectFile) => unknown }[] = [
+  { path: "profile.name", label: "Project name", stop: "profile.identity", get: (p) => p.profile?.name },
+  { path: "profile.productType", label: "Product type", stop: "profile.identity", get: (p) => p.profile?.productType },
+  { path: "profile.platform", label: "Platform", stop: "profile.platform", get: (p) => p.profile?.platform },
+  { path: "principles", label: "UX principles", stop: "principles", get: (p) => p.principles },
+  { path: "visual.fontPair", label: "Font pair", stop: "visual.fontPair", get: (p) => p.visual?.fontPair },
+  { path: "visual.spacingBase", label: "Spacing base", stop: "visual.spacingBase", get: (p) => p.visual?.spacingBase },
+  { path: "visual.radius", label: "Radius", stop: "visual.radius", get: (p) => p.visual?.radius },
+  { path: "visual.brandHex", label: "Brand colour", stop: "visual.paletteVariant", get: (p) => p.visual?.brandHex },
+  { path: "visual.paletteVariant", label: "Palette", stop: "visual.paletteVariant", get: (p) => p.visual?.paletteVariant },
+  { path: "visual.density", label: "Density", stop: "visual.density", get: (p) => p.visual?.density },
 ];
+
+/** The open decisions with the stop that reopens each, in wizard order (the export step's blocked list). */
+export function openDecisionStops(p: ProjectFile): { label: string; stop: StopId }[] {
+  return DECISIONS.filter((d) => d.get(p) === null).map((d) => ({ label: d.label, stop: d.stop }));
+}
 
 /** Labels of the decisions that are still open (null), in wizard order. */
 export function openDecisions(p: ProjectFile): string[] {
@@ -124,6 +129,8 @@ export const STOPS = [
   ...VISUAL_SUBDECISIONS.map((s) => ({ id: `visual.${s.key}` as const, step: "visual" as const, label: s.label })),
   // Step 4 shows every decision on one sample screen; there is nothing to decide there.
   { id: "preview", step: "preview", label: "Live preview" },
+  // Step 5: the files. Nothing to decide; its blocked state lists the open decisions instead.
+  { id: "export", step: "export", label: "Files" },
 ] as const;
 export type StopId = (typeof STOPS)[number]["id"];
 const STOP_IDS: readonly StopId[] = STOPS.map((s) => s.id);
@@ -145,6 +152,7 @@ export function isStopDecided(p: ProjectFile, id: StopId): boolean {
       return p.profile.platform !== null;
     case "profile.library":
     case "preview":
+    case "export":
       return true;
     case "principles":
       return p.principles !== null;

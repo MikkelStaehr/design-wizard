@@ -2,11 +2,11 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { LawEntry, LawParam } from "@/contracts/content";
 import type { Principle, ProjectFile, Visual } from "@/contracts/project";
-import { LAW_BY_ID, LAWS } from "@/content/laws";
+import { LAWS } from "@/content/laws";
 import { projectStore, useProject } from "@/data/project/store";
 import { lastDecidedStopBefore, nextStop, type StopId } from "@/domain/decisions";
 import { parseParamInput } from "@/domain/parse-input";
-import { formatParam, renderRule, ruleParts } from "@/domain/rules";
+import { countLine, formatParam, renderRule, ruleParts } from "@/domain/rules";
 import { PREVIEW_NEUTRALS, resolveForPlate } from "@/domain/tokens/resolve";
 import { Plate } from "@/components/plate/Plate";
 import { DEMO_VALUES, LAW_DEMO_VARS } from "@/components/plate/demo-vars";
@@ -43,17 +43,6 @@ const STATUS = {
   none: "Decided: no UX rules. ux-rules.yaml exports an empty rules list.",
 };
 
-function countLine(principles: Principle[] | null): string {
-  if (principles === null) return "NO RULES YET";
-  if (principles.length === 0) return "NO RULES · DECIDED";
-  const n = principles.length;
-  if (n === 1) return "1 RULE";
-  const must = principles.filter((p) => LAW_BY_ID.get(p.lawId)?.rule.severity === "must").length;
-  const head = `${n} RULES`;
-  if (must === n) return `${head} · ALL MUST`;
-  if (must === 0) return `${head} · ALL SHOULD`;
-  return `${head} · ${must} MUST · ${n - must} SHOULD`;
-}
 
 function paramsText(law: LawEntry, params: Record<string, number>): string {
   return law.params.map((p) => formatParam(params[p.key], p.unit)).join(", ");

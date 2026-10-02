@@ -37,7 +37,8 @@ test("an opened project is autosaved and restored on the next start", () => {
 
   const second = createProjectStore(storage, now);
   expect(second.getState().project.profile.name).toBe("Harbour");
-  expect(second.getState().downloadedAt).toBeNull();
+  // The opened file on disk matches the project, so it counts as downloaded at the open (CONTRACTS §1).
+  expect(second.getState().downloadedAt).toBe("2026-10-01T10:00:00.000Z");
 });
 
 test("markDownloaded records when the durable copy was taken", () => {

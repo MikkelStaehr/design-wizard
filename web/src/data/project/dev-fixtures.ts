@@ -1,9 +1,9 @@
-// ?fixture=empty|harbour|stale|invalid-many (development builds only), so every state can be
+// ?fixture=<name> (development builds only), so every state can be
 // screenshotted without touching the real autosave. The store for a fixture never writes storage.
 import { emptyProject } from "./empty";
 import { serialize } from "./serialize";
 
-export const DEV_FIXTURES = ["empty", "harbour", "stale", "invalid-many", "zero-laws"] as const;
+export const DEV_FIXTURES = ["empty", "harbour", "stale", "invalid-many", "zero-laws", "behind", "edge-name", "snapshot-differs"] as const;
 export type DevFixture = (typeof DEV_FIXTURES)[number];
 
 export function devFixtureName(search: string): DevFixture | null {
@@ -12,9 +12,25 @@ export function devFixtureName(search: string): DevFixture | null {
   return (DEV_FIXTURES as readonly string[]).includes(name ?? "") ? (name as DevFixture) : null;
 }
 
-/** File text for a fixture, plus a fixed savedAt for "stale" (an autosave a week old, never downloaded). */
-export async function devFixtureText(name: DevFixture): Promise<{ text: string; savedAt: string | null }> {
+const local = (month: number, day: number, h: number, m: number) => new Date(2026, month - 1, day, h, m).toISOString();
+const harbourText = async () => JSON.stringify((await import("../../../fixtures/harbour.project.json")).default, null, 2);
+
+/**
+ * File text for a fixture, plus fixed times: "stale" is an autosave a week old, never downloaded; "behind" was
+ * downloaded at 1 Oct 14:32 and changed at 2 Oct 09:10. "snapshot-differs" stores one colour and one size off.
+ */
+export async function devFixtureText(name: DevFixture): Promise<{ text: string; savedAt: string | null; downloadedAt?: string | null }> {
   switch (name) {
+    case "behind":
+      return { text: await harbourText(), savedAt: local(10, 2, 9, 10), downloadedAt: local(10, 1, 14, 32) };
+    case "edge-name":
+      return { text: JSON.stringify((await import("../../../fixtures/edge-name.project.json")).default, null, 2), savedAt: null };
+    case "snapshot-differs": {
+      const p = structuredClone((await import("../../../fixtures/harbour.project.json")).default);
+      p.resolved.color.light.text = "#1a1a1a";
+      p.resolved.fontSize.base = 0.875;
+      return { text: JSON.stringify(p, null, 2), savedAt: null };
+    }
     case "empty":
       return { text: serialize(emptyProject()), savedAt: null };
     case "harbour":

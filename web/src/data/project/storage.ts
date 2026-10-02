@@ -18,8 +18,8 @@ export type Restored =
   | { kind: "restored"; project: ProjectFile; envelope: Envelope }
   | { kind: "quarantined"; errors: ParseError[] };
 
-export function save(storage: Storage, file: string, now: Date, downloadedAt: string | null): Envelope {
-  const envelope: Envelope = { savedAt: now.toISOString(), downloadedAt, file };
+export function save(storage: Storage, file: string, savedAt: string, downloadedAt: string | null): Envelope {
+  const envelope: Envelope = { savedAt, downloadedAt, file };
   storage.setItem(STORAGE_KEY, JSON.stringify(envelope));
   return envelope;
 }

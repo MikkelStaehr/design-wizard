@@ -1,6 +1,8 @@
 // Owner of law + params → rendered rule (docs/ARCHITECTURE.md §4).
 import type { LawEntry, ParamUnit } from "@/contracts/content";
+import type { Principle } from "@/contracts/project";
 import type { Rule } from "@/contracts/rules";
+import { LAW_BY_ID } from "@/content/laws";
 
 /** Up to 2 decimals with trailing zeros trimmed, then the unit: 44px, 400 ms, 1, 4.5:1. */
 export function formatParam(value: number, unit: ParamUnit): string {
@@ -48,4 +50,17 @@ export function renderRule(law: LawEntry, params: Record<string, number>): Rule 
       ...(kind === "manual" ? { question } : {}),
     },
   };
+}
+
+/** "4 RULES · 3 MUST · 1 SHOULD", "NO RULES YET", "NO RULES · DECIDED": the laws step's and the export's count line. */
+export function countLine(principles: Principle[] | null): string {
+  if (principles === null) return "NO RULES YET";
+  if (principles.length === 0) return "NO RULES · DECIDED";
+  const n = principles.length;
+  if (n === 1) return "1 RULE";
+  const must = principles.filter((p) => LAW_BY_ID.get(p.lawId)?.rule.severity === "must").length;
+  const head = `${n} RULES`;
+  if (must === n) return `${head} · ALL MUST`;
+  if (must === 0) return `${head} · ALL SHOULD`;
+  return `${head} · ${must} MUST · ${n - must} SHOULD`;
 }

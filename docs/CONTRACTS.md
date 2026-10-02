@@ -102,6 +102,8 @@ The real serializer writes one key per line with a 2-space indent; the compact l
   - The only early stops: `json-syntax`, `not-object`, a wrong `format` or a wrong `schemaVersion`. After one of these, the remaining fields can't be interpreted, so only that error is returned.
 - An invalid file leaves the store unchanged. The errors are listed in the UI.
 - **localStorage:** the key `design-wizard:v1:project` holds `{ "savedAt": ISO, "downloadedAt": ISO or null, "file": "<canonical project file text>" }`. On restore, `file` goes through the same parser. If it can't be parsed, the text is moved to `design-wizard:v1:quarantine` and nothing is lost.
+  - `savedAt` is when the file's text last changed: an action that leaves the canonical text identical does not move it.
+  - `downloadedAt` is the last time a file on disk matched the project: a download of the project file (not of DESIGN.md, tokens.json or ux-rules.yaml), or a successful open (since 3d; design/specs/step-5-export.md §10). `savedAt` later than `downloadedAt` means the browser holds changes that no file has.
 - **Form input is not file input:** `domain/parse-input.ts` accepts `8`, `8px`, `8,0`, `8.0` and hex with or without `#` in either case, and rejects junk next to the field.
 
 ---

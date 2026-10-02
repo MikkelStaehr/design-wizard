@@ -18,7 +18,9 @@ export interface ProjectState {
   project: ProjectFile;
   /** Problems from the last open or restore; [] when there are none. */
   errors: ParseError[];
+  /** When the file's text last changed (autosaved to this browser when storage works). */
   savedAt: string | null;
+  /** Last time a file on disk matched the project: a project-file download, or a successful open (CONTRACTS §1). */
   downloadedAt: string | null;
   /** True when the last autosave to this browser failed (full or blocked storage); the download is then the only copy. */
   saveFailed: boolean;
@@ -34,13 +36,21 @@ export interface ProjectState {
   parked: { resolved: Resolved; snapshotDiffers: boolean; pending: "none" | "rules" | "all"; pendingLabel: string | null } | null;
   /** Increments when open() or replace() puts another file's content in place; per-file UI state keys on it. */
   fileVersion: number;
+  /** What the last open() replaced, for Undo open; cleared by the next change, Keep/Recompute or another open. */
+  replaced: Replaced | null;
+  /** The opened notice: "Opened {fileName}.", or after Undo open "Back to …". Cleared with `replaced`. */
+  openNotice: { fileName: string; undone: boolean } | null;
 }
+
+/** Everything open() replaced, restored byte for byte by undoOpen(). */
+export type Replaced = Pick<ProjectState, "project" | "savedAt" | "downloadedAt" | "snapshotDiffers" | "recomputedBy" | "previousResolved" | "parked">;
 
 export interface ProjectStore {
   getState(): ProjectState;
   subscribe(listener: () => void): () => void;
-  /** Parses `text`; on success it replaces the project, otherwise only `errors` change. */
-  open(text: string): ParseError[];
+  /** Parses `text`; on success it replaces the project (undoOpen() brings it back), otherwise only `errors` change. */
+  open(text: string, fileName?: string): ParseError[];
+  undoOpen(): void;
   replace(project: ProjectFile): void;
   /** Decision actions: each autosaves; `resolved` is null while any decision is open. */
   setProfile<K extends keyof Profile>(key: K, value: Profile[K]): void;
@@ -52,26 +62,36 @@ export interface ProjectStore {
   recomputeSnapshot(): void;
   /** Undo "Recompute now": put the stored snapshot back and show the notice again. */
   undoRecompute(): void;
-  /** Dev only (?fixture=): open fixture text and pretend it was saved at `savedAt`. */
-  openDevFixture(text: string, savedAt: string | null): void;
+  /** Dev only (?fixture=): open fixture text and pretend it was saved at `savedAt` and downloaded at `downloadedAt`. */
+  openDevFixture(text: string, savedAt: string | null, downloadedAt?: string | null): void;
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null, fileVersion: 0 };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null, fileVersion: 0, replaced: null, openNotice: null };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
     listeners.forEach((l) => l());
   };
-  /** Returns the new savedAt and whether saving failed; never throws (quota or blocked storage). */
-  const persist = (project: ProjectFile, downloadedAt: string | null): { savedAt: string | null; saveFailed: boolean } => {
-    if (!storage) return { savedAt: state.savedAt, saveFailed: false };
+  /** The canonical text last persisted: savedAt moves only when this text changes. */
+  let lastText: string | null = null;
+  /**
+   * Returns the new savedAt and whether saving failed; never throws (quota or blocked storage).
+   * `at` is the action's timestamp; `savedAt` (Undo open) puts an exact earlier value back.
+   */
+  const persist = (project: ProjectFile, downloadedAt: string | null, opts: { at?: string; savedAt?: string | null } = {}): { savedAt: string | null; saveFailed: boolean } => {
+    const text = serialize(project);
+    const savedAt = opts.savedAt !== undefined ? opts.savedAt : text === lastText ? state.savedAt : (opts.at ?? now().toISOString());
     try {
-      return { savedAt: save(storage, serialize(project), now(), downloadedAt).savedAt, saveFailed: false };
+      if (storage) save(storage, text, savedAt ?? (opts.at ?? now().toISOString()), downloadedAt);
+      lastText = text;
+      return { savedAt, saveFailed: false };
     } catch {
       return { savedAt: state.savedAt, saveFailed: true };
     }
   };
+  /** Undo open lasts until the next change. */
+  const EXPIRE = { replaced: null, openNotice: null } as const;
 
 /**
    * THE transition for every decision change (project rule: one function, one test per action).
@@ -97,7 +117,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
         pendingLabel: prev.pendingLabel ?? (impact === "all" ? label : null),
       };
       const project = { ...next, resolved: null };
-      emit({ ...state, project, errors: [], snapshotDiffers: false, previousResolved: null, parked, ...persist(project, state.downloadedAt) });
+      emit({ ...state, ...EXPIRE, project, errors: [], snapshotDiffers: false, previousResolved: null, parked, ...persist(project, state.downloadedAt) });
       return;
     }
     const base = before ?? state.parked?.resolved ?? null;
@@ -122,7 +142,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       snapshotDiffers = differed;
     }
     const project = { ...next, resolved };
-    emit({ ...state, project, errors: [], snapshotDiffers, recomputedBy, previousResolved: null, parked: null, ...persist(project, state.downloadedAt) });
+    emit({ ...state, ...EXPIRE, project, errors: [], snapshotDiffers, recomputedBy, previousResolved: null, parked: null, ...persist(project, state.downloadedAt) });
   };
   const labelOf = (path: string) => DECISIONS.find((d) => d.path === path)?.label ?? path;
 
@@ -140,6 +160,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     if (restored.kind === "restored") {
       const { project, snapshotDiffers, changed } = settle(restored.project);
       state = { ...state, project, snapshotDiffers, savedAt: restored.envelope.savedAt, downloadedAt: restored.envelope.downloadedAt };
+      lastText = restored.envelope.file;
       // Resolved on load (CONTRACTS §1: the file is marked as changed), so save it back.
       if (changed) state = { ...state, ...persist(project, restored.envelope.downloadedAt) };
     } else if (restored.kind === "quarantined") {
@@ -153,18 +174,34 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    open(text) {
+    open(text, fileName) {
       const result = parse(text);
       if (!result.ok) {
         emit({ ...state, errors: result.errors });
         return result.errors;
       }
       const { project, snapshotDiffers } = settle(result.project);
-      emit({ ...state, project, errors: [], downloadedAt: null, snapshotDiffers, parked: null, fileVersion: state.fileVersion + 1, ...persist(project, null) });
+      const { savedAt, downloadedAt, recomputedBy, previousResolved, parked } = state;
+      const replaced: Replaced = { project: state.project, savedAt, downloadedAt, snapshotDiffers: state.snapshotDiffers, recomputedBy, previousResolved, parked };
+      // The file on disk matches what is now here, so it counts as the durable copy (CONTRACTS §1).
+      const at = now().toISOString();
+      emit({
+        ...state, project, errors: [], downloadedAt: at, snapshotDiffers, recomputedBy: null, previousResolved: null, parked: null,
+        fileVersion: state.fileVersion + 1, replaced, openNotice: { fileName: fileName ?? "the project file", undone: false },
+        ...persist(project, at, { at }),
+      });
       return [];
     },
+    undoOpen() {
+      const r = state.replaced;
+      if (r === null || state.openNotice === null) return;
+      emit({
+        ...state, ...r, errors: [], fileVersion: state.fileVersion + 1, replaced: null, openNotice: { ...state.openNotice, undone: true },
+        ...persist(r.project, r.downloadedAt, { savedAt: r.savedAt }),
+      });
+    },
     replace(project) {
-      emit({ ...state, project, errors: [], snapshotDiffers: false, parked: null, fileVersion: state.fileVersion + 1, ...persist(project, state.downloadedAt) });
+      emit({ ...state, ...EXPIRE, project, errors: [], snapshotDiffers: false, parked: null, fileVersion: state.fileVersion + 1, ...persist(project, state.downloadedAt) });
     },
     setProfile(key, value) {
       transition({ ...state.project, profile: { ...state.project.profile, [key]: value } }, "none", labelOf(`profile.${String(key)}`));
@@ -186,32 +223,33 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       const changed = state.project.visual[key] !== value || reopened;
       transition({ ...state.project, visual }, changed ? "all" : "none", labelOf(`visual.${String(key)}`));
     },
-    openDevFixture(text, savedAt) {
+    openDevFixture(text, savedAt, downloadedAt = null) {
       const errors = this.open(text);
-      if (errors.length === 0) emit({ ...state, savedAt });
+      if (errors.length === 0) emit({ ...state, ...EXPIRE, savedAt, downloadedAt });
     },
     keepSnapshot() {
-      emit({ ...state, snapshotDiffers: false });
+      emit({ ...state, ...EXPIRE, snapshotDiffers: false });
     },
     recomputeSnapshot() {
       const previousResolved = state.project.resolved;
       const project = { ...state.project, resolved: resolveSnapshot(state.project) };
-      emit({ ...state, project, snapshotDiffers: false, recomputedBy: null, previousResolved, ...persist(project, state.downloadedAt) });
+      emit({ ...state, ...EXPIRE, project, snapshotDiffers: false, recomputedBy: null, previousResolved, ...persist(project, state.downloadedAt) });
     },
     undoRecompute() {
       if (state.previousResolved === null) return;
       const project = { ...state.project, resolved: state.previousResolved };
-      emit({ ...state, project, snapshotDiffers: true, previousResolved: null, ...persist(project, state.downloadedAt) });
+      emit({ ...state, ...EXPIRE, project, snapshotDiffers: true, previousResolved: null, ...persist(project, state.downloadedAt) });
     },
     markDownloaded() {
+      // Only the project file is a copy you can reopen. Its text didn't change, so savedAt stays.
       const downloadedAt = now().toISOString();
-      emit({ ...state, downloadedAt, ...persist(state.project, downloadedAt) });
+      emit({ ...state, downloadedAt, ...persist(state.project, downloadedAt, { savedAt: state.savedAt }) });
     },
   };
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null, fileVersion: 0 };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null, fileVersion: 0, replaced: null, openNotice: null };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {
@@ -220,7 +258,7 @@ function getBrowserStore(): ProjectStore {
       // A fixture never touches the real autosave: in-memory store, no storage.
       const store = createProjectStore(null);
       browserStore = store;
-      void devFixtureText(fixture).then(({ text, savedAt }) => store.openDevFixture(text, savedAt));
+      void devFixtureText(fixture).then(({ text, savedAt, downloadedAt }) => store.openDevFixture(text, savedAt, downloadedAt));
       return store;
     }
     let storage: Storage | null = null;
@@ -244,4 +282,13 @@ export function useProject(): ProjectState {
 
 export function projectStore(): ProjectStore {
   return getBrowserStore();
+}
+
+export type FileStatus = { kind: "none" } | { kind: "current"; at: string } | { kind: "behind"; since: string };
+
+/** Where the durable copy stands: no project file yet, the file on disk matches, or the project moved on after it. */
+export function fileStatus(s: Pick<ProjectState, "savedAt" | "downloadedAt">): FileStatus {
+  if (s.downloadedAt === null) return { kind: "none" };
+  if (s.savedAt !== null && s.savedAt > s.downloadedAt) return { kind: "behind", since: s.downloadedAt };
+  return { kind: "current", at: s.downloadedAt };
 }
