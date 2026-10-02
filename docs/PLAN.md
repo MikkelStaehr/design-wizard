@@ -93,6 +93,23 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 - **run-web.** `serve.ps1 -Mode prod` uses `next start`, which doesn't work with a static export, so v0.1 uses dev mode only. The `DEV_TODAY` option goes away (slice 1).
 - **localStorage can be lost.** The downloaded project file is the durable copy, and the UI shows "unsaved since".
 
+## Slices
+
+Every slice and task of the project, in order. Status is never written here; it is derived from git (each commit ends with a `Slice: <id>` line).
+
+| id | title | size |
+|---|---|---|
+| 0 | Project start: direction, DESIGN.md, plan and architecture | Project start |
+| 1 | Contract first: scaffold, project file v1, exporters and contract tests C1–C6 | L |
+| 2 | Variants: font catalogue, laws, plates, wizard shell, visual decisions, palettes | L |
+| 3a | Carry-over fixes and the project profile (step 1) | L |
+| 3b | UX principles picker (step 2) | L |
+| 3c | Live preview (step 4 and the preview column) | L |
+| 3d | Export (step 5) | L |
+| 3e | Wrap-up of v0.1: keyboard e2e, AC1–AC11, architecture, ProjectStart proposal | M |
+| 3f | Regenerate the Harbour fixture | S |
+| 3g | Slices table, Slice commit line, team install and run-web merge | S |
+
 ## Plan (one commit per step; no building until the user says go)
 
 *Project start:* fill in CLAUDE.md, design-lead finishes DESIGN.md, and architect writes `docs/ARCHITECTURE.md`.

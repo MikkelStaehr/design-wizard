@@ -29,7 +29,7 @@ Contract between `design-lead` (owns this file) and `ui` (builds).
 - [ ] WCAG 2.2 AA contrast in every theme: text ≥ 4.5:1; large text, icons and control borders ≥ 3:1.
 - [ ] Colour never carries meaning alone.
 - [ ] Semantic HTML (`main`, `nav`, headings in order, `button` vs `a`).
-- [ ] Everything works by keyboard, with a visible focus state.
+- [ ] Everything works by keyboard, with a visible focus state. Never remove the outline (`outline-none`) without a `focus-visible` replacement; in Tailwind v4 that needs `focus-visible:outline-solid` plus a width.
 - [ ] Icon-only buttons have `aria-label`. Images have `alt`.
 - [ ] Text zoom to 200% doesn't break the layout.
 - [ ] `prefers-reduced-motion` respected. All motion has a reduced alternative.
@@ -42,11 +42,16 @@ Contract between `design-lead` (owns this file) and `ui` (builds).
 ## Technical
 - Tokens only: no magic values in components.
 - Fonts are self-hosted (e.g. `next/font`), max 2 families.
+- Every glyph on screen is covered by the shipped font subset, or drawn as inline SVG with a text alternative. Never rely on a system-font fallback for characters like → ⌘ ✓ ✕.
+- Charts: a mark and its label offset use the same unit (both rem or both px), so they stay together at 200% text.
+- Shortcut hints match the user's OS: Ctrl on Windows and Linux, ⌘ only on macOS.
 - UI library: <!-- shadcn/ui + Tailwind for Next.js -->, **always themed by Part B. Never the default look.**
 
 ---
 
 # Part B – Direction (per project)
+
+> If `design/tokens.json` exists, this part is exported by Design Wizard. Fill only the `open: design-lead` items; change decided values in Design Wizard, not here.
 
 ## Personality
 <!-- Three words, plus one sentence on how it should feel to use. -->

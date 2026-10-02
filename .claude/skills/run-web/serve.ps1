@@ -1,6 +1,8 @@
 <#
 .SYNOPSIS
-  Start the web app in dev mode on port 3110 (agents' port), run a command against it, always stop it.
+  Start the web app on the project's agent port (CLAUDE.md: 3110) in dev mode, run a command against it, always stop it.
+  Dev mode only: a static export (output: 'export') can't be served by next start, and the app has no date override,
+  so the team template's -Mode prod and -DevToday are left out.
 .EXAMPLE
   .claude/skills/run-web/serve.ps1 -Cmd "node .claude/skills/run-web/shoot.mjs --out $env:TEMP\shell-390.png"
 #>
@@ -14,7 +16,7 @@ $pnpm = (Get-Command pnpm.cmd -ErrorAction SilentlyContinue).Source
 if (-not $pnpm) { $pnpm = Join-Path $env:APPDATA 'npm\pnpm.cmd' }
 
 if (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue) {
-  throw "port $Port is already in use; stop that server first (3000 belongs to the user, never touch it)"
+  throw "port $Port is already in use; never stop a server you didn't start - ask the user (3000 belongs to the user)"
 }
 
 $server = Start-Process -FilePath $pnpm -ArgumentList @('dev', '--port', "$Port") -WorkingDirectory $web -PassThru -WindowStyle Hidden

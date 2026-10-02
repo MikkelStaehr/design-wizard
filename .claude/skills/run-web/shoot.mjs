@@ -1,6 +1,6 @@
 // Exact-width, real-time screenshot of the web app through Edge's DevTools protocol (CDP).
 // node .claude/skills/run-web/shoot.mjs --out <file.png> [--path /load] [--width 390]
-//   [--open] [--dark] [--reduce-motion] [--zoom200] [--base http://localhost:3110]
+//   [--open] [--dark] [--reduce-motion] [--zoom200] [--base http://localhost:<agent port>]
 // Prints one JSON line; exits 1 on horizontal overflow, console errors or a page that never got ready.
 import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -75,9 +75,7 @@ try {
   await send("Page.enable");
   // Exact viewport: --window-size is clamped to ~516 px on Windows; device metrics are not.
   const metrics = (height) =>
-    // mobile: false. With mobile emulation, captureBeyondViewport repeats the first viewport down a tall
-    // 390px page (seen in design-wizard slice 3c). Layout here depends on width only, so nothing is lost.
-    send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
+    send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false }); // mobile emulation repeats the first screen in beyond-viewport captures
   await metrics(844);
   const media = [
     ...(opt.dark ? [{ name: "prefers-color-scheme", value: "dark" }] : []),
@@ -118,8 +116,7 @@ try {
     `({ height: Math.ceil(document.documentElement.scrollHeight),` +
       ` scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth })`,
   );
-  // Full page without resizing the viewport: resizing to the page height made headless Edge on
-  // Windows intermittently return a tiled 2×2 image (seen in design-wizard slice 1 and 2).
+  // Full page without resizing the viewport: a resize makes headless Edge return tiled images.
   const shot = await send("Page.captureScreenshot", {
     format: "png",
     captureBeyondViewport: true,

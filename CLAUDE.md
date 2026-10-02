@@ -24,7 +24,7 @@ Planned; they exist once slice 1, step 1 has scaffolded `web/`. Run them from `w
 - Strict types. No `any` / untyped dict without a comment.
 - All project-file reads, writes and parsing go through one data layer: `web/src/data/project/`. The store is the only writer.
 - Secrets only in env files or a vault. `.env.example` lists every variable.
-- Small commits with conventional-commit messages.
+- Small commits with conventional-commit messages. Every commit that belongs to a slice ends with a `Slice: <id>` line (the id from `docs/PLAN.md` § Slices).
 - Prefer boring **code**. No new dependency without a one-line justification.
 - **No silent defaults.** A value that can't be parsed never silently becomes 0 or empty. Missing is `null`, not 0. Collectors count and log unparseable values per run, and fail loudly above a threshold. Key derived values get sanity bounds; implausible values are flagged, not used.
 - **Zero vs. missing per field.** Decide per field whether 0 is a valid value, and document it next to the field (schema comment or type). Missing is always `null`; 0 means a real zero only where the field allows it.
@@ -66,6 +66,7 @@ At every step boundary the main session compares elapsed agent time with the bud
 **Migrations go live together with the code that writes them:** apply the migration → push the code → run the job. No scheduled or manual job runs in between.
 Reading agents (`tester`, `reviewer`, `security`) run on a **committed** state, and no agent edits files while they run.
 `∥` means the steps run in parallel.
+`docs/PLAN.md` lists every slice and task in a `## Slices` table (`id | title | size`); ids are unique and lowercase (e.g. `3a`). Status is never written in the table; it is derived from git.
 
 | Size | When | Steps | Budget (agent time) |
 |---|---|---|---|
