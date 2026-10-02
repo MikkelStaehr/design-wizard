@@ -156,7 +156,7 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
    - The module-level `memory` and the `drafts` state in `PrinciplesStep` survive opening another file, so an old draft can show instead of the stored value. Reset both on open.
    - Put the Must/Should badge in the checkbox's `aria-describedby`.
 
-4. **A generic `SampleScreen`** in `components/samples/`: it reads only `--v-*`, and only the product name comes from the profile. The preview column shows the focused variant on top of every earlier decision, in every step. Step 4 shows the same screen full size.
+4. *(Scope, 2026-10-02: the preview reflects token decisions only. Platform and component library change no tokens, so selecting them leaves the preview unchanged; their own stops show the difference.)* **A generic `SampleScreen`** in `components/samples/`: it reads only `--v-*`, and only the product name comes from the profile. The preview column shows the focused variant on top of every earlier decision, in every step. Step 4 shows the same screen full size.
    - **Done when:**
      - AC4 (the leak test) and AC5 (the box doesn't change while fonts load) hold for the preview too
      - AC2 holds: fonts are local only

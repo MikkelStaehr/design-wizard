@@ -26,9 +26,8 @@
 }
 
 .logo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--v-space-2);
+  display: block;
+  white-space: nowrap;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -38,7 +37,9 @@
 
 .logo::before {
   content: "";
-  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--v-space-2);
   width: 0.6em;
   height: 0.6em;
   border-radius: calc(var(--v-radius) / 4);

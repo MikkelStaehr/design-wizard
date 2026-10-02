@@ -1,0 +1,91 @@
+// Invariants that hold after EVERY store action, in any order (retro 3c: per-action tests missed a
+// sequence bug). Random but seeded sequences of all actions; after each step:
+//  1. the project serializes to a file the parser accepts (so the autosave never ends in quarantine);
+//  2. `resolved` is null exactly when a decision is open;
+//  3. when resolved, the snapshot's copied fields match the decisions (radius, rules = chosen laws).
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { expect, test } from "vitest";
+import { LAWS } from "@/content/laws";
+import { parse } from "@/data/project/parse";
+import { serialize } from "@/data/project/serialize";
+import { createProjectStore, type ProjectStore } from "@/data/project/store";
+import { openDecisions } from "@/domain/decisions";
+
+const harbour = readFileSync(join(__dirname, "..", "..", "fixtures", "harbour.project.json"), "utf8");
+
+function check(store: ProjectStore, trail: string[]) {
+  const p = store.getState().project;
+  const where = trail.join(" → ");
+  const reparsed = parse(serialize(p));
+  expect(reparsed.ok ? [] : reparsed.errors.map((e) => `${e.path}:${e.code}`), where).toEqual([]);
+  expect(p.resolved === null, where).toBe(openDecisions(p).length > 0);
+  if (p.resolved !== null) {
+    expect(p.resolved.radius, where).toBe(p.visual.radius);
+    expect(p.resolved.rules.map((r) => r.law), where).toEqual((p.principles ?? []).map((x) => x.lawId));
+  }
+}
+
+type Action = [string, (s: ProjectStore) => void];
+const suggested = (i: number) => ({ lawId: LAWS[i].id, params: Object.fromEntries(LAWS[i].params.map((q) => [q.key, q.suggested])) });
+const ACTIONS: Action[] = [
+  ["name null", (s) => s.setProfile("name", null)],
+  ["name set", (s) => s.setProfile("name", "Harbour")],
+  ["platform null", (s) => s.setProfile("platform", null)],
+  ["platform both", (s) => s.setProfile("platform", "both")],
+  ["notes", (s) => s.setProfile("notes", "n")],
+  ["library none", (s) => s.setProfile("componentLibrary", "none")],
+  ["radius 6", (s) => s.setVisual("radius", 6)],
+  ["radius 0", (s) => s.setVisual("radius", 0)],
+  ["radius null", (s) => s.setVisual("radius", null)],
+  ["spacing 8", (s) => s.setVisual("spacingBase", 8)],
+  ["density airy", (s) => s.setVisual("density", "airy")],
+  ["palette deep", (s) => s.setVisual("paletteVariant", "deep")],
+  ["palette null", (s) => s.setVisual("paletteVariant", null)],
+  ["brand yellow", (s) => s.setVisual("brandHex", "#FFFF00")],
+  ["pair inter-solo", (s) => s.setVisual("fontPair", "inter-solo")],
+  ["laws null", (s) => s.setPrinciples(null)],
+  ["laws []", (s) => s.setPrinciples([])],
+  ["laws 1", (s) => s.setPrinciples([suggested(0)])],
+  ["laws 3", (s) => s.setPrinciples([suggested(0), suggested(1), suggested(4)])],
+  ["keep", (s) => s.keepSnapshot()],
+  ["recompute", (s) => s.recomputeSnapshot()],
+  ["undo", (s) => s.undoRecompute()],
+  ["open harbour", (s) => s.open(harbour)],
+];
+
+test("after every action in 300 seeded random sequences, the autosave is valid and the snapshot is consistent", () => {
+  let x = 20261002;
+  const next = () => (x = (x * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+  for (let run = 0; run < 300; run++) {
+    const store = createProjectStore(null);
+    store.open(harbour);
+    const trail = ["open harbour"];
+    for (let step = 0; step < 15; step++) {
+      const [name, act] = ACTIONS[Math.floor(next() * ACTIONS.length)];
+      act(store);
+      trail.push(name);
+      check(store, trail);
+    }
+  }
+});
+
+test("reviewer case: a visual change while the name is open is not undone when the name returns", () => {
+  const store = createProjectStore(null);
+  store.open(harbour);
+  store.setProfile("name", null);
+  store.setVisual("radius", 6);
+  store.setProfile("name", "Harbour");
+  expect(store.getState().project.resolved?.radius).toBe(6);
+  check(store, ["name null", "radius 6", "name set"]);
+});
+
+test("reviewer case: a law change while the platform is open is kept when the platform returns", () => {
+  const store = createProjectStore(null);
+  store.open(harbour);
+  store.setProfile("platform", null);
+  store.setPrinciples([suggested(0)]);
+  store.setProfile("platform", "desktop");
+  expect(store.getState().project.resolved?.rules.map((r) => r.law)).toEqual(["fitts"]);
+  check(store, ["platform null", "laws 1", "platform set"]);
+});

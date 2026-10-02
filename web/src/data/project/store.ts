@@ -31,7 +31,7 @@ export interface ProjectState {
   /** The snapshot before "Recompute now", kept for Undo until the next change. */
   previousResolved: Resolved | null;
   /** The snapshot set aside while a decision is open again, and whether it differed; restored when it closes. */
-  parked: { resolved: Resolved; snapshotDiffers: boolean } | null;
+  parked: { resolved: Resolved; snapshotDiffers: boolean; pending: "none" | "rules" | "all"; pendingLabel: string | null } | null;
   /** Increments when open() or replace() puts another file's content in place; per-file UI state keys on it. */
   fileVersion: number;
 }
@@ -83,17 +83,30 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
    * when the decision closes again, so a stored or kept snapshot is never replaced silently.
    */
   type Impact = "none" | "rules" | "all";
+  const RANK: Record<Impact, number> = { none: 0, rules: 1, all: 2 };
+  const stronger = (a: Impact, b: Impact): Impact => (RANK[a] >= RANK[b] ? a : b);
   const transition = (next: ProjectFile, impact: Impact, label: string) => {
     const open = openDecisions(next).length > 0;
     const before = state.project.resolved;
     if (open) {
-      const parked = before !== null ? { resolved: before, snapshotDiffers: state.snapshotDiffers } : state.parked;
+      // Park the snapshot, and remember the strongest change made while parked (so it is never restored stale).
+      const prev = before !== null ? { resolved: before, snapshotDiffers: state.snapshotDiffers, pending: "none" as Impact, pendingLabel: null } : state.parked;
+      const parked = prev === null ? null : {
+        ...prev,
+        pending: stronger(prev.pending, impact),
+        pendingLabel: prev.pendingLabel ?? (impact === "all" ? label : null),
+      };
       const project = { ...next, resolved: null };
       emit({ ...state, project, errors: [], snapshotDiffers: false, previousResolved: null, parked, ...persist(project, state.downloadedAt) });
       return;
     }
     const base = before ?? state.parked?.resolved ?? null;
     const differed = before !== null ? state.snapshotDiffers : (state.parked?.snapshotDiffers ?? false);
+    // A change made while the snapshot was parked still counts when it comes back.
+    if (before === null && state.parked !== null) {
+      if (stronger(impact, state.parked.pending) !== impact) label = state.parked.pendingLabel ?? label;
+      impact = stronger(impact, state.parked.pending);
+    }
     let resolved: Resolved | null;
     let snapshotDiffers: boolean;
     let recomputedBy = state.recomputedBy;

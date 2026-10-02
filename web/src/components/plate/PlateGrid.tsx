@@ -58,6 +58,10 @@ export function PlateGrid<Id extends string>({ label, decision, options, chosenI
     previewRef.current = preview;
   });
   useEffect(() => () => clearPreviewCandidate(), []);
+  const offered = options.some((o) => o.id === selectedId);
+  useEffect(() => {
+    if (!offered) clearPreviewCandidate();
+  }, [offered]);
 
   const select = useCallback(
     (index: number, focus: boolean) => {

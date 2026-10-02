@@ -52,7 +52,7 @@ export function PreviewPlate({ visual, candidate, productName }: { visual: Visua
           <SampleScreen productName={productName} />
         </Plate>
       </div>
-      <figcaption className="font-mono text-label text-dw-text-muted">
+      <figcaption aria-hidden="true" className="font-mono text-label text-dw-text-muted">
         {ORDER.map((k, i) => (
           <span key={k}>
             {i > 0 ? " · " : ""}

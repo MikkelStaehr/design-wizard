@@ -33,7 +33,7 @@ function withoutPath(path: string, message: string): string {
 // Layout from DESIGN.md "Space & density": ≥1101px rail 232 | main | preview 340;
 // 761–1100px rail 200 + main with the preview below; ≤760px one column, rail and legend hidden.
 export function WizardShell() {
-  const { project, errors, saveFailed, hydrated } = useProject();
+  const { project, errors, saveFailed, hydrated, fileVersion } = useProject();
   const visual = project.visual;
   const productName = project.profile.name;
   const [picked, setPicked] = useState<StopId | null>(null);
@@ -114,7 +114,7 @@ export function WizardShell() {
         )}
         <SnapshotNotice />
         {current === "visual" && (
-          <VisualStep sub={visualSub} visual={visual} productName={productName} onMove={(k) => setPicked(`visual.${k}`)} />
+          <VisualStep key={fileVersion} sub={visualSub} visual={visual} productName={productName} onMove={(k) => setPicked(`visual.${k}`)} />
         )}
         {current === "profile" && <ProfileStep stop={stop as ProfileStop} project={project} onMove={setPicked} />}
         {current === "principles" && <PrinciplesStep project={project} onMove={setPicked} />}
