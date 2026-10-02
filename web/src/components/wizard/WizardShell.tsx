@@ -8,6 +8,8 @@ import { SnapshotNotice } from "./SnapshotNotice";
 import { VisualStep } from "./steps/visual/VisualStep";
 import { ProfileStep } from "./steps/profile/ProfileStep";
 import { PrinciplesStep } from "./steps/principles/PrinciplesStep";
+import { PreviewStep } from "./steps/preview/PreviewStep";
+import { LivePreview } from "./LivePreview";
 import type { ProfileStop } from "./steps/profile/model";
 
 /** ?step=<stop id> opens a stop directly; "visual.palette" and "visual.spacing" stay accepted as aliases. */
@@ -37,8 +39,8 @@ export function WizardShell() {
   const [picked, setPicked] = useState<StopId | null>(null);
   /** Until the user moves, the wizard opens on the first open stop (the project may load after first render). */
   const fromUrl = useSyncExternalStore(noSubscribe, () => stopFromSearch(window.location.search), () => null);
-  // Every decision set: open step 3, the last built step.
-  const stop: StopId = picked ?? fromUrl ?? firstOpenStop(project) ?? "visual.fontPair";
+  // Every decision set: open step 4, the last built step.
+  const stop: StopId = picked ?? fromUrl ?? firstOpenStop(project) ?? "preview";
   const current = stepOfStop(stop);
   // Pin the starting stop once, so committing a field never moves the user mid-step.
   if (hydrated && picked === null) setPicked(stop);
@@ -81,7 +83,7 @@ export function WizardShell() {
       <aside className="hidden min-[761px]:block min-[761px]:row-span-2 min-[1101px]:row-span-1">
         <Rail project={project} stop={stop} onPick={setPicked} />
       </aside>
-      <main className="min-w-0 px-4 pt-5 pb-8 min-[761px]:px-6">
+      <main className={`min-w-0 px-4 pt-5 pb-8 min-[761px]:px-6 ${current === "preview" ? "min-[1101px]:col-span-2" : ""}`}>
         {/* Before hydration the server snapshot is an empty project: show nothing to type into. */}
         {!hydrated ? (
           <p role="status" className="text-dw-text-muted">
@@ -116,20 +118,19 @@ export function WizardShell() {
         )}
         {current === "profile" && <ProfileStep stop={stop as ProfileStop} project={project} onMove={setPicked} />}
         {current === "principles" && <PrinciplesStep project={project} onMove={setPicked} />}
+        {current === "preview" && <PreviewStep project={project} onMove={setPicked} />}
           </>
         )}
       </main>
+      {/* Step 4 shows the same screen full size in main, so the column steps aside there. */}
+      {hydrated && current !== "preview" && (
       <section
         aria-labelledby="preview-label"
         className="border-t border-dw-line px-4 py-5 min-[761px]:col-start-2 min-[761px]:px-6 min-[1101px]:col-start-3 min-[1101px]:row-start-1 min-[1101px]:border-t-0 min-[1101px]:border-l min-[1101px]:px-4"
       >
-        <p id="preview-label" className="font-mono text-label font-medium tracking-[0.08em] text-dw-text-muted uppercase">
-          Live preview
-        </p>
-        <div className="mt-3 bg-dw-plate p-[18px]">
-          <p className="bg-dw-surface px-4 py-8 text-center text-dw-text-muted">The live preview arrives with step 4.</p>
-        </div>
+        <LivePreview visual={visual} productName={productName} />
       </section>
+      )}
     </div>
   );
 }

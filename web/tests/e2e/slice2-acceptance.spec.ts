@@ -36,7 +36,7 @@ async function chrome(page: Page) {
 
 /** Rendered-font proof: text measured as `"dwv-x", serif` and `"dwv-x", monospace` only match if dwv-x itself renders. */
 async function platesRenderOwnFonts(page: Page) {
-  return page.locator("[data-v-root]").evaluateAll((roots) =>
+  return page.locator("main [data-v-root]").evaluateAll((roots) =>
     roots.map((root) => {
       const out: string[] = [];
       for (const part of ["title", "body"]) {
@@ -94,7 +94,7 @@ test("AC2/AC3/AC4: every font pair and every sub-decision, only localhost reques
   });
   await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
-  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  await expect(page.locator("main [data-v-root]").first()).toBeVisible();
   const before = await chrome(page);
   expect(before.font).not.toContain("dwv-");
 
@@ -105,7 +105,7 @@ test("AC2/AC3/AC4: every font pair and every sub-decision, only localhost reques
     const m = /Pairs (\d+)–(\d+)/.exec((await status.textContent())!)!;
     const n = Number(m[2]) - Number(m[1]) + 1;
     counts.push(n);
-    await expect(page.locator("[data-v-root]")).toHaveCount(n);
+    await expect(page.locator("main [data-v-root]")).toHaveCount(n);
     await expect(page.getByText("Loading fonts…")).toHaveCount(0);
     await expectLayout(page, "Font pair variants", n);
     expect(await platesRenderOwnFonts(page)).toEqual(Array(n).fill([]));
@@ -130,7 +130,7 @@ test("AC2/AC3/AC4: every font pair and every sub-decision, only localhost reques
   await expect(page.getByRole("heading", { level: 1, name: /palette/i })).toBeVisible();
   await page.locator("#brand-hex").fill("#FFFF00");
   await page.locator("#brand-hex").press("Tab");
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
   await expectLayout(page, "Palette variants", 3);
   expect(await platesRenderOwnFonts(page)).toEqual([[], [], []]);
   await page.keyboard.press("3");
@@ -160,7 +160,7 @@ test("AC5: a plate's box is identical while its fonts load and after they loaded
   const loading = await boxes();
   test.info().annotations.push({ type: "loading", description: JSON.stringify(loading) });
   release();
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   expect(await boxes()).toEqual(loading);
 });
@@ -170,7 +170,7 @@ test("AC6: every clickable row in step 3 is at least 44px, on every sub-decision
   const found: Record<string, string[]> = {};
   for (const s of ["fontPair", "spacing", "radius", "palette", "density"]) {
     await page.goto(`/?step=visual.${s}`);
-    await expect(page.locator("[data-v-root]").first()).toBeVisible();
+    await expect(page.locator("main [data-v-root]").first()).toBeVisible();
     const small = await smallTargets(page);
     if (small.length) found[s] = small;
   }
@@ -181,7 +181,7 @@ test("AC6/AC7/saved: step 3 by keyboard alone with visible focus, brand typed; d
   await seed(page, openVisual);
   await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
   await page.keyboard.press("3");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Spacing" })).toBeVisible();
@@ -211,7 +211,7 @@ test("AC6/AC7/saved: step 3 by keyboard alone with visible focus, brand typed; d
   expect.soft(unfocused).toEqual([]);
   await page.keyboard.type(" #abc ");
   await page.keyboard.press("Enter");
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
   await page.keyboard.press("2");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Density" })).toBeVisible();
@@ -233,7 +233,7 @@ test("AC6/AC7/saved: step 3 by keyboard alone with visible focus, brand typed; d
   await expect(page.getByRole("heading", { level: 1, name: /palette/i })).toBeVisible();
 
   await page.reload();
-  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  await expect(page.locator("main [data-v-root]").first()).toBeVisible();
   await page.goto("/?step=visual.palette");
   await expect(page.locator("#brand-hex")).toHaveValue("#AABBCC");
   await expect(page.getByRole("radio", { checked: true })).toHaveAccessibleName(/Tinted/);
@@ -259,7 +259,7 @@ test("AC7: brand field validates on blur, keeps the input, puts the error next t
     await expect(field).toHaveAttribute("aria-describedby", "brand-hex-error");
     const [fb, ab] = [await field.boundingBox(), await alert.boundingBox()];
     expect(ab!.y - (fb!.y + fb!.height)).toBeLessThan(24);
-    await expect(page.locator("[data-v-root]")).toHaveCount(0);
+    await expect(page.locator("main [data-v-root]")).toHaveCount(0);
   }
   for (const [ok, norm] of [["0f766e", "#0F766E"], [" #ABC ", "#AABBCC"], ["#000", "#000000"], ["#FFF", "#FFFFFF"], ["#777", "#777777"], ["#FFFF00", "#FFFF00"]]) {
     await field.fill(ok);

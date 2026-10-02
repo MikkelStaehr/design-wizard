@@ -32,6 +32,7 @@ export function RadiusDecision({ visual, productName, onChoose }: DecisionProps)
       chosenId={chosen}
       productName={productName}
       onChoose={(id) => onChoose("radius", Number(id))}
+      preview={(id) => ({ key: "radius", value: Number(id) })}
     />
   );
 }

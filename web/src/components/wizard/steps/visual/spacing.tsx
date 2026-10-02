@@ -26,6 +26,7 @@ export function SpacingDecision({ visual, productName, onChoose }: DecisionProps
       chosenId={chosen}
       productName={productName}
       onChoose={(id) => onChoose("spacingBase", Number(id))}
+      preview={(id) => ({ key: "spacingBase", value: Number(id) })}
     />
   );
 }

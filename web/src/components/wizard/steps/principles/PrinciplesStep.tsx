@@ -2,8 +2,8 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { LawEntry, LawParam } from "@/contracts/content";
 import type { Principle, ProjectFile, Visual } from "@/contracts/project";
-import { LAWS } from "@/content/laws";
-import { projectStore } from "@/data/project/store";
+import { LAW_BY_ID, LAWS } from "@/content/laws";
+import { projectStore, useProject } from "@/data/project/store";
 import { lastDecidedStopBefore, nextStop, type StopId } from "@/domain/decisions";
 import { parseParamInput } from "@/domain/parse-input";
 import { formatParam, renderRule, ruleParts } from "@/domain/rules";
@@ -12,6 +12,7 @@ import { Plate } from "@/components/plate/Plate";
 import { DEMO_VALUES, LAW_DEMO_VARS } from "@/components/plate/demo-vars";
 import { lawDemos, type LawDemo } from "@/components/samples/law-demos";
 import { ownsKey } from "@/components/wizard/use-shortcuts";
+import { fontPairLabel } from "@/components/wizard/steps/visual/model";
 
 // Step 2 (design/specs/step-2-principles.md): one stop, one array. Every change commits at once.
 
@@ -23,6 +24,12 @@ const LAW_DEMOS = lawDemos(DEMO_VALUES);
 
 /** Session memory: the params last used per law, so unticking then re-ticking is a lossless undo. */
 const memory = new Map<string, Record<string, number>>();
+/** The file (store fileVersion) the session memory belongs to; another file starts with empty memory. */
+let memoryFile: number | undefined;
+const NO_MEMORY: ReadonlyMap<string, Record<string, number>> = new Map();
+function writePrinciples(list: Principle[] | null) {
+  projectStore().setPrinciples(list);
+}
 
 const suggested = (law: LawEntry) => Object.fromEntries(law.params.map((p) => [p.key, p.suggested]));
 const fieldKey = (lawId: string, key: string) => `${lawId}.${key}`;
@@ -41,7 +48,7 @@ function countLine(principles: Principle[] | null): string {
   if (principles.length === 0) return "NO RULES · DECIDED";
   const n = principles.length;
   if (n === 1) return "1 RULE";
-  const must = principles.filter((p) => LAWS.find((l) => l.id === p.lawId)?.rule.severity === "must").length;
+  const must = principles.filter((p) => LAW_BY_ID.get(p.lawId)?.rule.severity === "must").length;
   const head = `${n} RULES`;
   if (must === n) return `${head} · ALL MUST`;
   if (must === 0) return `${head} · ALL SHOULD`;
@@ -64,13 +71,28 @@ export function PrinciplesStep({ project, onMove }: { project: ProjectFile; onMo
   const [undoNone, setUndoNone] = useState(false);
   const [announce, setAnnounce] = useState<string | null>(null);
   const bar = useRef<HTMLDivElement>(null);
+  // Another file (store fileVersion) means the session memory and unsaved drafts belong to the old
+  // file, so an old draft never shows instead of the stored value.
+  const { fileVersion } = useProject();
+  const [fileSeen, setFileSeen] = useState(fileVersion);
+  if (fileVersion !== fileSeen) {
+    setFileSeen(fileVersion);
+    setDrafts({});
+    setErrors({});
+  }
+  const sessionMemory = fileVersion === memoryFile ? memory : NO_MEMORY;
+  useEffect(() => {
+    if (fileVersion === memoryFile) return;
+    memory.clear();
+    memoryFile = fileVersion;
+  }, [fileVersion]);
 
-  const paramsFor = (law: LawEntry) => chosen.get(law.id) ?? memory.get(law.id) ?? suggested(law);
+  const paramsFor = (law: LawEntry) => chosen.get(law.id) ?? sessionMemory.get(law.id) ?? suggested(law);
 
   /** Writes the list in catalogue order; an empty list from ticking is never written (that is "open"). */
   function commit(next: Map<string, Record<string, number>>) {
     const list = LAWS.filter((l) => next.has(l.id)).map((l) => ({ lawId: l.id, params: next.get(l.id)! }));
-    projectStore().setPrinciples(list.length === 0 ? null : list);
+    writePrinciples(list.length === 0 ? null : list);
     setUndoNone(false);
     setAnnounce(null);
   }
@@ -264,7 +286,7 @@ export function PrinciplesStep({ project, onMove }: { project: ProjectFile; onMo
             <button
               type="button"
               onClick={() => {
-                projectStore().setPrinciples([]);
+                writePrinciples([]);
                 setNote(null);
                 setAnnounce(null);
                 setUndoNone(true);
@@ -278,7 +300,7 @@ export function PrinciplesStep({ project, onMove }: { project: ProjectFile; onMo
             <button
               type="button"
               onClick={() => {
-                projectStore().setPrinciples(null);
+                writePrinciples(null);
                 setUndoNone(false);
               }}
               className="inline-flex min-h-11 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-4 font-medium whitespace-nowrap"
@@ -365,7 +387,7 @@ function LawCard(props: {
             onChange={props.onToggle}
             onKeyDown={props.onCheckboxKey}
             aria-labelledby={`${uid}-name`}
-            aria-describedby={`${uid}-summary`}
+            aria-describedby={`${uid}-severity ${uid}-summary`}
             className="absolute inset-0 z-10 m-0 size-full cursor-pointer appearance-none rounded-sm bg-transparent"
           />
           <span
@@ -380,6 +402,7 @@ function LawCard(props: {
             {law.name}
           </span>
           <span
+            id={`${uid}-severity`}
             className={`shrink-0 border px-1.5 py-0.5 font-mono text-label tracking-[0.08em] uppercase ${
               must ? "border-dw-text font-medium text-dw-text" : "border-dw-line text-dw-text-muted"
             }`}
@@ -467,7 +490,7 @@ function DemoFigure({ caption, law, demo }: { caption: string; law: LawEntry; de
       <Plate
         tokens={NEUTRAL_TOKENS}
         fontPairId={DEMO_FONT}
-        fontLabel="Inter"
+        fontLabel={fontPairLabel(DEMO_FONT)}
         selected={false}
         tabbable={false}
         interactive={false}

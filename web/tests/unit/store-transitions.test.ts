@@ -71,3 +71,15 @@ test("recomputeSnapshot replaces it; undoRecompute restores it byte-identically"
   store.undoRecompute();
   expect(JSON.stringify(store.getState().project.resolved)).toBe(snapshot);
 });
+
+test("fileVersion changes when another file is opened or replaces the project, never on a decision", () => {
+  const { store } = kept();
+  const v = store.getState().fileVersion;
+  store.setProfile("notes", "x");
+  store.setVisual("radius", 6);
+  expect(store.getState().fileVersion).toBe(v);
+  store.open(harbour);
+  expect(store.getState().fileVersion).toBe(v + 1);
+  expect(store.open("{ broken")).not.toEqual([]);
+  expect(store.getState().fileVersion).toBe(v + 1);
+});

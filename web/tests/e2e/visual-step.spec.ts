@@ -8,7 +8,7 @@ const isMobile = () => test.info().project.name === "mobile-390";
 async function openSpacing(page: Page) {
   await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
-  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  await expect(page.locator("main [data-v-root]").first()).toBeVisible();
   // J reaches the next sub-decision on the keyboard; on 390 the rail is hidden, so use the decision list there.
   if (isMobile()) await page.getByRole("navigation", { name: "Visual decisions" }).getByRole("button", { name: /Spacing/ }).click();
   else await page.keyboard.press("j");
@@ -26,7 +26,7 @@ test("spacing shows 3 plates side by side at 1280 and stacked at 390, with no ho
   await openSpacing(page);
   const radios = page.getByRole("radiogroup", { name: "Spacing variants" }).getByRole("radio");
   await expect(radios).toHaveCount(3);
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
   const boxes = await radios.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
   if (isMobile()) {
     expect(boxes[1].top).toBeGreaterThan(boxes[0].bottom);
@@ -44,7 +44,7 @@ test("spacing shows 3 plates side by side at 1280 and stacked at 390, with no ho
 test("leak: choosing another palette or font pair leaves the chrome h1 font and colour unchanged", async ({ page }) => {
   await page.goto("/?step=visual.fontPair");
   await expect(page.getByRole("heading", { level: 1, name: "Font pair" })).toBeVisible();
-  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  await expect(page.locator("main [data-v-root]").first()).toBeVisible();
   const before = await chromeH1Style(page);
   expect(before.fontFamily).not.toContain("dwv-");
 
@@ -60,7 +60,7 @@ test("leak: choosing another palette or font pair leaves the chrome h1 font and 
   await page.getByLabel("Brand colour").blur();
   const palettes = page.getByRole("radiogroup", { name: "Palette variants" }).getByRole("radio");
   await expect(palettes).toHaveCount(3);
-  await expect(page.locator("[data-v-root]").first()).toBeVisible();
+  await expect(page.locator("main [data-v-root]").first()).toBeVisible();
   await palettes.nth(2).click();
   await page.getByRole("button", { name: /^Choose / }).click();
   expect(await chromeH1Style(page)).toEqual(before);
@@ -73,7 +73,7 @@ test("keyboard: 1/2/3 then Enter records a decision; J and K move between sub-de
   const radios = page.getByRole("radiogroup", { name: "Font pair variants" }).getByRole("radio");
   // The radios exist in the static HTML; a loaded plate root only appears once the client has hydrated.
   // 3 pairs at a time (the catalogue has more, behind "More pairs").
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
 
   await page.keyboard.press("2");
   await expect(radios.nth(1)).toHaveAttribute("aria-checked", "true");

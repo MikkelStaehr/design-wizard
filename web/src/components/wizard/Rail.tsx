@@ -25,7 +25,9 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                 ? `${visualDecided} of ${SUB_KEYS.length} decided`
                 : step.id === "principles"
                   ? `${project.principles === null ? 0 : 1} of 1 decided`
-                  : "Not built yet";
+                  : step.id === "preview"
+                    ? "Nothing to decide"
+                    : "Not built yet";
           return (
             <li
               key={step.id}
@@ -46,6 +48,11 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                 {step.id === "principles" && (
                   <span className="mt-1.5 -ml-1.5 block">
                     <StopList rows={[{ id: "principles" as const, label: "Laws", value: lawsValue(project) }]} current={isCurrent ? "principles" : null} onPick={onPick} />
+                  </span>
+                )}
+                {step.id === "preview" && (
+                  <span className="mt-1.5 -ml-1.5 block">
+                    <StopList rows={[{ id: "preview" as const, label: "Sample screen", value: "All choices" }]} current={isCurrent ? "preview" : null} onPick={onPick} />
                   </span>
                 )}
                 {step.id === "visual" && (

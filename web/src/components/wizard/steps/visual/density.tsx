@@ -30,6 +30,7 @@ export function DensityDecision({ visual, productName, onChoose }: DecisionProps
       chosenId={visual.density}
       productName={productName}
       onChoose={(id) => onChoose("density", id)}
+      preview={(id) => ({ key: "density", value: id })}
     />
   );
 }

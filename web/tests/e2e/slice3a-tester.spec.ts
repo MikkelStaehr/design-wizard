@@ -203,7 +203,7 @@ test("library panels show the real role mapping from resolved", async ({ page })
   await expect(row(none, "--bg")).toContainText(light.bg);
   await expect(row(none, "--radius")).toContainText(`${file.resolved!.radius}px`);
   await expect(page.getByText("set in step 3")).toHaveCount(0);
-  await expect(page.locator("[data-v-root]")).toHaveCount(0);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(0);
 });
 
 test("Esc in a field moves focus to the h1 and the field still saves", async ({ page }) => {

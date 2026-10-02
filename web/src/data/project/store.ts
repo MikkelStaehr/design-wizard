@@ -32,6 +32,8 @@ export interface ProjectState {
   previousResolved: Resolved | null;
   /** The snapshot set aside while a decision is open again, and whether it differed; restored when it closes. */
   parked: { resolved: Resolved; snapshotDiffers: boolean } | null;
+  /** Increments when open() or replace() puts another file's content in place; per-file UI state keys on it. */
+  fileVersion: number;
 }
 
 export interface ProjectStore {
@@ -55,7 +57,7 @@ export interface ProjectStore {
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null, fileVersion: 0 };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
@@ -145,11 +147,11 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
         return result.errors;
       }
       const { project, snapshotDiffers } = settle(result.project);
-      emit({ ...state, project, errors: [], downloadedAt: null, snapshotDiffers, parked: null, ...persist(project, null) });
+      emit({ ...state, project, errors: [], downloadedAt: null, snapshotDiffers, parked: null, fileVersion: state.fileVersion + 1, ...persist(project, null) });
       return [];
     },
     replace(project) {
-      emit({ ...state, project, errors: [], snapshotDiffers: false, parked: null, ...persist(project, state.downloadedAt) });
+      emit({ ...state, project, errors: [], snapshotDiffers: false, parked: null, fileVersion: state.fileVersion + 1, ...persist(project, state.downloadedAt) });
     },
     setProfile(key, value) {
       transition({ ...state.project, profile: { ...state.project.profile, [key]: value } }, "none", labelOf(`profile.${String(key)}`));
@@ -196,7 +198,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null, fileVersion: 0 };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {

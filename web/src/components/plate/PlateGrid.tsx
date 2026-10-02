@@ -4,6 +4,7 @@ import type { FontLoadState } from "@/fonts/loader";
 import type { PlateTokens } from "@/domain/tokens/resolve";
 import { SampleCard } from "@/components/samples/SampleCard";
 import { ownsKey } from "@/components/wizard/use-shortcuts";
+import { clearPreviewCandidate, setPreviewCandidate, type PreviewCandidate } from "@/components/wizard/preview-candidate";
 import { Plate } from "./Plate";
 
 export interface PlateOption<Id extends string = string> {
@@ -36,6 +37,8 @@ interface PlateGridProps<Id extends string> {
   status?: string;
   /** A line under the options, above the choose bar. */
   note?: ReactNode;
+  /** Visual decisions: the candidate a selected (not yet chosen) variant shows in the preview column. */
+  preview?: (id: Id) => PreviewCandidate;
 }
 
 
@@ -43,25 +46,34 @@ interface PlateGridProps<Id extends string> {
  * 2–3 plates side by side as one radio group. 1/2/3 (or arrows) select a variant; Enter or the
  * primary button records it. A variant whose fonts failed can be looked at but not chosen.
  */
-export function PlateGrid<Id extends string>({ label, decision, options, chosenId, productName, onChoose, frame = "plate", status, note }: PlateGridProps<Id>) {
+export function PlateGrid<Id extends string>({ label, decision, options, chosenId, productName, onChoose, frame = "plate", status, note, preview }: PlateGridProps<Id>) {
   const [selectedId, setSelectedId] = useState<Id | null>(chosenId);
   const [fontStates, setFontStates] = useState<Record<string, FontLoadState>>({});
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const selected = options.find((o) => o.id === selectedId) ?? null;
   const selectedFailed = selected !== null && fontStates[selected.id] === "failed";
+  // The preview candidate: published on select, cleared on choose and on unmount (it is UI state, never stored).
+  const previewRef = useRef(preview);
+  useEffect(() => {
+    previewRef.current = preview;
+  });
+  useEffect(() => () => clearPreviewCandidate(), []);
 
   const select = useCallback(
     (index: number, focus: boolean) => {
       const option = options[index];
       if (!option) return;
       setSelectedId(option.id);
+      if (previewRef.current) setPreviewCandidate(previewRef.current(option.id));
       if (focus) refs.current[index]?.focus();
     },
     [options],
   );
 
   const choose = useCallback(() => {
-    if (selected && fontStates[selected.id] !== "failed") onChoose(selected.id);
+    if (!selected || fontStates[selected.id] === "failed") return;
+    if (previewRef.current) clearPreviewCandidate();
+    onChoose(selected.id);
   }, [selected, fontStates, onChoose]);
 
   useEffect(() => {

@@ -105,7 +105,7 @@ test("platform: 3 live plates side by side at 1280, stacked at 390, no overflow"
   await expect(h1(page, "Platform")).toBeVisible();
   const radios = page.getByRole("radiogroup", { name: "Platform variants" }).getByRole("radio");
   await expect(radios).toHaveCount(3);
-  await expect(page.locator("[data-v-root]")).toHaveCount(3);
+  await expect(page.locator("main [data-v-root]")).toHaveCount(3);
   const boxes = await radios.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
   if (isMobile()) {
     expect(boxes[1].top).toBeGreaterThan(boxes[0].bottom);

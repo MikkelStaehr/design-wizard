@@ -45,6 +45,7 @@ export function FontPairDecision({ visual, productName, onChoose }: DecisionProp
         chosenId={visual.fontPair}
         productName={productName}
         onChoose={(id) => onChoose("fontPair", id)}
+        preview={(id) => ({ key: "fontPair", value: id })}
       />
     </>
   );

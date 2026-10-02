@@ -93,6 +93,7 @@ export function PaletteDecision({ visual, productName, onChoose }: DecisionProps
           chosenId={visual.paletteVariant}
           productName={productName}
           onChoose={(id) => onChoose("paletteVariant", id)}
+          preview={(id) => ({ key: "paletteVariant", value: id })}
         />
       )}
     </>
