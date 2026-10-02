@@ -140,7 +140,7 @@ test("AC5: a platform plate box is the same before and after the fonts load", as
     await route.continue();
   });
   await seedHarbour(page);
-  await page.goto("/?step=profile.platform");
+  await page.goto("/?step=profile.platform", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Loading fonts…").first()).toBeVisible();
   const radios = page.getByRole("radiogroup", { name: "Platform variants" }).getByRole("radio");
   const boxes = () => radios.evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { w: r.width, h: r.height }; }));

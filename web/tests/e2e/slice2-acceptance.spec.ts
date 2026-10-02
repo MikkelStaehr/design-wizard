@@ -153,7 +153,7 @@ test("AC5: a plate's box is identical while its fonts load and after they loaded
     await gate;
     await route.continue();
   });
-  await page.goto("/?step=visual.radius");
+  await page.goto("/?step=visual.radius", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Loading fonts…").first()).toBeVisible();
   const radios = page.getByRole("radiogroup", { name: "Radius variants" }).getByRole("radio");
   const boxes = () => radios.evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { w: r.width, h: r.height }; }));

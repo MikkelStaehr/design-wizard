@@ -178,7 +178,7 @@ test("demo plate boxes are identical before and after Inter loads", async ({ pag
     await gate;
     await route.continue();
   });
-  await page.goto("/?step=principles");
+  await page.goto("/?step=principles", { waitUntil: "domcontentloaded" });
   const plates = page.locator("li[data-law] figure [role=img]");
   await expect(plates).toHaveCount(18);
   await expect(page.getByText("Loading fonts…").first()).toBeVisible();

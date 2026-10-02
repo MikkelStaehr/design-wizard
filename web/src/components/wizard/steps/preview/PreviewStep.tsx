@@ -23,7 +23,11 @@ export function PreviewStep({ project, onMove }: { project: ProjectFile; onMove:
         Live preview
       </h1>
       <p className="mt-1 max-w-[60ch] text-dw-text-muted">
-        The sample screen in every decision you have made; open decisions show in preview-only neutrals.
+        Every decision you have made, on one sample screen.{" "}
+        {rows.some((r) => r.value === null)
+          ? "Open decisions show in neutral placeholders until you make them. Select a row below to make or change one."
+          : "Select a row below to change it."}
+        {profile.name === null ? " Harbour stands in until you name the project." : ""}
       </p>
       <div className="mt-5 max-w-[720px]">
         <PreviewPlate visual={visual} candidate={null} productName={profile.name} />
@@ -38,10 +42,16 @@ export function PreviewStep({ project, onMove }: { project: ProjectFile; onMove:
               className="flex min-h-11 w-full items-center justify-between gap-4 px-2 text-left hover:bg-dw-hover"
             >
               <span className="font-medium">
+                <span className="sr-only">Change </span>
                 <ArrowText text={r.label} />
               </span>
-              <span className={`min-w-0 truncate font-mono text-label ${r.value === null ? "text-dw-text-muted" : ""}`}>
-                {r.value ?? "pending"}
+              <span className="flex min-w-0 items-center gap-2">
+                <span className={`min-w-0 truncate font-mono text-label ${r.value === null ? "text-dw-text-muted" : ""}`}>
+                  {r.value ?? "pending"}
+                </span>
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0 text-dw-text-muted" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square">
+                  <path d="M6 3l5 5-5 5" />
+                </svg>
               </span>
             </button>
           </li>

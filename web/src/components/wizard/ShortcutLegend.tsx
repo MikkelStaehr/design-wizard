@@ -9,9 +9,9 @@ const SHORTCUTS: readonly { keys: readonly string[]; label: string }[] = [
 
 const LAWS_KEY = { keys: ["Space"], label: "Add or remove law" } as const;
 
-/** On step 2, Space replaces "1 2 3 Pick variant" (laws are not variants) and Enter continues. */
-export function ShortcutLegend({ className = "", laws = false }: { className?: string; laws?: boolean }) {
-  const list = laws ? [LAWS_KEY, { keys: ["Enter"], label: "Continue" }, ...SHORTCUTS.slice(2)] : SHORTCUTS;
+/** On step 2, Space replaces "1 2 3 Pick variant" (laws are not variants) and Enter continues. Step 4 has nothing to pick. */
+export function ShortcutLegend({ className = "", laws = false, view = false }: { className?: string; laws?: boolean; view?: boolean }) {
+  const list = view ? SHORTCUTS.slice(2) : laws ? [LAWS_KEY, { keys: ["Enter"], label: "Continue" }, ...SHORTCUTS.slice(2)] : SHORTCUTS;
   return (
     <dl aria-label="Keyboard shortcuts" className={`grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 text-small ${className}`}>
       {list.map((s) => (

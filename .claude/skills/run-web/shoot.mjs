@@ -75,7 +75,9 @@ try {
   await send("Page.enable");
   // Exact viewport: --window-size is clamped to ~516 px on Windows; device metrics are not.
   const metrics = (height) =>
-    send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 600 });
+    // mobile: false. With mobile emulation, captureBeyondViewport repeats the first viewport down a tall
+    // 390px page (seen in design-wizard slice 3c). Layout here depends on width only, so nothing is lost.
+    send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
   await metrics(844);
   const media = [
     ...(opt.dark ? [{ name: "prefers-color-scheme", value: "dark" }] : []),

@@ -52,7 +52,7 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                 )}
                 {step.id === "preview" && (
                   <span className="mt-1.5 -ml-1.5 block">
-                    <StopList rows={[{ id: "preview" as const, label: "Sample screen", value: "All choices" }]} current={isCurrent ? "preview" : null} onPick={onPick} />
+                    <StopList rows={[{ id: "preview" as const, label: "Sample screen", value: "All" }]} current={isCurrent ? "preview" : null} onPick={onPick} />
                   </span>
                 )}
                 {step.id === "visual" && (
@@ -69,7 +69,7 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
           );
         })}
       </ol>
-      <ShortcutLegend className="mt-auto pt-6" laws={current === "principles"} />
+      <ShortcutLegend className="mt-auto pt-6" laws={current === "principles"} view={current === "preview"} />
     </nav>
   );
 }

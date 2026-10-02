@@ -87,7 +87,7 @@ test("AC5: the preview plate box is the same before and after its fonts load", a
     await route.continue();
   });
   await seedHarbour(page);
-  await page.goto("/?step=profile.platform");
+  await page.goto("/?step=profile.platform", { waitUntil: "domcontentloaded" });
   await expect(column(page).getByText("Loading fonts…")).toBeVisible();
   const box = () => column(page).getByRole("img").evaluate((e) => { const r = e.getBoundingClientRect(); return { w: r.width, h: r.height }; });
   await frames(page);
@@ -120,12 +120,12 @@ test("step 4: J from density and ?step=preview land there, and each decision row
   await expect(page.getByRole("img", { name: /Sample screen rendered with Sora \+ Inter/ })).toBeVisible();
 
   const rows: [RegExp, string][] = [
-    [/^Product name/, "Name and product type"],
-    [/^Font pair/, "Font pair"],
-    [/^Spacing/, "Spacing"],
-    [/^Radius/, "Radius"],
-    [/^Brand colour/, "Brand colour"],
-    [/^Density/, "Density"],
+    [/^Change Product name/, "Name and product type"],
+    [/^Change Font pair/, "Font pair"],
+    [/^Change Spacing/, "Spacing"],
+    [/^Change Radius/, "Radius"],
+    [/^Change Brand colour/, "Brand colour"],
+    [/^Change Density/, "Density"],
   ];
   for (const [row, title] of rows) {
     await page.goto("/?step=preview");

@@ -109,6 +109,12 @@
   text-overflow: ellipsis;
 }
 
+.who > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Outline chip: --v-positive passes 4.5:1 on --v-bg in every offered palette (CONTRACTS §6: no chip role). */
 .chip {
   display: inline-flex;
