@@ -122,9 +122,50 @@ test("file status: none until a project file exists, current after download or o
   expect(fileStatus(store.getState())).toEqual({ kind: "behind", since: at });
   store.open(harbour, "harbour.dwproj.json");
   expect(fileStatus(store.getState()).kind).toBe("current");
-  // Reopening the same text: savedAt stays older than the open, so the status stays current.
+  // Reopening the same text is current too: the file on disk matches.
   store.open(harbour, "harbour.dwproj.json");
   expect(fileStatus(store.getState()).kind).toBe("current");
+});
+
+test("a failed autosave still stamps the change, so a downloaded project reads behind (reviewer Must)", () => {
+  const full = { ...new MemoryStorage(), getItem: () => null, setItem: () => { throw new Error("full"); }, removeItem: () => {} } as unknown as Storage;
+  const store = createProjectStore(full, ticking());
+  store.open(harbour);
+  store.markDownloaded();
+  expect(fileStatus(store.getState()).kind).toBe("current");
+  store.setVisual("density", "airy");
+  expect(store.getState().saveFailed).toBe(true);
+  expect(fileStatus(store.getState()).kind).toBe("behind");
+});
+
+test("a change in the same millisecond as a download or open still reads behind (frozen clock)", () => {
+  const frozen = () => new Date("2026-10-02T09:00:00.000Z");
+  const store = createProjectStore(null, frozen);
+  store.open(harbour);
+  expect(fileStatus(store.getState()).kind).toBe("current");
+  store.setVisual("density", "airy");
+  expect(fileStatus(store.getState()).kind).toBe("behind");
+  store.markDownloaded();
+  expect(fileStatus(store.getState()).kind).toBe("current");
+});
+
+test("opening a file that is resolved on load marks it changed: behind, not current", () => {
+  const p = JSON.parse(harbour);
+  p.resolved = null;
+  const store = createProjectStore(null, ticking());
+  store.open(JSON.stringify(p), "ready.dwproj.json");
+  expect(store.getState().project.resolved).not.toBeNull();
+  expect(fileStatus(store.getState()).kind).toBe("behind");
+});
+
+test("undo open in a fresh browser removes the autosave it created", () => {
+  const storage = new MemoryStorage();
+  const store = createProjectStore(storage, ticking());
+  store.open(harbour, "harbour.dwproj.json");
+  expect(storage.getItem(STORAGE_KEY)).not.toBeNull();
+  store.undoOpen();
+  expect(store.getState().savedAt).toBeNull();
+  expect(storage.getItem(STORAGE_KEY)).toBeNull();
 });
 
 test("openDecisionStops lists every open decision in wizard order with the stop that decides it", () => {

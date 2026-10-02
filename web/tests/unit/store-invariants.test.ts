@@ -21,7 +21,9 @@ function check(store: ProjectStore, trail: string[], before?: { text: string; sa
   const where = trail.join(" → ");
   const action = trail[trail.length - 1];
   const s = store.getState();
-  if (before && action !== "undo open") {
+  // An open sets both times itself (the file on disk matches); undo open puts the old ones back.
+  const opened = action.startsWith("open") && s.errors.length === 0;
+  if (before && action !== "undo open" && !opened) {
     const changed = serialize(p) !== before.text;
     if (!changed) expect(s.savedAt, `${where}: savedAt moved without a text change`).toBe(before.savedAt);
     if (changed && !action.startsWith("open")) expect(fileStatus(s).kind, where).not.toBe("current");
@@ -68,6 +70,9 @@ const ACTIONS: Action[] = [
   ["download", (s) => s.markDownloaded()],
 ];
 
+/** Storage that is full: every save throws (the download is then the only copy). */
+const fullStorage = { getItem: () => null, setItem: () => { throw new Error("QuotaExceededError"); }, removeItem: () => {}, clear: () => {}, key: () => null, length: 0 } as Storage;
+
 /** A clock that moves one second per call, so every timestamp is distinct and ordered. */
 const ticking = () => {
   let t = Date.parse("2026-10-02T09:00:00.000Z");
@@ -78,7 +83,7 @@ test("after every action in 300 seeded random sequences, the autosave is valid a
   let x = 20261002;
   const next = () => (x = (x * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
   for (let run = 0; run < 300; run++) {
-    const store = createProjectStore(null, ticking());
+    const store = createProjectStore(run % 3 === 0 ? fullStorage : null, run % 5 === 0 ? () => new Date("2026-10-02T09:00:00.000Z") : ticking());
     store.open(harbour);
     const trail = ["open harbour"];
     for (let step = 0; step < 15; step++) {

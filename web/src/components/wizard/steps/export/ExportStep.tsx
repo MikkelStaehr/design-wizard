@@ -37,7 +37,7 @@ const STATUS_LINE: Record<FileStatus["kind"], (s: FileStatus) => [string, string
   },
   behind: (s) => {
     const t = s.kind === "behind" ? clockTime(s.since) : "";
-    return [`UNSAVED SINCE ${t.toUpperCase()}`, `Changes made after ${t} are only in this browser. Download the project file to keep them.`];
+    return [`UNSAVED SINCE ${t}`, `Changes made after ${t} are only in this browser. Download the project file to keep them.`];
   },
 };
 
@@ -84,12 +84,11 @@ export function ExportStep({ project, onMove }: { project: ProjectFile; onMove: 
   }
   function downloadAll() {
     const list = [{ name: projectName, text: projectText }, ...(files ? EXPORT_NAMES.map((n) => ({ name: n, text: files[n], type: TYPES[n] })) : [])];
-    projectStore().markDownloaded();
-    if (files) {
-      const at = new Date().toISOString();
-      setDownloaded({ "DESIGN.md": at, "tokens.json": at, "ux-rules.yaml": at });
-    }
-    void downloadMany(list);
+    // The project file goes first; it counts as downloaded only once the browser has it.
+    void downloadMany(list, (i) => {
+      if (i === 0) projectStore().markDownloaded();
+      else setDownloaded((d) => ({ ...d, [EXPORT_NAMES[i - 1]]: new Date().toISOString() }));
+    });
   }
 
   function primary() {
@@ -106,6 +105,8 @@ export function ExportStep({ project, onMove }: { project: ProjectFile; onMove: 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Enter" || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
       if (ownsKey(e.target, e.key)) return;
+      // Reading a file's text or a notice is not a request to download (reviewer 3d).
+      if (e.target instanceof Element && e.target.closest("pre, [role=status], [role=alert]")) return;
       e.preventDefault();
       primaryRef.current();
     };

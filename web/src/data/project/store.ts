@@ -12,7 +12,7 @@ import { devFixtureName, devFixtureText } from "./dev-fixtures";
 import { emptyProject } from "./empty";
 import { parse } from "./parse";
 import { serialize } from "./serialize";
-import { restore, save } from "./storage";
+import { restore, save, STORAGE_KEY } from "./storage";
 
 export interface ProjectState {
   project: ProjectFile;
@@ -73,21 +73,26 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     state = next;
     listeners.forEach((l) => l());
   };
-  /** The canonical text last persisted: savedAt moves only when this text changes. */
+  /** The canonical text savedAt belongs to: savedAt moves only when this text changes. */
   let lastText: string | null = null;
+  /** `t`, or 1 ms after `floor` when `t` is not later (same millisecond, clock set back). */
+  const after = (t: string, floor: string | null) => (floor === null || t > floor ? t : new Date(Date.parse(floor) + 1).toISOString());
   /**
-   * Returns the new savedAt and whether saving failed; never throws (quota or blocked storage).
-   * `at` is the action's timestamp; `savedAt` (Undo open) puts an exact earlier value back.
+   * Stamps and autosaves the project; never throws (quota or blocked storage). When the text changes, savedAt
+   * becomes now (but always after downloadedAt), also when the save fails, so fileStatus
+   * never reads an unsaved change as current. `savedAt` puts an exact value back (Undo open); null = never
+   * saved, so the envelope is removed.
    */
-  const persist = (project: ProjectFile, downloadedAt: string | null, opts: { at?: string; savedAt?: string | null } = {}): { savedAt: string | null; saveFailed: boolean } => {
+  const persist = (project: ProjectFile, downloadedAt: string | null, opts: { savedAt?: string | null } = {}): { savedAt: string | null; saveFailed: boolean } => {
     const text = serialize(project);
-    const savedAt = opts.savedAt !== undefined ? opts.savedAt : text === lastText ? state.savedAt : (opts.at ?? now().toISOString());
+    const savedAt = opts.savedAt !== undefined ? opts.savedAt : text === lastText ? state.savedAt : after(now().toISOString(), downloadedAt);
+    lastText = text;
     try {
-      if (storage) save(storage, text, savedAt ?? (opts.at ?? now().toISOString()), downloadedAt);
-      lastText = text;
+      if (storage && savedAt === null) storage.removeItem(STORAGE_KEY);
+      else if (storage && savedAt !== null) save(storage, text, savedAt, downloadedAt);
       return { savedAt, saveFailed: false };
     } catch {
-      return { savedAt: state.savedAt, saveFailed: true };
+      return { savedAt, saveFailed: true };
     }
   };
   /** Undo open lasts until the next change. */
@@ -180,15 +185,16 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
         emit({ ...state, errors: result.errors });
         return result.errors;
       }
-      const { project, snapshotDiffers } = settle(result.project);
+      const { project, snapshotDiffers, changed } = settle(result.project);
       const { savedAt, downloadedAt, recomputedBy, previousResolved, parked } = state;
       const replaced: Replaced = { project: state.project, savedAt, downloadedAt, snapshotDiffers: state.snapshotDiffers, recomputedBy, previousResolved, parked };
-      // The file on disk matches what is now here, so it counts as the durable copy (CONTRACTS §1).
+      // The file on disk matches what is now here, so it counts as the durable copy (CONTRACTS §1), unless
+      // it was resolved on load: then the file is marked as changed (behind).
       const at = now().toISOString();
       emit({
         ...state, project, errors: [], downloadedAt: at, snapshotDiffers, recomputedBy: null, previousResolved: null, parked: null,
         fileVersion: state.fileVersion + 1, replaced, openNotice: { fileName: fileName ?? "the project file", undone: false },
-        ...persist(project, at, { at }),
+        ...persist(project, at, { savedAt: changed ? after(at, at) : at }),
       });
       return [];
     },
@@ -242,7 +248,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
     },
     markDownloaded() {
       // Only the project file is a copy you can reopen. Its text didn't change, so savedAt stays.
-      const downloadedAt = now().toISOString();
+      const downloadedAt = state.savedAt === null ? now().toISOString() : later(now().toISOString(), state.savedAt);
       emit({ ...state, downloadedAt, ...persist(state.project, downloadedAt, { savedAt: state.savedAt }) });
     },
   };
@@ -282,6 +288,11 @@ export function useProject(): ProjectState {
 
 export function projectStore(): ProjectStore {
   return getBrowserStore();
+}
+
+/** The later of two ISO timestamps (a download is never before the change it saved, even if the clock went back). */
+function later(a: string, b: string): string {
+  return a >= b ? a : b;
 }
 
 export type FileStatus = { kind: "none" } | { kind: "current"; at: string } | { kind: "behind"; since: string };

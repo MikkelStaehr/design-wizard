@@ -28,7 +28,13 @@ export function OpenProjectButton({
     if (input.current) input.current.value = ""; // the same file can be picked again
     if (!file) return;
     setStatus(`Reading ${file.name}…`);
-    const text = await readFileText(file);
+    let text: string;
+    try {
+      text = await readFileText(file);
+    } catch {
+      setStatus(`${file.name} could not be read. Nothing here changed.`);
+      return;
+    }
     const errors = projectStore().open(text, file.name);
     if (errors.length === 0) {
       setStatus(null);

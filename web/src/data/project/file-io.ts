@@ -13,10 +13,18 @@ export function downloadText(name: string, text: string, type = "application/jso
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** Several downloads, 150 ms apart, so the browser shows one multiple-downloads prompt at most. */
-export async function downloadMany(files: { name: string; text: string; type?: string }[], gapMs = 150): Promise<void> {
-  for (const [i, f] of files.entries()) {
-    if (i > 0) await new Promise((r) => setTimeout(r, gapMs));
-    downloadText(f.name, f.text, f.type);
+/**
+ * Several downloads, 150 ms apart, so the browser shows one multiple-downloads prompt at most. `onSent(i)` runs
+ * after file i was handed to the browser; a failure stops the rest and resolves (the unsent files stay unmarked).
+ */
+export async function downloadMany(files: { name: string; text: string; type?: string }[], onSent: (i: number) => void = () => {}, gapMs = 150): Promise<void> {
+  try {
+    for (const [i, f] of files.entries()) {
+      if (i > 0) await new Promise((r) => setTimeout(r, gapMs));
+      downloadText(f.name, f.text, f.type);
+      onSent(i);
+    }
+  } catch {
+    // Nothing to roll back: only the files that went out were marked.
   }
 }
