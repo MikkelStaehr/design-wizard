@@ -72,7 +72,7 @@
   },
   "resolved": {
     "color": {
-      "light": { "bg": "#EEF6F4", "surface": "#FFFFFF", "border": "#7FA39D", "text": "#0B2B28", "text-muted": "#527370",
+      "light": { "bg": "#E8FAF8", "surface": "#FFFFFF", "border": "#699691", "text": "#022522", "text-muted": "#4E716C",
                  "accent": "#0F766E", "on-accent": "#FFFFFF", "positive": "#…", "warning": "#…", "negative": "#…", "focus": "#0F766E" },
       "dark": null
     },
@@ -284,7 +284,7 @@ The mapping reuses shadcn's names on purpose. Part B's `--accent` and shadcn's `
 
 ```css
 :root {
-  --background: #EEF6F4; /* color.bg */
+  --background: #E8FAF8; /* color.bg */
   --primary: #0F766E; /* color.accent */
   /* … every row of the table above, in table order … */
   --radius: 8px; /* radius.base */

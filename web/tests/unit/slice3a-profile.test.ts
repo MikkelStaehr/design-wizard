@@ -36,6 +36,9 @@ class MemoryStorage implements Storage {
 }
 
 const harbour = readFileSync(join(__dirname, "..", "..", "fixtures", "harbour.project.json"), "utf8");
+// Harbour as written in slice 1, before the palette algorithm: its stored colours differ from a fresh
+// computation on purpose, so it opens with "Stored values differ" (task 3f).
+const harbourStale = readFileSync(join(__dirname, "..", "fixtures", "harbour-stale.project.json"), "utf8");
 const now = () => new Date("2026-10-01T10:00:00.000Z");
 const savedFile = (s: Storage) => JSON.parse(JSON.parse(s.getItem(STORAGE_KEY)!).file);
 const resolvedBytes = (s: Storage) => JSON.stringify(savedFile(s).resolved);
@@ -118,7 +121,7 @@ describe("snapshot rule on Harbour (CONTRACTS §1)", () => {
   const opened = () => {
     const storage = new MemoryStorage();
     const store = createProjectStore(storage, now);
-    expect(store.open(harbour)).toEqual([]);
+    expect(store.open(harbourStale)).toEqual([]);
     return { storage, store };
   };
 

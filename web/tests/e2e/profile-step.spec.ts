@@ -7,8 +7,8 @@ const isMobile = () => test.info().project.name === "mobile-390";
 const KEY = "design-wizard:v1:project";
 
 /** Seeds Harbour into the autosave once per tab, so a reload reads what the app saved. */
-async function seedHarbour(page: Page) {
-  const p = JSON.parse(readFileSync(resolve("fixtures/harbour.project.json"), "utf8"));
+async function seedHarbour(page: Page, file = "fixtures/harbour.project.json") {
+  const p = JSON.parse(readFileSync(resolve(file), "utf8"));
   const envelope = JSON.stringify({ savedAt: "2026-10-01T09:00:00.000Z", downloadedAt: null, file: JSON.stringify(p, null, 2) + "\n" });
   await page.addInitScript(
     ([key, value]) => {
@@ -120,7 +120,8 @@ test("platform: 3 live plates side by side at 1280, stacked at 390, no overflow"
 });
 
 test("harbour snapshot notice: Keep stored values dismisses it and leaves resolved unchanged", async ({ page }) => {
-  await seedHarbour(page);
+  // Stored colours that differ on purpose (task 3f).
+  await seedHarbour(page, "tests/fixtures/harbour-stale.project.json");
   await page.goto("/?step=profile.identity");
   const title = page.getByRole("heading", { name: "Stored values differ from the current algorithm: keep or recompute" });
   await expect(title).toBeVisible();

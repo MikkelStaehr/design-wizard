@@ -48,49 +48,49 @@
 
 | Role | Hex |
 |---|---|
-| `bg` | #EEF6F4 |
+| `bg` | #E8FAF8 |
 | `surface` | #FFFFFF |
-| `border` | #5F817C |
-| `text` | #0B2B28 |
-| `text-muted` | #527370 |
+| `border` | #699691 |
+| `text` | #022522 |
+| `text-muted` | #4E716C |
 | `accent` | #0F766E |
 | `on-accent` | #FFFFFF |
-| `positive` | #166534 |
-| `warning` | #92400E |
-| `negative` | #B91C1C |
+| `positive` | #1D7D3E |
+| `warning` | #A46100 |
+| `negative` | #C22826 |
 | `focus` | #0F766E |
 
 **Contrast (WCAG 2.x, AA)**
 
 | Pair | Ratio | Minimum | Result |
 |---|---|---|---|
-| text / bg | 13.75 : 1 | ≥ 4.5 | PASS |
-| text / surface | 15.10 : 1 | ≥ 4.5 | PASS |
-| text-muted / bg | 4.72 : 1 | ≥ 4.5 | PASS |
-| text-muted / surface | 5.19 : 1 | ≥ 4.5 | PASS |
+| text / bg | 15.08 : 1 | ≥ 4.5 | PASS |
+| text / surface | 16.27 : 1 | ≥ 4.5 | PASS |
+| text-muted / bg | 4.98 : 1 | ≥ 4.5 | PASS |
+| text-muted / surface | 5.38 : 1 | ≥ 4.5 | PASS |
 | on-accent / accent | 5.47 : 1 | ≥ 4.5 | PASS |
-| accent / bg | 4.98 : 1 | ≥ 4.5 | PASS |
-| positive / bg | 6.49 : 1 | ≥ 4.5 | PASS |
-| warning / bg | 6.45 : 1 | ≥ 4.5 | PASS |
-| negative / bg | 5.89 : 1 | ≥ 4.5 | PASS |
-| border / bg | 3.88 : 1 | ≥ 3 | PASS |
-| border / surface | 4.27 : 1 | ≥ 3 | PASS |
-| focus / bg | 4.98 : 1 | ≥ 3 | PASS |
+| accent / bg | 5.07 : 1 | ≥ 4.5 | PASS |
+| positive / bg | 4.79 : 1 | ≥ 4.5 | PASS |
+| warning / bg | 4.53 : 1 | ≥ 4.5 | PASS |
+| negative / bg | 5.36 : 1 | ≥ 4.5 | PASS |
+| border / bg | 3.05 : 1 | ≥ 3 | PASS |
+| border / surface | 3.29 : 1 | ≥ 3 | PASS |
+| focus / bg | 5.07 : 1 | ≥ 3 | PASS |
 
 **CSS variables**
 
 ```css
 :root {
-  --bg: #EEF6F4; /* color.bg */
+  --bg: #E8FAF8; /* color.bg */
   --surface: #FFFFFF; /* color.surface */
-  --border: #5F817C; /* color.border */
-  --text: #0B2B28; /* color.text */
-  --text-muted: #527370; /* color.text-muted */
+  --border: #699691; /* color.border */
+  --text: #022522; /* color.text */
+  --text-muted: #4E716C; /* color.text-muted */
   --accent: #0F766E; /* color.accent */
   --on-accent: #FFFFFF; /* color.on-accent */
-  --positive: #166534; /* color.positive */
-  --warning: #92400E; /* color.warning */
-  --negative: #B91C1C; /* color.negative */
+  --positive: #1D7D3E; /* color.positive */
+  --warning: #A46100; /* color.warning */
+  --negative: #C22826; /* color.negative */
   --focus: #0F766E; /* color.focus */
   --radius: 8px; /* radius.base */
 }

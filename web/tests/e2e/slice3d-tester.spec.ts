@@ -8,7 +8,7 @@ const KEY = "design-wizard:v1:project";
 const isMobile = () => test.info().project.name === "mobile-390";
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const fixture = (name: string): Json => JSON.parse(readFileSync(resolve(`fixtures/${name}.project.json`), "utf8"));
-/** Harbour with no stored snapshot: the store resolves a fresh one (the dev "ready" fixture). */
+/** Harbour with no stored snapshot: the store resolves a fresh one on load. */
 const ready = (): Json => ({ ...fixture("harbour"), resolved: null });
 const local = (mo: number, d: number, h: number, mi: number) => new Date(2026, mo - 1, d, h, mi).toISOString();
 

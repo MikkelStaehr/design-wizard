@@ -48,34 +48,34 @@
 
 | Role | Hex |
 |---|---|
-| `bg` | #1A1A14 |
-| `surface` | #26261D |
-| `border` | #8C8C70 |
-| `text` | #F5F5E6 |
-| `text-muted` | #BDBDA6 |
-| `accent` | #E6E600 |
-| `on-accent` | #1A1A00 |
-| `positive` | #86EFAC |
-| `warning` | #FCD34D |
-| `negative` | #FCA5A5 |
-| `focus` | #E6E600 |
+| `bg` | #1C1C00 |
+| `surface` | #282807 |
+| `border` | #737459 |
+| `text` | #EFF0E1 |
+| `text-muted` | #B8B9A4 |
+| `accent` | #FFFF00 |
+| `on-accent` | #101002 |
+| `positive` | #7CD591 |
+| `warning` | #EEC469 |
+| `negative` | #F28881 |
+| `focus` | #FFFF00 |
 
 **Contrast (WCAG 2.x, AA)**
 
 | Pair | Ratio | Minimum | Result |
 |---|---|---|---|
-| text / bg | 15.88 : 1 | ≥ 4.5 | PASS |
-| text / surface | 13.85 : 1 | ≥ 4.5 | PASS |
-| text-muted / bg | 9.14 : 1 | ≥ 4.5 | PASS |
-| text-muted / surface | 7.98 : 1 | ≥ 4.5 | PASS |
-| on-accent / accent | 13.16 : 1 | ≥ 4.5 | PASS |
-| accent / bg | 13.05 : 1 | ≥ 4.5 | PASS |
-| positive / bg | 12.44 : 1 | ≥ 4.5 | PASS |
-| warning / bg | 12.11 : 1 | ≥ 4.5 | PASS |
-| negative / bg | 9.20 : 1 | ≥ 4.5 | PASS |
-| border / bg | 5.07 : 1 | ≥ 3 | PASS |
-| border / surface | 4.42 : 1 | ≥ 3 | PASS |
-| focus / bg | 13.05 : 1 | ≥ 3 | PASS |
+| text / bg | 14.99 : 1 | ≥ 4.5 | PASS |
+| text / surface | 13.04 : 1 | ≥ 4.5 | PASS |
+| text-muted / bg | 8.64 : 1 | ≥ 4.5 | PASS |
+| text-muted / surface | 7.52 : 1 | ≥ 4.5 | PASS |
+| on-accent / accent | 17.82 : 1 | ≥ 4.5 | PASS |
+| accent / bg | 16.08 : 1 | ≥ 4.5 | PASS |
+| positive / bg | 9.69 : 1 | ≥ 4.5 | PASS |
+| warning / bg | 10.47 : 1 | ≥ 4.5 | PASS |
+| negative / bg | 7.08 : 1 | ≥ 4.5 | PASS |
+| border / bg | 3.59 : 1 | ≥ 3 | PASS |
+| border / surface | 3.12 : 1 | ≥ 3 | PASS |
+| focus / bg | 16.08 : 1 | ≥ 3 | PASS |
 
 **shadcn/ui variables**
 
@@ -102,34 +102,34 @@
 
 ```css
 :root {
-  --background: #1A1A14; /* color.bg */
-  --foreground: #F5F5E6; /* color.text */
-  --card: #1A1A14; /* color.bg */
-  --popover: #1A1A14; /* color.bg */
-  --card-foreground: #F5F5E6; /* color.text */
-  --popover-foreground: #F5F5E6; /* color.text */
-  --primary: #E6E600; /* color.accent */
-  --primary-foreground: #1A1A00; /* color.on-accent */
-  --secondary: #26261D; /* color.surface */
-  --muted: #26261D; /* color.surface */
-  --secondary-foreground: #F5F5E6; /* color.text */
-  --muted-foreground: #BDBDA6; /* color.text-muted */
-  --accent: #26261D; /* color.surface */
-  --accent-foreground: #F5F5E6; /* color.text */
-  --destructive: #FCA5A5; /* color.negative */
-  --border: #8C8C70; /* color.border */
-  --input: #8C8C70; /* color.border */
-  --ring: #E6E600; /* color.focus */
-  --sidebar: #1A1A14; /* color.bg */
-  --sidebar-foreground: #F5F5E6; /* color.text */
-  --sidebar-primary: #E6E600; /* color.accent */
-  --sidebar-primary-foreground: #1A1A00; /* color.on-accent */
-  --sidebar-accent: #26261D; /* color.surface */
-  --sidebar-accent-foreground: #F5F5E6; /* color.text */
-  --sidebar-border: #8C8C70; /* color.border */
-  --sidebar-ring: #E6E600; /* color.focus */
-  --positive: #86EFAC; /* color.positive */
-  --warning: #FCD34D; /* color.warning */
+  --background: #1C1C00; /* color.bg */
+  --foreground: #EFF0E1; /* color.text */
+  --card: #1C1C00; /* color.bg */
+  --popover: #1C1C00; /* color.bg */
+  --card-foreground: #EFF0E1; /* color.text */
+  --popover-foreground: #EFF0E1; /* color.text */
+  --primary: #FFFF00; /* color.accent */
+  --primary-foreground: #101002; /* color.on-accent */
+  --secondary: #282807; /* color.surface */
+  --muted: #282807; /* color.surface */
+  --secondary-foreground: #EFF0E1; /* color.text */
+  --muted-foreground: #B8B9A4; /* color.text-muted */
+  --accent: #282807; /* color.surface */
+  --accent-foreground: #EFF0E1; /* color.text */
+  --destructive: #F28881; /* color.negative */
+  --border: #737459; /* color.border */
+  --input: #737459; /* color.border */
+  --ring: #FFFF00; /* color.focus */
+  --sidebar: #1C1C00; /* color.bg */
+  --sidebar-foreground: #EFF0E1; /* color.text */
+  --sidebar-primary: #FFFF00; /* color.accent */
+  --sidebar-primary-foreground: #101002; /* color.on-accent */
+  --sidebar-accent: #282807; /* color.surface */
+  --sidebar-accent-foreground: #EFF0E1; /* color.text */
+  --sidebar-border: #737459; /* color.border */
+  --sidebar-ring: #FFFF00; /* color.focus */
+  --positive: #7CD591; /* color.positive */
+  --warning: #EEC469; /* color.warning */
   --radius: 8px; /* radius.base */
 }
 @theme inline {

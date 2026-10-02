@@ -56,7 +56,7 @@ web/
 │  │  ├─ store.ts         in-memory store + actions (open/undoOpen, decisions, keep/recompute, markDownloaded) + fileStatus + useProject()
 │  │  ├─ storage.ts       localStorage envelope, "unsaved since", quarantine of unparseable text
 │  │  ├─ file-io.ts       open (File.text), download (Blob URL, delayed revoke), downloadMany (150 ms apart)
-│  │  └─ dev-fixtures.ts  ?fixture=empty|harbour|stale|invalid-many|zero-laws|behind|edge-name|snapshot-differs|ready (development build only)
+│  │  └─ dev-fixtures.ts  ?fixture=empty|harbour|stale|invalid-many|zero-laws|behind|edge-name|snapshot-differs (development build only)
 │  ├─ export/             pure: ProjectFile → file text
 │  │  ├─ tokens-json.ts   DTCG 2025.10
 │  │  ├─ shadcn-map.ts    role → shadcn table + CSS block. Optional layer, only when profile.componentLibrary = "shadcn"

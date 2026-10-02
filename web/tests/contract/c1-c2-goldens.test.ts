@@ -35,7 +35,7 @@ describe("C1/C2 goldens", () => {
     expect(readGolden("edge-no-shadcn", "tokens.json")).toBe(readGolden("harbour", "tokens.json"));
     const md = readGolden("edge-no-shadcn", "DESIGN.md");
     expect(md).not.toContain("--background");
-    expect(md).toContain("  --bg: #EEF6F4; /* color.bg */");
+    expect(md).toContain("  --bg: #E8FAF8; /* color.bg */");
   });
 
   test("names are slugged and escaped", () => {

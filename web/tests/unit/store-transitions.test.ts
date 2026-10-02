@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { expect, test } from "vitest";
 import { createProjectStore, type ProjectStore } from "@/data/project/store";
 
-const harbour = readFileSync(join(__dirname, "..", "..", "fixtures", "harbour.project.json"), "utf8");
+// Harbour as written in slice 1, before the palette algorithm: its stored colours differ from a fresh
+// computation on purpose, so it opens with "Stored values differ" (task 3f).
+const harbour = readFileSync(join(__dirname, "..", "fixtures", "harbour-stale.project.json"), "utf8");
 
 /** Harbour opened and its differing snapshot kept: the state every case starts from. */
 function kept(): { store: ProjectStore; snapshot: string } {

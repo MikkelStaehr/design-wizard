@@ -44,16 +44,16 @@
   "resolved": {
     "color": {
       "light": {
-        "bg": "#EEF6F4",
+        "bg": "#E8FAF8",
         "surface": "#FFFFFF",
-        "border": "#5F817C",
-        "text": "#0B2B28",
-        "text-muted": "#527370",
+        "border": "#699691",
+        "text": "#022522",
+        "text-muted": "#4E716C",
         "accent": "#0F766E",
         "on-accent": "#FFFFFF",
-        "positive": "#166534",
-        "warning": "#92400E",
-        "negative": "#B91C1C",
+        "positive": "#1D7D3E",
+        "warning": "#A46100",
+        "negative": "#C22826",
         "focus": "#0F766E"
       },
       "dark": null

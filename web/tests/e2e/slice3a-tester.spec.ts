@@ -7,6 +7,8 @@ import { expect, test, type Page } from "@playwright/test";
 const isMobile = () => test.info().project.name === "mobile-390";
 const KEY = "design-wizard:v1:project";
 const NOTICE = "Stored values differ from the current algorithm: keep or recompute";
+const STALE = "tests/fixtures/harbour-stale.project.json"; // stored colours differ on purpose (task 3f)
+
 const h1 = (page: Page, name: string) => page.getByRole("heading", { level: 1, name });
 
 type Saved = {
@@ -14,8 +16,8 @@ type Saved = {
   resolved: { color: { light: Record<string, string> }; radius: number } | null;
 };
 
-async function seedHarbour(page: Page) {
-  const p = JSON.parse(readFileSync(resolve("fixtures/harbour.project.json"), "utf8"));
+async function seedHarbour(page: Page, file = "fixtures/harbour.project.json") {
+  const p = JSON.parse(readFileSync(resolve(file), "utf8"));
   const envelope = JSON.stringify({ savedAt: "2026-10-01T09:00:00.000Z", downloadedAt: null, file: JSON.stringify(p, null, 2) + "\n" });
   await page.addInitScript(
     ([key, value]) => {
@@ -141,7 +143,7 @@ test("submit validates untouched fields: Enter on an empty form shows both error
 });
 
 test("harbour: editing notes, name, type, platform and library leaves resolved byte-identical and the notice stays", async ({ page }) => {
-  await seedHarbour(page);
+  await seedHarbour(page, STALE);
   await page.goto("/?step=profile.identity");
   const title = page.getByRole("heading", { name: NOTICE });
   await expect(title).toBeVisible();
@@ -168,7 +170,7 @@ test("harbour: editing notes, name, type, platform and library leaves resolved b
 });
 
 test("harbour: Recompute now replaces resolved and can be undone; after a recompute the notice does not return on reload", async ({ page }) => {
-  await seedHarbour(page);
+  await seedHarbour(page, STALE);
   await page.goto("/?step=profile.identity");
   const title = page.getByRole("heading", { name: NOTICE });
   await expect(title).toBeVisible();

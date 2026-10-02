@@ -26,7 +26,9 @@ class MemoryStorage implements Storage {
   }
 }
 
-const harbour = readFileSync(join(__dirname, "..", "..", "fixtures", "harbour.project.json"), "utf8");
+// Harbour as written in slice 1, before the palette algorithm: its stored colours differ from a fresh
+// computation on purpose, so it opens with "Stored values differ" (task 3f).
+const harbour = readFileSync(join(__dirname, "..", "fixtures", "harbour-stale.project.json"), "utf8");
 const now = () => new Date("2026-10-01T10:00:00.000Z");
 
 test("an opened project is autosaved and restored on the next start", () => {

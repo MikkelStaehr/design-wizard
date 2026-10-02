@@ -6,8 +6,8 @@ import { expect, test, type Page } from "@playwright/test";
 const KEY = "design-wizard:v1:project";
 type Saved = { principles: { lawId: string; params: Record<string, number> }[] | null; resolved: { color: unknown; rules: { id: string; rule: string }[] } | null };
 
-async function seed(page: Page, edit: (p: Record<string, unknown>) => void = () => {}) {
-  const p = JSON.parse(readFileSync(resolve("fixtures/harbour.project.json"), "utf8"));
+async function seed(page: Page, edit: (p: Record<string, unknown>) => void = () => {}, file = "fixtures/harbour.project.json") {
+  const p = JSON.parse(readFileSync(resolve(file), "utf8"));
   edit(p);
   const envelope = JSON.stringify({ savedAt: "2026-10-01T09:00:00.000Z", downloadedAt: null, file: JSON.stringify(p, null, 2) + "\n" });
   await page.addInitScript(
@@ -116,7 +116,8 @@ test("keyboard only through step 2; rows are at least 44px and nothing overflows
 });
 
 test("the kept snapshot survives a param change", async ({ page }) => {
-  await seed(page);
+  // Stored colours that differ on purpose (task 3f), so there is a snapshot to keep.
+  await seed(page, undefined, "tests/fixtures/harbour-stale.project.json");
   await page.goto("/?step=profile.identity");
   await page.getByRole("button", { name: "Keep stored values" }).click();
   const before = JSON.stringify((await saved(page)).resolved?.color);

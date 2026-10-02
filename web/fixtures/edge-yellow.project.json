@@ -44,17 +44,17 @@
   "resolved": {
     "color": {
       "light": {
-        "bg": "#1A1A14",
-        "surface": "#26261D",
-        "border": "#8C8C70",
-        "text": "#F5F5E6",
-        "text-muted": "#BDBDA6",
-        "accent": "#E6E600",
-        "on-accent": "#1A1A00",
-        "positive": "#86EFAC",
-        "warning": "#FCD34D",
-        "negative": "#FCA5A5",
-        "focus": "#E6E600"
+        "bg": "#1C1C00",
+        "surface": "#282807",
+        "border": "#737459",
+        "text": "#EFF0E1",
+        "text-muted": "#B8B9A4",
+        "accent": "#FFFF00",
+        "on-accent": "#101002",
+        "positive": "#7CD591",
+        "warning": "#EEC469",
+        "negative": "#F28881",
+        "focus": "#FFFF00"
       },
       "dark": null
     },

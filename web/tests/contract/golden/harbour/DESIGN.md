@@ -48,34 +48,34 @@
 
 | Role | Hex |
 |---|---|
-| `bg` | #EEF6F4 |
+| `bg` | #E8FAF8 |
 | `surface` | #FFFFFF |
-| `border` | #5F817C |
-| `text` | #0B2B28 |
-| `text-muted` | #527370 |
+| `border` | #699691 |
+| `text` | #022522 |
+| `text-muted` | #4E716C |
 | `accent` | #0F766E |
 | `on-accent` | #FFFFFF |
-| `positive` | #166534 |
-| `warning` | #92400E |
-| `negative` | #B91C1C |
+| `positive` | #1D7D3E |
+| `warning` | #A46100 |
+| `negative` | #C22826 |
 | `focus` | #0F766E |
 
 **Contrast (WCAG 2.x, AA)**
 
 | Pair | Ratio | Minimum | Result |
 |---|---|---|---|
-| text / bg | 13.75 : 1 | ≥ 4.5 | PASS |
-| text / surface | 15.10 : 1 | ≥ 4.5 | PASS |
-| text-muted / bg | 4.72 : 1 | ≥ 4.5 | PASS |
-| text-muted / surface | 5.19 : 1 | ≥ 4.5 | PASS |
+| text / bg | 15.08 : 1 | ≥ 4.5 | PASS |
+| text / surface | 16.27 : 1 | ≥ 4.5 | PASS |
+| text-muted / bg | 4.98 : 1 | ≥ 4.5 | PASS |
+| text-muted / surface | 5.38 : 1 | ≥ 4.5 | PASS |
 | on-accent / accent | 5.47 : 1 | ≥ 4.5 | PASS |
-| accent / bg | 4.98 : 1 | ≥ 4.5 | PASS |
-| positive / bg | 6.49 : 1 | ≥ 4.5 | PASS |
-| warning / bg | 6.45 : 1 | ≥ 4.5 | PASS |
-| negative / bg | 5.89 : 1 | ≥ 4.5 | PASS |
-| border / bg | 3.88 : 1 | ≥ 3 | PASS |
-| border / surface | 4.27 : 1 | ≥ 3 | PASS |
-| focus / bg | 4.98 : 1 | ≥ 3 | PASS |
+| accent / bg | 5.07 : 1 | ≥ 4.5 | PASS |
+| positive / bg | 4.79 : 1 | ≥ 4.5 | PASS |
+| warning / bg | 4.53 : 1 | ≥ 4.5 | PASS |
+| negative / bg | 5.36 : 1 | ≥ 4.5 | PASS |
+| border / bg | 3.05 : 1 | ≥ 3 | PASS |
+| border / surface | 3.29 : 1 | ≥ 3 | PASS |
+| focus / bg | 5.07 : 1 | ≥ 3 | PASS |
 
 **shadcn/ui variables**
 
@@ -102,34 +102,34 @@
 
 ```css
 :root {
-  --background: #EEF6F4; /* color.bg */
-  --foreground: #0B2B28; /* color.text */
-  --card: #EEF6F4; /* color.bg */
-  --popover: #EEF6F4; /* color.bg */
-  --card-foreground: #0B2B28; /* color.text */
-  --popover-foreground: #0B2B28; /* color.text */
+  --background: #E8FAF8; /* color.bg */
+  --foreground: #022522; /* color.text */
+  --card: #E8FAF8; /* color.bg */
+  --popover: #E8FAF8; /* color.bg */
+  --card-foreground: #022522; /* color.text */
+  --popover-foreground: #022522; /* color.text */
   --primary: #0F766E; /* color.accent */
   --primary-foreground: #FFFFFF; /* color.on-accent */
   --secondary: #FFFFFF; /* color.surface */
   --muted: #FFFFFF; /* color.surface */
-  --secondary-foreground: #0B2B28; /* color.text */
-  --muted-foreground: #527370; /* color.text-muted */
+  --secondary-foreground: #022522; /* color.text */
+  --muted-foreground: #4E716C; /* color.text-muted */
   --accent: #FFFFFF; /* color.surface */
-  --accent-foreground: #0B2B28; /* color.text */
-  --destructive: #B91C1C; /* color.negative */
-  --border: #5F817C; /* color.border */
-  --input: #5F817C; /* color.border */
+  --accent-foreground: #022522; /* color.text */
+  --destructive: #C22826; /* color.negative */
+  --border: #699691; /* color.border */
+  --input: #699691; /* color.border */
   --ring: #0F766E; /* color.focus */
-  --sidebar: #EEF6F4; /* color.bg */
-  --sidebar-foreground: #0B2B28; /* color.text */
+  --sidebar: #E8FAF8; /* color.bg */
+  --sidebar-foreground: #022522; /* color.text */
   --sidebar-primary: #0F766E; /* color.accent */
   --sidebar-primary-foreground: #FFFFFF; /* color.on-accent */
   --sidebar-accent: #FFFFFF; /* color.surface */
-  --sidebar-accent-foreground: #0B2B28; /* color.text */
-  --sidebar-border: #5F817C; /* color.border */
+  --sidebar-accent-foreground: #022522; /* color.text */
+  --sidebar-border: #699691; /* color.border */
   --sidebar-ring: #0F766E; /* color.focus */
-  --positive: #166534; /* color.positive */
-  --warning: #92400E; /* color.warning */
+  --positive: #1D7D3E; /* color.positive */
+  --warning: #A46100; /* color.warning */
   --radius: 8px; /* radius.base */
 }
 @theme inline {
