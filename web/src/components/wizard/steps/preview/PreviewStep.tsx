@@ -1,9 +1,11 @@
 "use client";
+import { useEffect, useRef } from "react";
 import type { ProjectFile } from "@/contracts/project";
 import { SUB_KEYS, VISUAL_SUBDECISIONS, type StopId } from "@/domain/decisions";
 import { PreviewPlate } from "@/components/wizard/LivePreview";
 import { ArrowText } from "@/components/wizard/ArrowText";
 import { valueLabel } from "@/components/wizard/steps/visual/model";
+import { ownsKey } from "@/components/wizard/use-shortcuts";
 
 // Step 4: every decision on one sample screen, full size. Nothing to decide here; each row reopens its decision.
 export function PreviewStep({ project, onMove }: { project: ProjectFile; onMove: (id: StopId) => void }) {
@@ -16,6 +18,22 @@ export function PreviewStep({ project, onMove }: { project: ProjectFile; onMove:
       value: valueLabel(visual, k),
     })),
   ];
+
+  // Enter outside a button, summary or field continues to step 5 (at 390 there is no rail and no J key).
+  const moveRef = useRef(onMove);
+  useEffect(() => {
+    moveRef.current = onMove;
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter" || e.ctrlKey || e.metaKey || e.altKey || e.repeat || ownsKey(e.target, e.key)) return;
+      e.preventDefault();
+      moveRef.current("export");
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <>
       <p className="font-mono text-label font-medium tracking-[0.08em] text-dw-text-muted uppercase">Step 04 · Live preview</p>
@@ -57,7 +75,15 @@ export function PreviewStep({ project, onMove }: { project: ProjectFile; onMove:
           </li>
         ))}
       </ul>
-      <p className="mt-5 text-dw-text-muted">Export is built next.</p>
+      <button
+        type="button"
+        data-primary-action=""
+        onClick={() => onMove("export")}
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2.5 rounded-sm bg-dw-accent px-4 font-semibold whitespace-nowrap text-dw-on-accent min-[761px]:w-auto"
+      >
+        Continue to export
+        <kbd className="border-dw-on-accent bg-transparent text-dw-on-accent">Enter</kbd>
+      </button>
     </>
   );
 }

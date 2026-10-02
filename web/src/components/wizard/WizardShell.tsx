@@ -9,6 +9,9 @@ import { VisualStep } from "./steps/visual/VisualStep";
 import { ProfileStep } from "./steps/profile/ProfileStep";
 import { PrinciplesStep } from "./steps/principles/PrinciplesStep";
 import { PreviewStep } from "./steps/preview/PreviewStep";
+import { ExportStep } from "./steps/export/ExportStep";
+import { OpenedNotice } from "./OpenedNotice";
+import { OpenProjectButton } from "./OpenProjectButton";
 import { LivePreview } from "./LivePreview";
 import type { ProfileStop } from "./steps/profile/model";
 
@@ -39,7 +42,7 @@ export function WizardShell() {
   const [picked, setPicked] = useState<StopId | null>(null);
   /** Until the user moves, the wizard opens on the first open stop (the project may load after first render). */
   const fromUrl = useSyncExternalStore(noSubscribe, () => stopFromSearch(window.location.search), () => null);
-  // Every decision set: open step 4, the last built step.
+  // Every decision set: open step 4, the live preview.
   const stop: StopId = picked ?? fromUrl ?? firstOpenStop(project) ?? "preview";
   const current = stepOfStop(stop);
   // Pin the starting stop once, so committing a field never moves the user mid-step.
@@ -76,8 +79,11 @@ export function WizardShell() {
     <div className="min-h-dvh min-[761px]:grid min-[761px]:grid-cols-[200px_minmax(0,1fr)] min-[1101px]:grid-cols-[232px_minmax(0,1fr)_340px]">
       <header className="flex min-h-11 items-center justify-between border-b border-dw-line px-4 min-[761px]:hidden">
         <span className="font-mono text-label font-medium tracking-[0.08em] uppercase">Design Wizard</span>
-        <span className="font-mono text-label text-dw-text-muted">
-          Step {step.number} of {STEPS.length}
+        <span className="flex items-center gap-3">
+          <span className="font-mono text-label text-dw-text-muted">
+            Step {step.number} of {STEPS.length}
+          </span>
+          {hydrated && <OpenProjectButton label="Open file" buttonClass="px-3" />}
         </span>
       </header>
       <aside className="hidden min-[761px]:block min-[761px]:row-span-2 min-[1101px]:row-span-1">
@@ -93,7 +99,7 @@ export function WizardShell() {
           <>
         {errors.length > 0 && (
           <section role="alert" aria-labelledby="file-errors-title" className="mb-5 border border-dw-ctl bg-dw-surface px-4 py-3">
-            <h2 id="file-errors-title" className="font-medium">
+            <h2 id="file-errors-title" tabIndex={-1} className="font-medium">
               The project file could not be opened: {errors.length} {errors.length === 1 ? "problem" : "problems"}
             </h2>
             <p className="text-small text-dw-text-muted">Nothing was replaced. Fix these in the file and open it again.</p>
@@ -112,6 +118,7 @@ export function WizardShell() {
             This browser did not save your last change. Keep the tab open until you can download the project file.
           </p>
         )}
+        <OpenedNotice />
         <SnapshotNotice />
         {current === "visual" && (
           <VisualStep key={fileVersion} sub={visualSub} visual={visual} productName={productName} onMove={(k) => setPicked(`visual.${k}`)} />
@@ -119,6 +126,7 @@ export function WizardShell() {
         {current === "profile" && <ProfileStep stop={stop as ProfileStop} project={project} onMove={setPicked} />}
         {current === "principles" && <PrinciplesStep project={project} onMove={setPicked} />}
         {current === "preview" && <PreviewStep project={project} onMove={setPicked} />}
+        {current === "export" && <ExportStep project={project} onMove={setPicked} />}
           </>
         )}
       </main>

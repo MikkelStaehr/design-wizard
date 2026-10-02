@@ -116,7 +116,7 @@ test("step 4: J from density and ?step=preview land there, and each decision row
   await expect(h1(page, "Density")).toBeVisible();
   await page.keyboard.press("j");
   await expect(h1(page, "Live preview")).toBeVisible();
-  await expect(page.getByText("Export is built next.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue to export Enter" })).toBeVisible();
   await expect(page.getByRole("img", { name: /Sample screen rendered with Sora \+ Inter/ })).toBeVisible();
 
   const rows: [RegExp, string][] = [

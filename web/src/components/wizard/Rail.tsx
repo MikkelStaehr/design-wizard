@@ -1,6 +1,7 @@
 "use client";
 import type { ProjectFile } from "@/contracts/project";
-import { isDecided, stepOfStop, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
+import { isDecided, openDecisions, stepOfStop, STEPS, SUB_KEYS, type StopId, type VisualKey } from "@/domain/decisions";
+import { OpenProjectButton } from "./OpenProjectButton";
 import { ShortcutLegend } from "./ShortcutLegend";
 import { StopList, SubDecisionList } from "./SubDecisionList";
 import { profileDecidedCount, profileRows, type ProfileStop } from "./steps/profile/model";
@@ -9,6 +10,8 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
   const productName = project.profile.name;
   const current = stepOfStop(stop);
   const visualDecided = SUB_KEYS.filter((k) => isDecided(project.visual, k)).length;
+  const openCount = openDecisions(project).length;
+  const exportValue = openCount === 0 ? "Ready" : `${openCount} open`;
   return (
     <nav aria-label="Wizard steps" className="flex h-full flex-col gap-3.5 border-r border-dw-line px-3 py-4">
       <p className="flex min-w-0 items-center gap-2 px-1 font-mono text-small font-medium tracking-[0.04em] uppercase">
@@ -27,7 +30,7 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                   ? `${project.principles === null ? 0 : 1} of 1 decided`
                   : step.id === "preview"
                     ? "Nothing to decide"
-                    : "Not built yet";
+                    : exportValue;
           return (
             <li
               key={step.id}
@@ -55,6 +58,11 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
                     <StopList rows={[{ id: "preview" as const, label: "Sample screen", value: "All" }]} current={isCurrent ? "preview" : null} onPick={onPick} />
                   </span>
                 )}
+                {step.id === "export" && (
+                  <span className="mt-1.5 -ml-1.5 block">
+                    <StopList rows={[{ id: "export" as const, label: "Files", value: exportValue }]} current={isCurrent ? "export" : null} onPick={onPick} />
+                  </span>
+                )}
                 {step.id === "visual" && (
                   <span className="mt-1.5 -ml-1.5 block">
                     <SubDecisionList
@@ -69,7 +77,14 @@ export function Rail({ project, stop, onPick }: { project: ProjectFile; stop: St
           );
         })}
       </ol>
-      <ShortcutLegend className="mt-auto pt-6" laws={current === "principles"} view={current === "preview"} />
+      <div className="mt-auto flex flex-col gap-3 pt-6">
+        <OpenProjectButton buttonClass="w-full" />
+        <ShortcutLegend
+          laws={current === "principles"}
+          view={current === "preview"}
+          exportEnter={current === "export" ? (openCount === 0 ? "Download all" : "Go to open decision") : undefined}
+        />
+      </div>
     </nav>
   );
 }
