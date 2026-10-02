@@ -31,6 +31,7 @@ export function parseParamInput(raw: string, param: LawParam): InputResult<numbe
   const m = new RegExp(`^\\s*(-?\\d+(?:[.,]\\d+)?)${suffix}\\s*$`, "i").exec(raw);
   const range = `from ${formatParam(param.min, param.unit)} to ${formatParam(param.max, param.unit)}`;
   const kind = param.integer ? "a whole number" : "a number";
+  if (m && /[.,]\d{3,}/.test(m[1])) return { ok: false, message: `Enter ${kind} ${range}, with at most 2 decimals.` };
   if (!m) return { ok: false, message: `Enter ${kind} ${range}.` };
   const value = Number(m[1].replace(",", "."));
   if (param.integer && !Number.isInteger(value)) return { ok: false, message: `Enter a whole number ${range}.` };

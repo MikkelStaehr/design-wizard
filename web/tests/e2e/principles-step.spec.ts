@@ -47,12 +47,14 @@ test("param errors stay next to the field, keep the input and leave the store un
   for (const bad of ["44,5", "80", "lots"]) {
     await field.fill(bad);
     await field.blur();
+    await field.blur();
     await expect(field).toHaveValue(bad);
     await expect(field).toHaveAttribute("aria-invalid", "true");
     await expect(law(page, "fitts").getByText(/The rule still says 44px\./)).toBeVisible();
     expect((await saved(page)).principles?.find((p) => p.lawId === "fitts")?.params).toEqual({ minPx: 44 });
   }
   await field.fill("48px");
+  await field.blur();
   await expect(field).not.toHaveAttribute("aria-invalid", "true");
   await expect.poll(async () => (await saved(page)).principles?.find((p) => p.lawId === "fitts")?.params).toEqual({ minPx: 48 });
   await expect(law(page, "fitts").locator("[data-rule-id]")).toHaveText("Make every interactive element at least 48px by 48px.");
@@ -120,6 +122,7 @@ test("the kept snapshot survives a param change", async ({ page }) => {
   const before = JSON.stringify((await saved(page)).resolved?.color);
   await page.goto("/?step=principles");
   await page.getByLabel("Minimum target size").fill("48");
+  await page.getByLabel("Minimum target size").blur();
   await expect.poll(async () => (await saved(page)).principles?.find((p) => p.lawId === "fitts")?.params).toEqual({ minPx: 48 });
   expect(JSON.stringify((await saved(page)).resolved?.color)).toBe(before);
 });

@@ -105,3 +105,29 @@ test("re-choosing a value never replaces a stored snapshot; Recompute can be und
   expect(store.getState().recomputedBy).toBe("Radius");
   expect(store.getState().snapshotDiffers).toBe(false);
 });
+
+test("unticking the last law parks a kept snapshot; re-ticking brings it back, never a silent recompute", () => {
+  const store = createProjectStore(null, now);
+  store.open(harbour);
+  store.keepSnapshot();
+  const kept = store.getState().project.resolved!;
+  const laws = store.getState().project.principles!;
+  store.setPrinciples(null);
+  expect(store.getState().project.resolved).toBeNull();
+  store.setPrinciples(laws.slice(0, 1));
+  const back = store.getState().project.resolved!;
+  expect(back.color).toBe(kept.color);
+  expect(back.fontSize).toBe(kept.fontSize);
+  expect(back.rules.map((r) => r.law)).toEqual(["fitts"]);
+  expect(store.getState().recomputedBy).toBeNull();
+});
+
+test("a differing snapshot parked by an open law keeps its notice when it comes back", () => {
+  const store = createProjectStore(null, now);
+  store.open(harbour);
+  expect(store.getState().snapshotDiffers).toBe(true);
+  const laws = store.getState().project.principles!;
+  store.setPrinciples(null);
+  store.setPrinciples(laws);
+  expect(store.getState().snapshotDiffers).toBe(true);
+});

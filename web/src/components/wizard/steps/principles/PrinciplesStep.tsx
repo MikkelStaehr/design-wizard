@@ -11,6 +11,7 @@ import { PREVIEW_NEUTRALS, resolveForPlate } from "@/domain/tokens/resolve";
 import { Plate } from "@/components/plate/Plate";
 import { DEMO_VALUES, LAW_DEMO_VARS } from "@/components/plate/demo-vars";
 import { lawDemos, type LawDemo } from "@/components/samples/law-demos";
+import { ownsKey } from "@/components/wizard/use-shortcuts";
 
 // Step 2 (design/specs/step-2-principles.md): one stop, one array. Every change commits at once.
 
@@ -102,23 +103,23 @@ export function PrinciplesStep({ project, onMove }: { project: ProjectFile; onMo
   function onInput(law: LawEntry, param: LawParam, raw: string) {
     const k = fieldKey(law.id, param.key);
     setDrafts((d) => ({ ...d, [k]: raw }));
-    const r = parseParamInput(raw, param);
-    if (r.ok) {
-      const params = { ...paramsFor(law), [param.key]: r.value };
-      memory.set(law.id, params);
-      commit(new Map(chosen).set(law.id, params));
-    }
-    // After an error shows, re-validate on each input so it clears as soon as the value is valid.
+    // Nothing is stored while typing: a value commits on blur, Enter or Esc (validate). After an error shows, re-validate on each input so it clears as soon as the value is valid.
     if (errors[k] !== undefined) setErrors((e) => withError(e, k, errorFor(law, param, raw)));
   }
 
-  /** Blur, Enter and Esc: show any error; returns true when the field is valid. */
+  /** Blur, Enter and Esc: commit a valid value, or show the error and keep the stored one. True when valid. */
   function validate(law: LawEntry, param: LawParam): boolean {
     const k = fieldKey(law.id, param.key);
     const raw = drafts[k];
     if (raw === undefined) return true;
     const message = errorFor(law, param, raw);
     setErrors((e) => withError(e, k, message));
+    const r = parseParamInput(raw, param);
+    if (r.ok && r.value !== paramsFor(law)[param.key]) {
+      const params = { ...paramsFor(law), [param.key]: r.value };
+      memory.set(law.id, params);
+      commit(new Map(chosen).set(law.id, params));
+    }
     return message === null;
   }
 
@@ -162,9 +163,7 @@ export function PrinciplesStep({ project, onMove }: { project: ProjectFile; onMo
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Enter" || e.ctrlKey || e.metaKey || e.altKey) return;
-      const t = e.target;
-      if (t instanceof HTMLElement && (t.isContentEditable || ["TEXTAREA", "SELECT", "BUTTON", "A", "SUMMARY"].includes(t.tagName))) return;
-      if (t instanceof HTMLInputElement && t.type !== "checkbox") return;
+      if (ownsKey(e.target, e.key)) return;
       e.preventDefault();
       primaryRef.current();
     };
@@ -267,6 +266,7 @@ export function PrinciplesStep({ project, onMove }: { project: ProjectFile; onMo
               onClick={() => {
                 projectStore().setPrinciples([]);
                 setNote(null);
+                setAnnounce(null);
                 setUndoNone(true);
               }}
               className="inline-flex min-h-11 items-center justify-center rounded-sm border border-dw-ctl bg-dw-surface px-4 font-medium whitespace-nowrap"

@@ -30,6 +30,8 @@ export interface ProjectState {
   recomputedBy: string | null;
   /** The snapshot before "Recompute now", kept for Undo until the next change. */
   previousResolved: Resolved | null;
+  /** The snapshot set aside while a decision is open again, and whether it differed; restored when it closes. */
+  parked: { resolved: Resolved; snapshotDiffers: boolean } | null;
 }
 
 export interface ProjectStore {
@@ -53,7 +55,7 @@ export interface ProjectStore {
 }
 
 export function createProjectStore(storage: Storage | null, now: () => Date = () => new Date()): ProjectStore {
-  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null };
+  let state: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: true, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null };
   const listeners = new Set<() => void>();
   const emit = (next: ProjectState) => {
     state = next;
@@ -76,12 +78,22 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
    */
   const decide = (next: ProjectFile, affectsSnapshot: boolean, label: string) => {
     const open = openDecisions(next).length > 0;
-    const resolved = open ? null : affectsSnapshot || next.resolved === null ? resolveSnapshot(next) : next.resolved;
+    const before = state.project.resolved;
+    // Park the snapshot while a decision is open; bring it back if it closes without a real change.
+    const parked = open ? (before !== null ? { resolved: before, snapshotDiffers: state.snapshotDiffers } : state.parked) : affectsSnapshot ? null : state.parked;
+    const restore = !open && !affectsSnapshot && next.resolved === null && state.parked !== null;
+    const resolved = open
+      ? null
+      : restore
+        ? state.parked!.resolved
+        : affectsSnapshot || next.resolved === null
+          ? resolveSnapshot(next)
+          : next.resolved;
     const project = { ...next, resolved };
     // A real change to a decision the snapshot depends on replaces it; say so if it differed.
-    const recomputedBy = affectsSnapshot && state.snapshotDiffers ? label : affectsSnapshot ? null : state.recomputedBy;
-    const snapshotDiffers = !open && !affectsSnapshot && state.snapshotDiffers;
-    emit({ ...state, project, errors: [], snapshotDiffers, recomputedBy, previousResolved: null, ...persist(project, state.downloadedAt) });
+    const recomputedBy = affectsSnapshot && (state.snapshotDiffers || state.parked?.snapshotDiffers) ? label : affectsSnapshot ? null : state.recomputedBy;
+    const snapshotDiffers = open ? false : restore ? state.parked!.snapshotDiffers : !affectsSnapshot && state.snapshotDiffers;
+    emit({ ...state, project, errors: [], snapshotDiffers, recomputedBy, previousResolved: null, parked: restore ? null : parked, ...persist(project, state.downloadedAt) });
   };
   const labelOf = (path: string) => DECISIONS.find((d) => d.path === path)?.label ?? path;
 
@@ -119,11 +131,11 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
         return result.errors;
       }
       const { project, snapshotDiffers } = settle(result.project);
-      emit({ ...state, project, errors: [], downloadedAt: null, snapshotDiffers, ...persist(project, null) });
+      emit({ ...state, project, errors: [], downloadedAt: null, snapshotDiffers, parked: null, ...persist(project, null) });
       return [];
     },
     replace(project) {
-      emit({ ...state, project, errors: [], snapshotDiffers: false, ...persist(project, state.downloadedAt) });
+      emit({ ...state, project, errors: [], snapshotDiffers: false, parked: null, ...persist(project, state.downloadedAt) });
     },
     setProfile(key, value) {
       decide({ ...state.project, profile: { ...state.project.profile, [key]: value } }, false, labelOf(`profile.${String(key)}`));
@@ -133,11 +145,20 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
       // stored (kept) snapshot's colours, fonts and scales are never replaced by a law or param tweak.
       if (JSON.stringify(state.project.principles) === JSON.stringify(principles)) return;
       const next = { ...state.project, principles };
-      const open = openDecisions(next).length > 0;
+      const open = openDecisions(next).length > 0 || principles === null;
       const before = state.project.resolved;
-      const resolved = open || principles === null ? null : before !== null ? { ...before, rules: resolveRules(principles) } : resolveSnapshot(next);
+      if (open) {
+        // Unticking the last law parks the snapshot (a kept, differing one included).
+        const parked = before !== null ? { resolved: before, snapshotDiffers: state.snapshotDiffers } : state.parked;
+        const project = { ...next, resolved: null };
+        emit({ ...state, project, errors: [], snapshotDiffers: false, previousResolved: null, parked, ...persist(project, state.downloadedAt) });
+        return;
+      }
+      const base = before ?? state.parked?.resolved ?? null;
+      const resolved = base !== null ? { ...base, rules: resolveRules(principles) } : resolveSnapshot(next);
+      const snapshotDiffers = before !== null ? state.snapshotDiffers : (state.parked?.snapshotDiffers ?? false);
       const project = { ...next, resolved };
-      emit({ ...state, project, errors: [], snapshotDiffers: !open && state.snapshotDiffers, previousResolved: null, ...persist(project, state.downloadedAt) });
+      emit({ ...state, project, errors: [], snapshotDiffers, previousResolved: null, parked: null, ...persist(project, state.downloadedAt) });
     },
     setVisual(key, value) {
       const visual = { ...state.project.visual, [key]: value };
@@ -176,7 +197,7 @@ export function createProjectStore(storage: Storage | null, now: () => Date = ()
 }
 
 let browserStore: ProjectStore | null = null;
-const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null };
+const serverState: ProjectState = { project: emptyProject(), errors: [], savedAt: null, downloadedAt: null, saveFailed: false, hydrated: false, snapshotDiffers: false, recomputedBy: null, previousResolved: null, parked: null };
 
 function getBrowserStore(): ProjectStore {
   if (!browserStore) {

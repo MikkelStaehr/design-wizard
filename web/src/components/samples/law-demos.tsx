@@ -29,6 +29,9 @@ export interface DemoValues {
   failGrey: string;
   targetPx: number;
   tinyPx: number;
+  /** Floored ratios on white, e.g. "6.48"; computed by the caller from the contrast owner. */
+  passRatio: string;
+  failRatio: string;
 }
 
 export function lawDemos(D: DemoValues): Record<string, { do: LawDemo; dont: LawDemo }> {
@@ -72,8 +75,8 @@ export function lawDemos(D: DemoValues): Record<string, { do: LawDemo; dont: Law
     ),
   },
   "wcag-contrast": {
-    do: demo(`${D.passGrey} on white, 6.49:1`, <p className={`${s.p} ${s.pass}`}>Free cancellation until 24 hours before.</p>),
-    dont: demo(`${D.failGrey} on white, 2.82:1`, <p className={`${s.p} ${s.fail}`}>Free cancellation until 24 hours before.</p>),
+    do: demo(`${D.passGrey} on white, ${D.passRatio}:1`, <p className={`${s.p} ${s.pass}`}>Free cancellation until 24 hours before.</p>),
+    dont: demo(`${D.failGrey} on white, ${D.failRatio}:1`, <p className={`${s.p} ${s.fail}`}>Free cancellation until 24 hours before.</p>),
   },
   "wcag-focus-visible": {
     do: demo(

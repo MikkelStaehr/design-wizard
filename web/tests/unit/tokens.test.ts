@@ -173,3 +173,19 @@ test("changing laws updates only resolved.rules; a kept snapshot's colours stay"
   store.setPrinciples(null);
   expect(store.getState().project.resolved).toBeNull();
 });
+
+test("law params take at most 2 decimals, which is what the rule shows", async () => {
+  const { parseParamInput } = await import("@/domain/parse-input");
+  const { LAW_BY_ID } = await import("@/content/laws");
+  const ratio = LAW_BY_ID.get("wcag-contrast")!.params[0];
+  expect(parseParamInput("4,56", ratio)).toEqual({ ok: true, value: 4.56 });
+  expect(parseParamInput("4.567", ratio)).toEqual({ ok: false, message: "Enter a number from 4.5:1 to 7:1, with at most 2 decimals." });
+});
+
+test("the demo contrast labels state the floored ratio of what is drawn", async () => {
+  const { DEMO_VALUES } = await import("@/components/plate/demo-vars");
+  const { contrastRatio, formatRatio } = await import("@/domain/color/contrast");
+  expect(DEMO_VALUES.passRatio).toBe(formatRatio(contrastRatio(DEMO_VALUES.passGrey, "#FFFFFF")));
+  expect(DEMO_VALUES.passRatio).toBe("6.48");
+  expect(DEMO_VALUES.failRatio).toBe("2.81");
+});

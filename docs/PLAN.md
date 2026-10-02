@@ -151,6 +151,11 @@ The UX laws and the font catalogue are **static typed content in the repo**, cha
 
 *Slice 3c: live preview (step 4 and the preview column). Build 40 min; probably less, because the mock covers it.*
 
+0. **Carried over from the slice 3b review** (reviewer Nice):
+   - `RuleSentence` repeats `renderRule`'s template fill. Add a shared `ruleParts()` in `domain/rules.ts`. Also use `LAW_BY_ID` in `countLine`, and `fontPairLabel(DEMO_FONT)` instead of the hard-coded "Inter".
+   - The module-level `memory` and the `drafts` state in `PrinciplesStep` survive opening another file, so an old draft can show instead of the stored value. Reset both on open.
+   - Put the Must/Should badge in the checkbox's `aria-describedby`.
+
 4. **A generic `SampleScreen`** in `components/samples/`: it reads only `--v-*`, and only the product name comes from the profile. The preview column shows the focused variant on top of every earlier decision, in every step. Step 4 shows the same screen full size.
    - **Done when:**
      - AC4 (the leak test) and AC5 (the box doesn't change while fonts load) hold for the preview too
